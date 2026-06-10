@@ -459,7 +459,7 @@ class _AssessmentSection extends StatelessWidget {
     );
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: EdgeInsets.only(top: metrics.sectionGap),
@@ -481,6 +481,7 @@ class _AssessmentSection extends StatelessWidget {
           )
         else if (metrics.isCompact)
           Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,6 +497,7 @@ class _AssessmentSection extends StatelessWidget {
           )
         else
           Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               inherentCard,
               SizedBox(height: metrics.fieldGap),
@@ -544,6 +546,7 @@ class _InherentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -615,6 +618,7 @@ class _ControlCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -689,6 +693,7 @@ class _ResidualCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
