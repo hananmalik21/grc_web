@@ -4,10 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/errors/failure.dart';
 import 'package:grc_web/core/localization/app_localizations_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
 import 'package:grc_web/core/widgets/app_error_view.dart';
+import 'package:grc_web/core/widgets/app_horizontal_scroll_row.dart';
 import 'package:grc_web/core/widgets/app_loading_indicator.dart';
+import 'package:grc_web/core/widgets/app_responsive_table.dart';
 import 'package:grc_web/features/risks/presentation/widgets/add_risk_dialog.dart';
 import 'package:grc_web/features/risks/presentation/widgets/risk_detail_dialog.dart';
 import 'package:grc_web/core/widgets/app_select_field.dart';
@@ -46,25 +49,37 @@ class _RisksView extends StatelessWidget {
 
   final RisksData data;
 
+  static const _textHeight = AppTextMetrics.textHeight;
+
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+    final sectionGap = compact
+        ? ResponsiveHelper.getTabSectionSpacing(context)
+        : 24.h;
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: compact
+          ? ResponsiveHelper.getDetailScreenPadding(context)
+          : EdgeInsets.all(24.w),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: BoxConstraints(
+          maxWidth: compact ? context.responsiveMaxContentWidth : 1512.w,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _RisksTitleBar(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _RisksStatsRow(summary: data.summary),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _RiskHeatMap(heatMap: data.heatMap),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _RisksFilterBar(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _RisksTable(risks: data.risks),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _RiskManagementIntegration(),
           ],
         ),
@@ -84,36 +99,58 @@ class _RisksTitleBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final l10n = context.l10n;
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+
+    final titleSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.riskRegistryTitle,
+          style: textTheme.displaySmall?.copyWith(
+            fontSize: isMobile ? 20.sp : null,
+          ),
+          strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+          textHeightBehavior: _RisksView._textHeight,
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          l10n.riskRegistrySubtitle,
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppColors.textBody,
+            fontSize: isMobile ? 13.sp : null,
+          ),
+          strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+          textHeightBehavior: _RisksView._textHeight,
+        ),
+      ],
+    );
+
+    final addButton = AppButton(
+      label: l10n.addRisk,
+      iconAsset: 'assets/figma/risks/svg/add_risk.svg',
+      variant: AppButtonVariant.primary,
+      iconSize: isMobile ? 20.r : 16.r,
+      size: isMobile ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: isMobile,
+      onPressed: () => showAddRiskDialog(context: context),
+    );
+
+    if (layout.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          titleSection,
+          SizedBox(height: 16.h),
+          addButton,
+        ],
+      );
+    }
 
     return Row(
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.riskRegistryTitle,
-                style: textTheme.displaySmall,
-                strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                l10n.riskRegistrySubtitle,
-                style: textTheme.bodyMedium?.copyWith(color: AppColors.textBody),
-                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-            ],
-          ),
-        ),
-        AppButton(
-          label: l10n.addRisk,
-          iconAsset: 'assets/figma/risks/svg/add_risk.svg',
-          variant: AppButtonVariant.primary,
-          iconSize: 16.r,
-          onPressed: () => showAddRiskDialog(context: context),
-        ),
+        Expanded(child: titleSection),
+        addButton,
       ],
     );
   }
@@ -131,40 +168,62 @@ class _RisksStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+
+    final cards = [
+      _RiskStatCard(
+        value: summary.inherentRiskVar,
+        label: l10n.statInherentRisk,
+        iconAsset: 'assets/figma/risks/svg/stat_inherent_risk.svg',
+      ),
+      _RiskStatCard(
+        value: summary.residualRiskVar,
+        label: l10n.statResidualRisk,
+        iconAsset: 'assets/figma/risks/svg/stat_residual_risk.svg',
+      ),
+      _RiskStatCard(
+        value: summary.controlEffectiveness,
+        label: l10n.statControlEffectiveness,
+        iconAsset: 'assets/figma/risks/svg/stat_control_effectiveness.svg',
+      ),
+      _RiskStatCard(
+        value: summary.riskReduction,
+        label: l10n.statRiskReduction,
+        iconAsset: 'assets/figma/risks/svg/stat_risk_reduction.svg',
+      ),
+    ];
+
+    if (compact) {
+      final cardWidth = layout.isMobile
+          ? MediaQuery.sizeOf(context).width * 0.86
+          : ResponsiveHelper.getResponsiveWidth(
+              context,
+              mobile: 220,
+              tablet: 240,
+              web: 260,
+            );
+      final spacing = context.responsive(
+        mobile: 12.0,
+        tablet: 14.0,
+        desktop: 16.0,
+      );
+
+      return AppHorizontalScrollRow(
+        spacing: spacing,
+        children: [
+          for (final card in cards)
+            SizedBox(width: cardWidth, child: card),
+        ],
+      );
+    }
 
     return Row(
       children: [
-        Expanded(
-          child: _RiskStatCard(
-            value: summary.inherentRiskVar,
-            label: l10n.statInherentRisk,
-            iconAsset: 'assets/figma/risks/svg/stat_inherent_risk.svg',
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: _RiskStatCard(
-            value: summary.residualRiskVar,
-            label: l10n.statResidualRisk,
-            iconAsset: 'assets/figma/risks/svg/stat_residual_risk.svg',
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: _RiskStatCard(
-            value: summary.controlEffectiveness,
-            label: l10n.statControlEffectiveness,
-            iconAsset: 'assets/figma/risks/svg/stat_control_effectiveness.svg',
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: _RiskStatCard(
-            value: summary.riskReduction,
-            label: l10n.statRiskReduction,
-            iconAsset: 'assets/figma/risks/svg/stat_risk_reduction.svg',
-          ),
-        ),
+        for (int i = 0; i < cards.length; i++) ...[
+          Expanded(child: cards[i]),
+          if (i != cards.length - 1) SizedBox(width: 16.w),
+        ],
       ],
     );
   }
@@ -184,9 +243,12 @@ class _RiskStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final isMobile = context.screenLayout.isMobile;
+    final padding = ResponsiveHelper.libraryCardPadding(context);
+    final iconBoxSize = isMobile ? 36.r : 40.r;
 
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -196,8 +258,8 @@ class _RiskStatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40.r,
-            height: 40.r,
+            width: iconBoxSize,
+            height: iconBoxSize,
             decoration: BoxDecoration(
               color: AppColors.primaryTint,
               borderRadius: BorderRadius.circular(8.r),
@@ -298,9 +360,11 @@ class _RiskHeatMap extends StatelessWidget {
       fontWeight: FontWeight.w500,
       letterSpacing: -0.154,
     );
+    final padding = ResponsiveHelper.libraryCardPadding(context);
+    final badgeSize = context.screenLayout.isMobile ? 40.r : 48.r;
 
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -390,6 +454,7 @@ class _RiskHeatMap extends StatelessWidget {
                                 rowIdx: rowIdx,
                                 colIdx: colIdx,
                                 badgeColorsFn: _badgeColors,
+                                badgeSize: badgeSize,
                               ),
                           ],
                         ),
@@ -412,12 +477,14 @@ class _HeatCell extends StatelessWidget {
     required this.rowIdx,
     required this.colIdx,
     required this.badgeColorsFn,
+    this.badgeSize = 48,
   });
 
   final int count;
   final int rowIdx;
   final int colIdx;
   final (Color, Color) Function(int row, int col) badgeColorsFn;
+  final double badgeSize;
 
   @override
   Widget build(BuildContext context) {
@@ -430,8 +497,8 @@ class _HeatCell extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.5.h),
       child: Center(
         child: Container(
-          width: 48.r,
-          height: 48.r,
+          width: badgeSize,
+          height: badgeSize,
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(10.r),
@@ -477,66 +544,126 @@ class _RisksFilterBarState extends State<_RisksFilterBar> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+    final isTabletSmall = layout.isTabletSmall;
+    final padding = ResponsiveHelper.libraryCardPadding(context);
+
+    final searchField = AppTextField.search(
+      controller: _searchController,
+      hint: l10n.searchRisksPlaceholder,
+    );
+
+    final categoryField = AppSelectField<String>(
+      value: 'all',
+      items: const ['all'],
+      itemLabel: (_) => l10n.allCategories,
+      onChanged: (_) {},
+      contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
+    );
+
+    final statusField = AppSelectField<String>(
+      value: 'all',
+      items: const ['all'],
+      itemLabel: (_) => l10n.allStatuses,
+      onChanged: (_) {},
+      contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
+    );
+
+    final exportButton = AppButton(
+      label: l10n.export,
+      iconAsset: 'assets/figma/assets/svg/export.svg',
+      variant: AppButtonVariant.outlined,
+      iconSize: isMobile ? 20.r : 20.r,
+      size: isMobile ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: isMobile,
+      onPressed: () {},
+    );
 
     return Container(
-      padding: EdgeInsets.all(17.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: AppTextField(
-              controller: _searchController,
-              hint: l10n.searchRisksPlaceholder,
-              prefixIcon: Padding(
-                padding: EdgeInsetsDirectional.only(start: 12.w, end: 9.w),
-                child: SvgPicture.asset(
-                  'assets/figma/assets/svg/search.svg',
-                  width: 20.r,
-                  height: 20.r,
+      child: isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                searchField,
+                SizedBox(height: 12.h),
+                categoryField,
+                SizedBox(height: 12.h),
+                statusField,
+                SizedBox(height: 12.h),
+                exportButton,
+              ],
+            )
+          : isTabletSmall
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    searchField,
+                    SizedBox(height: 16.h),
+                    Row(
+                      children: [
+                        Expanded(child: categoryField),
+                        SizedBox(width: 8.w),
+                        Expanded(child: statusField),
+                      ],
+                    ),
+                    SizedBox(height: 12.h),
+                    exportButton,
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(child: searchField),
+                    SizedBox(width: 16.w),
+                    SizedBox(width: 170.w, child: categoryField),
+                    SizedBox(width: 8.w),
+                    SizedBox(width: 140.w, child: statusField),
+                    SizedBox(width: 8.w),
+                    exportButton,
+                  ],
                 ),
-              ),
-              contentPadding: EdgeInsets.fromLTRB(41.w, 11.5.h, 17.w, 11.5.h),
-            ),
-          ),
-          SizedBox(width: 16.w),
-          SizedBox(
-            width: 170.w,
-            child: AppSelectField<String>(
-              value: 'all',
-              items: const ['all'],
-              itemLabel: (_) => l10n.allCategories,
-              onChanged: (_) {},
-              contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          SizedBox(
-            width: 140.w,
-            child: AppSelectField<String>(
-              value: 'all',
-              items: const ['all'],
-              itemLabel: (_) => l10n.allStatuses,
-              onChanged: (_) {},
-              contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          AppButton(
-            label: l10n.export,
-            iconAsset: 'assets/figma/assets/svg/export.svg',
-            variant: AppButtonVariant.outlined,
-            iconSize: 20.r,
-            onPressed: () {},
-          ),
-        ],
-      ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Risk display helpers (shared by table + mobile cards)
+// ---------------------------------------------------------------------------
+
+(Color bg, Color fg, String label) _riskStatusProps(
+  BuildContext context,
+  RiskStatus status,
+) {
+  final l10n = context.l10n;
+  return switch (status) {
+    RiskStatus.assessed => (
+        AppColors.statusHighBg,
+        AppColors.statusHighFg,
+        l10n.statusAssessed,
+      ),
+    RiskStatus.treated => (
+        AppColors.primaryTint,
+        AppColors.primary,
+        l10n.statusTreated,
+      ),
+    RiskStatus.monitored => (
+        AppColors.statusLowBg,
+        AppColors.statusLowFg,
+        l10n.statusMonitored,
+      ),
+    RiskStatus.open => (
+        AppColors.statusCriticalBg,
+        AppColors.statusCriticalFg,
+        l10n.statusCritical,
+      ),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -548,24 +675,27 @@ class _RisksTable extends StatelessWidget {
 
   final List<RiskItem> risks;
 
-  // Pixel-perfect column widths from Figma node 1085-6007 header cells (total ~1462px).
-  static const _colWidths = <double>[
-    82.59,  // Risk ID
-    265.79, // Title
-    78.91,  // Assets
-    140.91, // Category  (Figma: x=427.295, w=140.91)
-    114.54, // Status
-    111.91, // Likelihood
-    104.22, // Impact ($)
-    95.83,  // Inherent
-    97.16,  // Residual
-    102.98, // Treatment
-    143.19, // Owner
-    123.96, // Actions   (Figma: x=1338.035, w=123.96)
-  ];
+  static final _layout = AppResponsiveTableLayout(
+    columns: [
+      AppTableColumnSpec(minWidth: 82.59, dropPriority: 0), // Risk ID
+      AppTableColumnSpec(minWidth: 265.79, dropPriority: 0), // Title
+      AppTableColumnSpec(minWidth: 78.91, dropPriority: 7), // Assets
+      AppTableColumnSpec(minWidth: 140.91, dropPriority: 6), // Category
+      AppTableColumnSpec(minWidth: 114.54, dropPriority: 2), // Status
+      AppTableColumnSpec(minWidth: 111.91, dropPriority: 9), // Likelihood
+      AppTableColumnSpec(minWidth: 104.22, dropPriority: 8), // Impact
+      AppTableColumnSpec(minWidth: 95.83, dropPriority: 3), // Inherent
+      AppTableColumnSpec(minWidth: 97.16, dropPriority: 4), // Residual
+      AppTableColumnSpec(minWidth: 102.98, dropPriority: 10), // Treatment
+      AppTableColumnSpec(minWidth: 143.19, dropPriority: 5), // Owner
+      AppTableColumnSpec(minWidth: 123.96, dropPriority: 0), // Actions
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
+    final useMobileCards = context.screenLayout.isMobile;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -573,127 +703,142 @@ class _RisksTable extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final tableMinWidth = _colWidths.fold<double>(0, (s, w) => s + w.w);
-
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: constraints.maxWidth.clamp(tableMinWidth, double.infinity),
-              ),
-              child: Table(
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                columnWidths: {
-                  for (int i = 0; i < _colWidths.length; i++)
-                    i: FixedColumnWidth(_colWidths[i].w),
-                },
-                children: [
-                  _headerRow(context),
-                  for (final risk in risks) _dataRow(context, risk),
+      child: useMobileCards
+          ? Column(
+              children: [
+                for (int i = 0; i < risks.length; i++) ...[
+                  _RiskMobileCard(risk: risks[i]),
+                  if (i != risks.length - 1)
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.rowDivider.withValues(alpha: 0.8),
+                    ),
                 ],
-              ),
+              ],
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final visible = _layout.visibleIndicesForWidth(
+                  constraints.maxWidth,
+                );
+                final tableMinWidth = _layout.minWidthForIndices(visible);
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth.clamp(
+                        tableMinWidth,
+                        double.infinity,
+                      ),
+                    ),
+                    child: Table(
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      columnWidths: _layout.columnWidthsForIndices(visible),
+                      children: [
+                        _headerRow(context, visible),
+                        for (final risk in risks)
+                          _dataRow(context, risk, visible),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 
-  TableRow _headerRow(BuildContext context) {
+  TableRow _headerRow(BuildContext context, List<int> visible) {
     final l10n = context.l10n;
     final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: AppColors.textLabel,
           fontWeight: FontWeight.w500,
         );
 
+    final cells = [
+      _headerCell(l10n.tableRiskId, style),
+      _headerCell(l10n.tableRiskTitle, style),
+      _headerCell(l10n.tableRiskAssets, style),
+      _headerCell(l10n.tableRiskCategory, style),
+      _headerCell(l10n.tableStatus, style),
+      _headerCell(l10n.tableLikelihood, style),
+      _headerCell(l10n.tableImpactDollar, style),
+      _headerCell(l10n.tableInherent, style),
+      _headerCell(l10n.tableResidual, style),
+      _headerCell(l10n.tableTreatment, style),
+      _headerCell(l10n.tableOwner, style),
+      _headerCell(l10n.tableActions, style),
+    ];
+
     return TableRow(
       decoration: const BoxDecoration(
         color: AppColors.bg,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      children: [
-        _headerCell(l10n.tableRiskId, style),
-        _headerCell(l10n.tableRiskTitle, style),
-        _headerCell(l10n.tableRiskAssets, style),
-        _headerCell(l10n.tableRiskCategory, style),
-        _headerCell(l10n.tableStatus, style),
-        _headerCell(l10n.tableLikelihood, style),
-        _headerCell(l10n.tableImpactDollar, style),
-        _headerCell(l10n.tableInherent, style),
-        _headerCell(l10n.tableResidual, style),
-        _headerCell(l10n.tableTreatment, style),
-        _headerCell(l10n.tableOwner, style),
-        _headerCell(l10n.tableActions, style),
-      ],
+      children: _layout.cellsForIndices(cells, visible),
     );
   }
 
-  TableRow _dataRow(BuildContext context, RiskItem risk) {
+  TableRow _dataRow(BuildContext context, RiskItem risk, List<int> visible) {
     final textTheme = Theme.of(context).textTheme;
     final bodyStyle = textTheme.bodyMedium?.copyWith(
       color: AppColors.textLabel,
       fontWeight: FontWeight.w400,
     );
 
+    final cells = [
+      _idCell(
+        context,
+        risk.id,
+        () => showRiskDetailDialog(context: context, risk: risk),
+      ),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+        child: Text(
+          risk.title,
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      _assetsCell(context, risk.assetCount),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+        child: Text(risk.category, style: bodyStyle),
+      ),
+      _statusCell(context, risk.status),
+      _likelihoodCell(context, risk.likelihood),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+        child: Text(
+          risk.impactValue,
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      _twoLineRiskCell(context, risk.inherentValue, risk.inherentSeverity),
+      _twoLineRiskCell(context, risk.residualValue, risk.residualSeverity),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+        child: Text(_treatmentLabel(context, risk.treatment), style: bodyStyle),
+      ),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+        child: Text(risk.owner, style: bodyStyle),
+      ),
+      _actionsCell(context, risk),
+    ];
+
     return TableRow(
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.rowDivider)),
       ),
-      children: [
-        // Risk ID
-        _idCell(context, risk.id, () => showRiskDetailDialog(context: context, risk: risk)),
-        // Title
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-          child: Text(
-            risk.title,
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        // Assets count chip
-        _assetsCell(context, risk.assetCount),
-        // Category
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-          child: Text(risk.category, style: bodyStyle),
-        ),
-        // Status badge
-        _statusCell(context, risk.status),
-        // Likelihood badge
-        _likelihoodCell(context, risk.likelihood),
-        // Impact ($)
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-          child: Text(
-            risk.impactValue,
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        // Inherent (value + severity badge stacked)
-        _twoLineRiskCell(context, risk.inherentValue, risk.inherentSeverity),
-        // Residual (value + severity badge stacked)
-        _twoLineRiskCell(context, risk.residualValue, risk.residualSeverity),
-        // Treatment
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-          child: Text(_treatmentLabel(context, risk.treatment), style: bodyStyle),
-        ),
-        // Owner
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-          child: Text(risk.owner, style: bodyStyle),
-        ),
-        // Actions
-        _actionsCell(context, risk),
-      ],
+      children: _layout.cellsForIndices(cells, visible),
     );
   }
 
@@ -763,7 +908,7 @@ class _RisksTable extends StatelessWidget {
   }
 
   Widget _statusCell(BuildContext context, RiskStatus status) {
-    final (bg, fg, label) = _statusProps(context, status);
+    final (bg, fg, label) = _riskStatusProps(context, status);
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 22.h, 16.w, 22.h),
       child: Container(
@@ -874,16 +1019,6 @@ class _RisksTable extends StatelessWidget {
     );
   }
 
-  (Color bg, Color fg, String label) _statusProps(BuildContext context, RiskStatus status) {
-    final l10n = context.l10n;
-    return switch (status) {
-      RiskStatus.assessed => (AppColors.statusHighBg, AppColors.statusHighFg, l10n.statusAssessed),
-      RiskStatus.treated => (AppColors.primaryTint, AppColors.primary, l10n.statusTreated),
-      RiskStatus.monitored => (AppColors.statusLowBg, AppColors.statusLowFg, l10n.statusMonitored),
-      RiskStatus.open => (AppColors.statusCriticalBg, AppColors.statusCriticalFg, l10n.statusCritical),
-    };
-  }
-
   (Color bg, Color fg, String label) _likelihoodProps(BuildContext context, RiskLikelihood likelihood) {
     final l10n = context.l10n;
     return switch (likelihood) {
@@ -913,6 +1048,196 @@ class _RisksTable extends StatelessWidget {
       RiskTreatment.accept => l10n.treatmentAccept,
       RiskTreatment.avoid => l10n.treatmentAvoid,
     };
+  }
+}
+
+class _RiskMobileCard extends StatelessWidget {
+  const _RiskMobileCard({required this.risk});
+
+  final RiskItem risk;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final textTheme = Theme.of(context).textTheme;
+    final (statusBg, statusFg, statusLabel) =
+        _riskStatusProps(context, risk.status);
+
+    return Padding(
+      padding: EdgeInsets.all(16.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () =>
+                          showRiskDetailDialog(context: context, risk: risk),
+                      borderRadius: BorderRadius.circular(4.r),
+                      child: Text(
+                        risk.id,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      risk.title,
+                      style: textTheme.titleSmall?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _StatusBadge(
+                label: statusLabel,
+                backgroundColor: statusBg,
+                foregroundColor: statusFg,
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _MobileField(
+                  label: l10n.tableRiskCategory,
+                  value: risk.category,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _MobileField(
+                  label: l10n.tableRiskAssets,
+                  value: '${risk.assetCount}',
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            children: [
+              Expanded(
+                child: _MobileField(
+                  label: l10n.tableInherent,
+                  value: risk.inherentValue,
+                  valueStyle: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _MobileField(
+                  label: l10n.tableResidual,
+                  value: risk.residualValue,
+                  valueStyle: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          _MobileField(label: l10n.tableOwner, value: risk.owner),
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _TableIconButton(
+                iconAsset: 'assets/figma/assets/svg/edit_asset.svg',
+                onPressed: () {},
+              ),
+              SizedBox(width: 4.w),
+              _TableIconButton(
+                iconAsset: 'assets/figma/risks/svg/view_risk.svg',
+                onPressed: () =>
+                    showRiskDetailDialog(context: context, risk: risk),
+              ),
+              SizedBox(width: 4.w),
+              _TableIconButton(
+                iconAsset: 'assets/figma/assets/svg/delete_asset.svg',
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MobileField extends StatelessWidget {
+  const _MobileField({
+    required this.label,
+    required this.value,
+    this.valueStyle,
+  });
+
+  final String label;
+  final String value;
+  final TextStyle? valueStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          value,
+          style: valueStyle ?? textTheme.bodyMedium,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999.r),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.w500,
+              fontSize: 12.sp,
+            ),
+      ),
+    );
   }
 }
 
@@ -980,10 +1305,13 @@ class _RiskManagementIntegration extends StatelessWidget {
       ),
     ];
 
+    final layout = context.screenLayout;
+    final padding = ResponsiveHelper.libraryCardPadding(context);
+    final gap = layout.isMobile ? 16.h : 16.w;
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: padding,
       decoration: BoxDecoration(
-        // Figma: bg-[#eff6ff] border border-[#bedbff]
         color: AppColors.primaryLightBg,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.bannerBorder),
@@ -991,34 +1319,93 @@ class _RiskManagementIntegration extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title — 18px semibold, tracking -0.45
           Text(
             l10n.riskManagementIntegration,
             style: textTheme.titleLarge?.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.45,
+              fontSize: layout.isMobile ? 16.sp : null,
             ),
             strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
             textHeightBehavior: AppTextMetrics.textHeight,
           ),
           SizedBox(height: 16.h),
-          // 4-column grid with 16.w gap between items
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (int i = 0; i < items.length; i++) ...[
-                if (i > 0) SizedBox(width: 16.w),
-                Expanded(
-                  child: _IntegrationItem(
+          if (layout.isMobile)
+            Column(
+              children: [
+                for (int i = 0; i < items.length; i++) ...[
+                  _IntegrationItem(
                     iconAsset: items[i].icon,
                     title: items[i].title,
                     description: items[i].desc,
                   ),
+                  if (i != items.length - 1) SizedBox(height: gap),
+                ],
+              ],
+            )
+          else if (layout.isCompact)
+            Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _IntegrationItem(
+                        iconAsset: items[0].icon,
+                        title: items[0].title,
+                        description: items[0].desc,
+                      ),
+                    ),
+                    SizedBox(width: gap),
+                    Expanded(
+                      child: _IntegrationItem(
+                        iconAsset: items[1].icon,
+                        title: items[1].title,
+                        description: items[1].desc,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: gap),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _IntegrationItem(
+                        iconAsset: items[2].icon,
+                        title: items[2].title,
+                        description: items[2].desc,
+                      ),
+                    ),
+                    SizedBox(width: gap),
+                    Expanded(
+                      child: _IntegrationItem(
+                        iconAsset: items[3].icon,
+                        title: items[3].title,
+                        description: items[3].desc,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ],
-          ),
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 0; i < items.length; i++) ...[
+                  if (i > 0) SizedBox(width: gap),
+                  Expanded(
+                    child: _IntegrationItem(
+                      iconAsset: items[i].icon,
+                      title: items[i].title,
+                      description: items[i].desc,
+                    ),
+                  ),
+                ],
+              ],
+            ),
         ],
       ),
     );
@@ -1056,10 +1443,7 @@ class _IntegrationItem extends StatelessWidget {
               iconAsset,
               width: 16.r,
               height: 16.r,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
+              fit: BoxFit.contain,
             ),
           ),
         ),

@@ -86,10 +86,9 @@ class AppSelectField<T> extends StatelessWidget {
   }
 
   static Widget prefixIconAsset(BuildContext context, String asset) {
-    final iconSize = AppTextField.prefixIconSizeFor(context);
     return Padding(
       padding: EdgeInsetsDirectional.only(start: 12.w, end: 8.w),
-      child: SvgPicture.asset(asset, width: iconSize, height: iconSize),
+      child: SvgPicture.asset(asset, width: 20.r, height: 20.r),
     );
   }
 
@@ -102,16 +101,15 @@ class AppSelectField<T> extends StatelessWidget {
     final arrowSize = layout.isMobile ? 22.r : 20.r;
 
     final field = SizedBox(
-      height: height.h,
+      height: height.w,
       child: InputDecorator(
         decoration: AppTextField.decoration(
+          context: context,
           hint: hint,
           prefixIcon: prefixIcon,
           contentPadding: resolvedPadding,
           fixedHeight: true,
-          height: height,
           fontSize: AppTextField.fontSizeFor(context),
-          prefixIconConstraints: AppTextField.prefixIconConstraintsFor(context),
         ),
         isEmpty: false,
         child: DropdownButtonHideUnderline(

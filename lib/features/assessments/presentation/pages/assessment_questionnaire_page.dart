@@ -6,6 +6,7 @@ import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_text_field.dart';
 import 'package:grc_web/features/library/presentation/widgets/edit_question_dialog.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
@@ -1110,13 +1111,13 @@ class _QuestionCard extends StatelessWidget {
                 SizedBox(height: 16.h),
                 _evidenceLabel(l10n),
                 SizedBox(height: 8.h),
-                _TextArea(hint: l10n.qlibEvidencePlaceholder),
+                AppTextArea(hint: l10n.qlibEvidencePlaceholder, minLines: 1, maxLines: 4),
                 SizedBox(height: 6.h),
               ],
               SizedBox(height: data.hasEvidence ? 10.h : 16.h),
               _label(l10n.qlibNotesOptional),
               SizedBox(height: 8.h),
-              _TextArea(hint: l10n.qlibNotesPlaceholder),
+              AppTextArea(hint: l10n.qlibNotesPlaceholder, minLines: 1, maxLines: 4),
               SizedBox(height: 6.h),
             ],
           ),
@@ -1406,49 +1407,6 @@ class _SelectField extends StatelessWidget {
           onChanged: (v) {
             if (v != null) onChanged(v);
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _TextArea extends StatelessWidget {
-  const _TextArea({required this.hint});
-
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      minLines: 1,
-      maxLines: 4,
-      style: TextStyle(
-        color: AppColors.textDark,
-        fontSize: 16.sp,
-        height: 24 / 16,
-        letterSpacing: -0.32,
-      ),
-      decoration: InputDecoration(
-        isDense: true,
-        hintText: hint,
-        hintStyle: TextStyle(
-          color: AppColors.textDark.withValues(alpha: 0.5),
-          fontSize: 16.sp,
-          height: 24 / 16,
-          letterSpacing: -0.32,
-        ),
-        contentPadding: EdgeInsets.fromLTRB(13.w, 9.h, 13.w, 33.h),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: AppColors.borderInput),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: AppColors.borderInput),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: AppColors.primary),
         ),
       ),
     );

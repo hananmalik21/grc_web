@@ -1,9 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
+import 'package:grc_web/core/widgets/app_text_metrics.dart';
 import 'package:grc_web/features/risks/domain/entities/risk_entities.dart';
 
 Future<void> showRiskDetailDialog({
@@ -34,6 +38,9 @@ const _kResidualLabel = Color(0xFF9F2D00);
 const _kResidualValue = Color(0xFF7E2A0C);
 const _kResidualDetail = Color(0xFFCA3500);
 
+const _kAssetChipBg = Color(0xFFE3EFFE);
+const _kAssetChipBorder = Color(0xFFBAD0FF);
+
 // ─── Dialog ───────────────────────────────────────────────────────────────────
 
 class RiskDetailDialog extends StatelessWidget {
@@ -41,51 +48,108 @@ class RiskDetailDialog extends StatelessWidget {
 
   final RiskItem risk;
 
-  static const _dialogWidth = 936.0;
+  static const _textHeight = AppTextMetrics.textHeight;
+  static const double maxDialogWidth = 936;
 
   @override
   Widget build(BuildContext context) {
-    final screenW = MediaQuery.sizeOf(context).width;
-    final hPad = ((screenW - _dialogWidth.w) / 2).clamp(16.0, double.infinity);
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
 
     return Dialog(
-      insetPadding: EdgeInsets.symmetric(horizontal: hPad, vertical: 40.h),
       backgroundColor: Colors.transparent,
-      elevation: 0,
-      child: SizedBox(
-        width: _dialogWidth.w,
-        child: Material(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.r),
-          elevation: 25,
-          shadowColor: Colors.black.withValues(alpha: 0.15),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Header(risk: risk, onClose: () => Navigator.of(context).pop()),
-                SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _InfoSection(risk: risk),
-                        _AssessmentSection(risk: risk),
-                      ],
-                    ),
-                  ),
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+          final useScrollableBody = !metrics.isWide;
+
+          final bodyContent = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _InfoSection(risk: risk, metrics: metrics),
+              _AssessmentSection(risk: risk, metrics: metrics),
+            ],
+          );
+
+          final shell = DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10.r),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 25,
+                  offset: Offset(0, 20),
                 ),
-                _Footer(
-                  onEdit: () => Navigator.of(context).pop(),
-                  onClose: () => Navigator.of(context).pop(),
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 8),
                 ),
               ],
             ),
-          ),
-        ),
+            child: Column(
+              mainAxisSize:
+                  useScrollableBody ? MainAxisSize.max : MainAxisSize.min,
+              children: [
+                _Header(
+                  risk: risk,
+                  onClose: () => Navigator.of(context).pop(),
+                  metrics: metrics,
+                ),
+                if (useScrollableBody)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: metrics.contentPadding,
+                      child: bodyContent,
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: metrics.contentPadding,
+                    child: bodyContent,
+                  ),
+                _Footer(
+                  onEdit: () => Navigator.of(context).pop(),
+                  onClose: () => Navigator.of(context).pop(),
+                  metrics: metrics,
+                ),
+              ],
+            ),
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: Material(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10.r),
+              clipBehavior: Clip.antiAlias,
+              child: useScrollableBody
+                  ? SizedBox(
+                      width: dialogWidth,
+                      height: metrics.maxHeight,
+                      child: shell,
+                    )
+                  : ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: dialogWidth,
+                        maxHeight: metrics.maxHeight,
+                      ),
+                      child: shell,
+                    ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -94,17 +158,24 @@ class RiskDetailDialog extends StatelessWidget {
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _Header extends StatelessWidget {
-  const _Header({required this.risk, required this.onClose});
+  const _Header({
+    required this.risk,
+    required this.onClose,
+    required this.metrics,
+  });
 
   final RiskItem risk;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       color: AppColors.primary,
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 8.w, 17.h),
+      padding: metrics.headerPadding.copyWith(right: 8.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -114,24 +185,28 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   risk.title,
-                  style: TextStyle(
+                  style: textTheme.titleLarge?.copyWith(
                     color: Colors.white,
-                    fontSize: 20.sp,
                     fontWeight: FontWeight.w600,
-                    height: 28 / 20,
                     letterSpacing: -0.46,
+                    fontSize: metrics.isPhone ? 18.sp : 20.sp,
                   ),
+                  maxLines: metrics.isWide ? 1 : 3,
+                  overflow: TextOverflow.ellipsis,
+                  strutStyle: AppTextMetrics.strut(fontSize: 20, lineHeight: 28),
+                  textHeightBehavior: RiskDetailDialog._textHeight,
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   '${l10n.riskIdPrefix} ${risk.id}',
-                  style: TextStyle(
+                  style: textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
-                    fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
-                    height: 20 / 14,
                     letterSpacing: -0.154,
+                    fontSize: metrics.isPhone ? 13.sp : 14.sp,
                   ),
+                  strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                  textHeightBehavior: RiskDetailDialog._textHeight,
                 ),
               ],
             ),
@@ -158,27 +233,40 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ─── Info + Linked Assets row ─────────────────────────────────────────────────
+// ─── Info + Linked Assets ─────────────────────────────────────────────────────
 
 class _InfoSection extends StatelessWidget {
-  const _InfoSection({required this.risk});
+  const _InfoSection({required this.risk, required this.metrics});
 
   final RiskItem risk;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final riskInfo = _RiskInfoColumn(risk: risk);
+    final linkedAssets = _LinkedAssetsColumn(
+      heading: l10n.linkedAssetsLabel,
+      assets: risk.linkedAssets,
+    );
+
+    if (metrics.isWide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: riskInfo),
+          SizedBox(width: 24.w),
+          Expanded(child: linkedAssets),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(child: _RiskInfoColumn(risk: risk)),
-        SizedBox(width: 24.w),
-        Expanded(
-          child: _LinkedAssetsColumn(
-            heading: l10n.linkedAssetsLabel,
-            assets: risk.linkedAssets,
-          ),
-        ),
+        riskInfo,
+        SizedBox(height: metrics.sectionGap),
+        linkedAssets,
       ],
     );
   }
@@ -229,16 +317,35 @@ class _RiskInfoColumn extends StatelessWidget {
   (Color bg, Color fg, String label) _statusBadge(BuildContext context) {
     final l10n = context.l10n;
     return switch (risk.status) {
-      RiskStatus.assessed => (AppColors.statusHighBg, AppColors.statusHighFg, l10n.statusAssessed),
-      RiskStatus.treated => (AppColors.primaryTint, AppColors.primary, l10n.statusTreated),
-      RiskStatus.monitored => (AppColors.statusLowBg, AppColors.statusLowFg, l10n.statusMonitored),
-      RiskStatus.open => (AppColors.statusCriticalBg, AppColors.statusCriticalFg, l10n.statusCritical),
+      RiskStatus.assessed => (
+          AppColors.statusMediumBg,
+          AppColors.statusMediumFg,
+          l10n.statusAssessed,
+        ),
+      RiskStatus.treated => (
+          AppColors.primaryTint,
+          AppColors.primary,
+          l10n.statusTreated,
+        ),
+      RiskStatus.monitored => (
+          AppColors.statusLowBg,
+          AppColors.statusLowFg,
+          l10n.statusMonitored,
+        ),
+      RiskStatus.open => (
+          AppColors.statusCriticalBg,
+          AppColors.statusCriticalFg,
+          l10n.statusCritical,
+        ),
     };
   }
 }
 
 class _LinkedAssetsColumn extends StatelessWidget {
-  const _LinkedAssetsColumn({required this.heading, required this.assets});
+  const _LinkedAssetsColumn({
+    required this.heading,
+    required this.assets,
+  });
 
   final String heading;
   final List<RiskLinkedAsset> assets;
@@ -250,7 +357,10 @@ class _LinkedAssetsColumn extends StatelessWidget {
       children: [
         _SectionHeading(heading),
         SizedBox(height: 12.h),
-        ...assets.map((a) => _AssetChip(asset: a)),
+        for (int i = 0; i < assets.length; i++) ...[
+          _AssetChip(asset: assets[i]),
+          if (i != assets.length - 1) SizedBox(height: 8.h),
+        ],
       ],
     );
   }
@@ -264,10 +374,11 @@ class _AssetChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 9.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFE3EFFE),
-        border: Border.all(color: const Color(0xFFBAD0FF)),
+        color: _kAssetChipBg,
+        border: Border.all(color: _kAssetChipBorder),
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Row(
@@ -278,29 +389,31 @@ class _AssetChip extends StatelessWidget {
             height: 16.r,
           ),
           SizedBox(width: 8.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                asset.id,
-                style: TextStyle(
-                  color: const Color(0xFF101828),
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  asset.id,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    height: 20 / 14,
+                    letterSpacing: -0.154,
+                  ),
                 ),
-              ),
-              Text(
-                asset.name,
-                style: TextStyle(
-                  color: const Color(0xFF4A5565),
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 16 / 12,
+                Text(
+                  asset.name,
+                  style: TextStyle(
+                    color: AppColors.textBody,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    height: 16 / 12,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -311,9 +424,10 @@ class _AssetChip extends StatelessWidget {
 // ─── Risk Assessment section ──────────────────────────────────────────────────
 
 class _AssessmentSection extends StatelessWidget {
-  const _AssessmentSection({required this.risk});
+  const _AssessmentSection({required this.risk, required this.metrics});
 
   final RiskItem risk;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
@@ -323,47 +437,73 @@ class _AssessmentSection extends StatelessWidget {
     final likelihoodLabel = _likelihoodLabel(context);
     final likelihoodNumber = _likelihoodNumber();
 
+    final inherentCard = _InherentCard(
+      label: l10n.inherentRiskVar,
+      value: risk.inherentValue,
+      likelihoodText:
+          '${l10n.likelihoodLabel}: $likelihoodLabel ($likelihoodNumber/5)',
+      impactText: '${l10n.impactLabel}: ${risk.impactValue}',
+    );
+
+    final controlCard = _ControlCard(
+      label: l10n.controlEffectivenessLabel,
+      value: '${risk.controlEffectiveness.toStringAsFixed(0)}%',
+      progress: effectivePct,
+    );
+
+    final residualCard = _ResidualCard(
+      label: l10n.residualRiskVar,
+      value: risk.residualValue,
+      reductionText:
+          '${l10n.riskReductionLabel}: ${reductionPct.toStringAsFixed(1)}%',
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(top: 24.h),
-          child: Divider(color: const Color(0xFFE5E7EB), height: 1.h),
+          padding: EdgeInsets.only(top: metrics.sectionGap),
+          child: Divider(color: AppColors.border, height: 1.h),
         ),
         SizedBox(height: 25.h),
         _SectionHeading(l10n.riskAssessmentTitle),
         SizedBox(height: 16.h),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _InherentCard(
-                label: l10n.inherentRiskVar,
-                value: risk.inherentValue,
-                likelihoodText:
-                    '${l10n.likelihoodLabel}: $likelihoodLabel ($likelihoodNumber/5)',
-                impactText: '${l10n.impactLabel}: ${risk.impactValue}',
+        if (metrics.isWide)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: inherentCard),
+              SizedBox(width: 16.w),
+              Expanded(child: controlCard),
+              SizedBox(width: 16.w),
+              Expanded(child: residualCard),
+            ],
+          )
+        else if (metrics.isCompact)
+          Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: inherentCard),
+                  SizedBox(width: 16.w),
+                  Expanded(child: controlCard),
+                ],
               ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: _ControlCard(
-                label: l10n.controlEffectivenessLabel,
-                value: '${risk.controlEffectiveness.toStringAsFixed(0)}%',
-                progress: effectivePct,
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: _ResidualCard(
-                label: l10n.residualRiskVar,
-                value: risk.residualValue,
-                reductionText:
-                    '${l10n.riskReductionLabel}: ${reductionPct.toStringAsFixed(1)}%',
-              ),
-            ),
-          ],
-        ),
+              SizedBox(height: 16.h),
+              residualCard,
+            ],
+          )
+        else
+          Column(
+            children: [
+              inherentCard,
+              SizedBox(height: metrics.fieldGap),
+              controlCard,
+              SizedBox(height: metrics.fieldGap),
+              residualCard,
+            ],
+          ),
       ],
     );
   }
@@ -380,12 +520,12 @@ class _AssessmentSection extends StatelessWidget {
   }
 
   int _likelihoodNumber() => switch (risk.likelihood) {
-    RiskLikelihood.veryHigh => 5,
-    RiskLikelihood.high => 4,
-    RiskLikelihood.medium => 3,
-    RiskLikelihood.low => 2,
-    RiskLikelihood.veryLow => 1,
-  };
+        RiskLikelihood.veryHigh => 5,
+        RiskLikelihood.high => 4,
+        RiskLikelihood.medium => 3,
+        RiskLikelihood.low => 2,
+        RiskLikelihood.veryLow => 1,
+      };
 }
 
 class _InherentCard extends StatelessWidget {
@@ -475,7 +615,7 @@ class _ControlCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment(-0.6, -1.0),
@@ -600,37 +740,75 @@ class _ResidualCard extends StatelessWidget {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
 class _Footer extends StatelessWidget {
-  const _Footer({required this.onEdit, required this.onClose});
+  const _Footer({
+    required this.onEdit,
+    required this.onClose,
+    required this.metrics,
+  });
 
   final VoidCallback onEdit;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
+
+  EdgeInsets get _footerPadding => metrics.isPhone
+      ? metrics.footerPadding
+      : metrics.isCompact
+          ? metrics.footerPadding
+          : EdgeInsets.fromLTRB(24.w, 25.h, 24.w, 22.h);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final buttonSize = metrics.isPhone ? AppButtonSize.md : AppButtonSize.lg;
+
+    final editButton = AppButton(
+      label: l10n.editRisk,
+      iconAsset: 'assets/figma/risks/svg/edit_icon.svg',
+      variant: AppButtonVariant.primary,
+      iconSize: 16.r,
+      size: buttonSize,
+      fullWidth: !metrics.isWide,
+      onPressed: onEdit,
+    );
+
+    final closeButton = AppButton(
+      label: l10n.cancel,
+      variant: AppButtonVariant.outlined,
+      size: buttonSize,
+      fullWidth: !metrics.isWide,
+      onPressed: onClose,
+    );
+
     return Column(
       children: [
-        Divider(color: const Color(0xFFE5E7EB), height: 1.h),
+        Divider(color: AppColors.border, height: 1.h),
         Padding(
-          padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 16.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              AppButton(
-                label: l10n.editRisk,
-                iconAsset: 'assets/figma/risks/svg/edit_icon.svg',
-                variant: AppButtonVariant.primary,
-                iconSize: 16.r,
-                onPressed: onEdit,
-              ),
-              SizedBox(width: 12.w),
-              AppButton(
-                label: l10n.cancel,
-                variant: AppButtonVariant.outlined,
-                onPressed: onClose,
-              ),
-            ],
-          ),
+          padding: _footerPadding,
+          child: metrics.isPhone
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    editButton,
+                    SizedBox(height: 10.h),
+                    closeButton,
+                  ],
+                )
+              : metrics.isCompact
+                  ? Row(
+                      children: [
+                        Expanded(child: editButton),
+                        SizedBox(width: 12.w),
+                        Expanded(child: closeButton),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        editButton,
+                        SizedBox(width: 12.w),
+                        closeButton,
+                      ],
+                    ),
         ),
       ],
     );
@@ -649,7 +827,7 @@ class _SectionHeading extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: const Color(0xFF364153),
+        color: AppColors.textLabel,
         fontSize: 14.sp,
         fontWeight: FontWeight.w500,
         height: 20 / 14,
@@ -673,7 +851,7 @@ class _InfoField extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: const Color(0xFF6A7282),
+            color: AppColors.textSecondary,
             fontSize: 12.sp,
             fontWeight: FontWeight.w400,
             height: 16 / 12,
@@ -682,7 +860,7 @@ class _InfoField extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            color: const Color(0xFF101828),
+            color: AppColors.textPrimary,
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
             height: 20 / 14,
@@ -715,7 +893,7 @@ class _StatusField extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: const Color(0xFF6A7282),
+            color: AppColors.textSecondary,
             fontSize: 12.sp,
             fontWeight: FontWeight.w400,
             height: 16 / 12,

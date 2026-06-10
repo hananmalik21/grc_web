@@ -82,6 +82,7 @@ class AppButton extends StatelessWidget {
     final colors = _colorsFor(variant);
     final enabled = onPressed != null && !isLoading;
     final resolvedIconSize = iconSize ?? resolvedMetrics.iconSize;
+    final resolvedBackground = backgroundColor ?? colors.background;
 
     final child = Row(
       mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
@@ -186,7 +187,7 @@ class AppButton extends StatelessWidget {
           width: fullWidth ? double.infinity : null,
           padding: resolvedMetrics.padding,
           decoration: BoxDecoration(
-            color: colors.background,
+            color: resolvedBackground,
             borderRadius: BorderRadius.circular(10.r),
             border: colors.borderWidth > 0
                 ? Border.all(color: colors.border, width: colors.borderWidth)

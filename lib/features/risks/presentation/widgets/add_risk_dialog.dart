@@ -1,12 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
 import 'package:grc_web/core/widgets/app_select_field.dart';
 import 'package:grc_web/core/widgets/app_text_field.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
@@ -28,7 +28,7 @@ const _kInherentRedColor = Color(0xFFE7000B); // red VAR in mitigation summary
 class AddRiskDialog extends StatefulWidget {
   const AddRiskDialog({super.key});
 
-  static const _dialogWidth = 984.0;
+  static const double maxDialogWidth = 984;
 
   @override
   State<AddRiskDialog> createState() => _AddRiskDialogState();
@@ -142,61 +142,96 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-    final dialogWidth = math.min(AddRiskDialog._dialogWidth.w, screen.width - 48.w);
-    final dialogHeight = screen.height * 0.92;
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-      child: SizedBox(
-        width: dialogWidth,
-        height: dialogHeight,
-        child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(10.r),
-              boxShadow: const [
-                BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20)),
-                BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 8)),
-              ],
-            ),
-            child: Column(
-              children: [
-                _AddRiskHeader(
-                  riskId: 'R-1779130981039',
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-                _AddRiskStepper(currentStep: _currentStep),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
-                    child: _buildStepContent(context),
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            AddRiskDialog.maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: dialogWidth,
+              height: metrics.maxHeight,
+              child: Material(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10.r),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 25,
+                        offset: Offset(0, 20),
+                      ),
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _AddRiskHeader(
+                        riskId: 'R-1779130981039',
+                        onClose: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                      _AddRiskStepper(
+                        currentStep: _currentStep,
+                        totalSteps: _totalSteps,
+                        metrics: metrics,
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: metrics.contentPadding,
+                          child: _buildStepContent(context, metrics),
+                        ),
+                      ),
+                      _AddRiskFooter(
+                        currentStep: _currentStep,
+                        isLastStep: _currentStep == _totalSteps - 1,
+                        onPrevious: _goPrevious,
+                        onCancel: () => Navigator.of(context).pop(),
+                        onNext: _goNext,
+                        onSave: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                    ],
                   ),
                 ),
-                _AddRiskFooter(
-                  currentStep: _currentStep,
-                  isLastStep: _currentStep == _totalSteps - 1,
-                  onPrevious: _goPrevious,
-                  onCancel: () => Navigator.of(context).pop(),
-                  onNext: _goNext,
-                  onSave: () => Navigator.of(context).pop(),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStepContent(BuildContext context) {
+  Widget _buildStepContent(
+    BuildContext context,
+    AppResponsiveDialogMetrics metrics,
+  ) {
     return switch (_currentStep) {
       0 => _IdentificationStepContent(
+          metrics: metrics,
           titleController: _titleController,
           descriptionController: _descriptionController,
           category: _category,
@@ -227,6 +262,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
           departmentController: _departmentController,
         ),
       1 => _AssessmentStepContent(
+          metrics: metrics,
           likelihood: _likelihood,
           impact: _impact,
           onLikelihoodChanged: (v) => setState(() => _likelihood = v),
@@ -236,6 +272,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
           valueAtRisk: _valueAtRisk,
         ),
       2 => _TreatmentStepContent(
+          metrics: metrics,
           treatmentStrategy: _treatmentStrategy,
           onStrategyChanged: (v) { if (v != null) setState(() => _treatmentStrategy = v); },
           treatmentStatus: _treatmentStatus,
@@ -249,6 +286,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
           appetites: _appetites,
         ),
       3 => _ControlsStepContent(
+          metrics: metrics,
           controlEffectiveness: _controlEffectiveness,
           onEffectivenessChanged: (v) => setState(() => _controlEffectiveness = v),
           likelihood: _likelihood,
@@ -258,6 +296,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
           reductionPct: _controlEffectiveness,
         ),
       4 => _MitigationStepContent(
+          metrics: metrics,
           notesController: _notesController,
           titleValue: _titleController.text.isEmpty
               ? null : _titleController.text,
@@ -300,15 +339,20 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
 // ─── Header ──────────────────────────────────────────────────────────────────
 
 class _AddRiskHeader extends StatelessWidget {
-  const _AddRiskHeader({required this.riskId, required this.onClose});
+  const _AddRiskHeader({
+    required this.riskId,
+    required this.onClose,
+    required this.metrics,
+  });
   final String riskId;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h),
+      padding: metrics.headerPadding,
       decoration: const BoxDecoration(
         color: AppColors.primary,
         border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -323,7 +367,11 @@ class _AddRiskHeader extends StatelessWidget {
                 Text(
                   context.l10n.addNewRisk,
                   style: textTheme.titleLarge?.copyWith(
-                    color: Colors.white, fontWeight: FontWeight.w600, letterSpacing: -0.46),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.46,
+                    fontSize: metrics.isPhone ? 18.sp : null,
+                  ),
                   strutStyle: AppTextMetrics.strut(fontSize: 20, lineHeight: 28),
                   textHeightBehavior: AppTextMetrics.textHeight,
                 ),
@@ -364,8 +412,14 @@ class _AddRiskHeader extends StatelessWidget {
 // ─── Stepper ─────────────────────────────────────────────────────────────────
 
 class _AddRiskStepper extends StatelessWidget {
-  const _AddRiskStepper({required this.currentStep});
+  const _AddRiskStepper({
+    required this.currentStep,
+    required this.totalSteps,
+    required this.metrics,
+  });
   final int currentStep;
+  final int totalSteps;
+  final AppResponsiveDialogMetrics metrics;
 
   static const _steps = [
     ('step_identification', 'Identification'),
@@ -384,68 +438,166 @@ class _AddRiskStepper extends StatelessWidget {
       context.l10n.stepControls,
       context.l10n.stepMitigation,
     ];
+
+    final padding = metrics.isPhone
+        ? EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 13.h)
+        : EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h);
+
+    if (metrics.isPhone) {
+      return Container(
+        padding: padding,
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: AppColors.border)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                _StepButton(
+                  svgName: _steps[currentStep].$1,
+                  label: labels[currentStep],
+                  isDone: true,
+                  iconOnly: false,
+                  compact: true,
+                ),
+                const Spacer(),
+                Text(
+                  '${currentStep + 1} / $totalSteps',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textBody,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.154,
+                      ),
+                  strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                  textHeightBehavior: AppTextMetrics.textHeight,
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2.r),
+              child: LinearProgressIndicator(
+                value: (currentStep + 1) / totalSteps,
+                minHeight: 4.h,
+                backgroundColor: AppColors.border,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final stepperRow = Row(
+      children: [
+        for (int i = 0; i < _steps.length; i++) ...[
+          _StepButton(
+            svgName: _steps[i].$1,
+            label: labels[i],
+            isDone: i <= currentStep,
+            compact: metrics.isCompact,
+          ),
+          if (i < _steps.length - 1)
+            metrics.isWide
+                ? Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
+                      child: Container(
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: i < currentStep
+                              ? AppColors.primary
+                              : AppColors.border,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w),
+                    child: SizedBox(
+                      width: 24.w,
+                      child: Container(
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: i < currentStep
+                              ? AppColors.primary
+                              : AppColors.border,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                    ),
+                  ),
+        ],
+      ],
+    );
+
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h),
+      padding: padding,
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      child: Row(
-        children: [
-          for (int i = 0; i < _steps.length; i++) ...[
-            _StepButton(
-              svgName: _steps[i].$1,
-              label: labels[i],
-              isDone: i <= currentStep,
-            ),
-            if (i < _steps.length - 1)
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w),
-                  child: Container(
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: i < currentStep ? AppColors.primary : AppColors.border,
-                      borderRadius: BorderRadius.circular(2.r),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ],
-      ),
+      child: metrics.isCompact
+          ? SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: stepperRow,
+            )
+          : stepperRow,
     );
   }
 }
 
 class _StepButton extends StatelessWidget {
-  const _StepButton({required this.svgName, required this.label, required this.isDone});
+  const _StepButton({
+    required this.svgName,
+    required this.label,
+    required this.isDone,
+    this.iconOnly = false,
+    this.compact = false,
+  });
   final String svgName;
   final String label;
   final bool isDone;
+  final bool iconOnly;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final bg = isDone ? AppColors.primaryTint : AppColors.rowDivider;
     final fg = isDone ? AppColors.primary : AppColors.textBody;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10.r)),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 12.w : 16.w,
+        vertical: compact ? 6.h : 8.h,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           SvgPicture.asset(
             'assets/figma/risks/svg/$svgName.svg',
-            width: 16.r, height: 16.r,
+            width: 16.r,
+            height: 16.r,
             colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
           ),
-          SizedBox(width: 8.w),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: fg, fontWeight: FontWeight.w500, letterSpacing: -0.154),
-            strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-            textHeightBehavior: AppTextMetrics.textHeight,
-          ),
+          if (!iconOnly) ...[
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: fg,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.154,
+                    fontSize: compact ? 13.sp : null,
+                  ),
+              strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+              textHeightBehavior: AppTextMetrics.textHeight,
+            ),
+          ],
         ],
       ),
     );
@@ -462,6 +614,7 @@ class _AddRiskFooter extends StatelessWidget {
     required this.onCancel,
     required this.onNext,
     required this.onSave,
+    required this.metrics,
   });
   final int currentStep;
   final bool isLastStep;
@@ -469,13 +622,109 @@ class _AddRiskFooter extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onNext;
   final VoidCallback onSave;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final primaryButton = isLastStep
+        ? AppButton(
+            label: l10n.saveRisk,
+            iconAsset: 'assets/figma/risks/svg/save_icon.svg',
+            variant: AppButtonVariant.primary,
+            iconSize: 16.r,
+            onPressed: onSave,
+          )
+        : AppButton(
+            label: l10n.next,
+            variant: AppButtonVariant.primary,
+            onPressed: onNext,
+          );
+
+    if (metrics.useStackedFooter) {
+      return Container(
+        width: double.infinity,
+        padding: metrics.footerPadding,
+        decoration: const BoxDecoration(
+          color: AppColors.bg,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (currentStep > 0) ...[
+              AppButton(
+                label: l10n.previous,
+                variant: AppButtonVariant.outlined,
+                fullWidth: true,
+                onPressed: onPrevious,
+              ),
+              SizedBox(height: 10.h),
+            ],
+            AppButton(
+              label: isLastStep ? l10n.saveRisk : l10n.next,
+              iconAsset: isLastStep
+                  ? 'assets/figma/risks/svg/save_icon.svg'
+                  : null,
+              variant: AppButtonVariant.primary,
+              iconSize: 16.r,
+              fullWidth: true,
+              onPressed: isLastStep ? onSave : onNext,
+            ),
+            SizedBox(height: 10.h),
+            AppButton(
+              label: l10n.cancel,
+              variant: AppButtonVariant.outlined,
+              fullWidth: true,
+              onPressed: onCancel,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Container(
+        width: double.infinity,
+        padding: metrics.footerPadding,
+        decoration: const BoxDecoration(
+          color: AppColors.bg,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (currentStep > 0) ...[
+              AppButton(
+                label: l10n.previous,
+                variant: AppButtonVariant.outlined,
+                fullWidth: true,
+                onPressed: onPrevious,
+              ),
+              SizedBox(height: 10.h),
+            ],
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: l10n.cancel,
+                    variant: AppButtonVariant.outlined,
+                    fullWidth: true,
+                    onPressed: onCancel,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Expanded(child: primaryButton),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(24.w, 17.h, 24.w, 16.h),
+      padding: metrics.footerPadding,
       decoration: const BoxDecoration(
         color: AppColors.bg,
         border: Border(top: BorderSide(color: AppColors.border)),
@@ -499,20 +748,7 @@ class _AddRiskFooter extends StatelessWidget {
                 onPressed: onCancel,
               ),
               SizedBox(width: 8.w),
-              if (isLastStep)
-                AppButton(
-                  label: l10n.saveRisk,
-                  iconAsset: 'assets/figma/risks/svg/save_icon.svg',
-                  variant: AppButtonVariant.primary,
-                  iconSize: 16.r,
-                  onPressed: onSave,
-                )
-              else
-                AppButton(
-                  label: l10n.next,
-                  variant: AppButtonVariant.primary,
-                  onPressed: onNext,
-                ),
+              primaryButton,
             ],
           ),
         ],
@@ -527,6 +763,7 @@ class _AddRiskFooter extends StatelessWidget {
 
 class _IdentificationStepContent extends StatelessWidget {
   const _IdentificationStepContent({
+    required this.metrics,
     required this.titleController,
     required this.descriptionController,
     required this.category,
@@ -555,6 +792,7 @@ class _IdentificationStepContent extends StatelessWidget {
     required this.departmentController,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final TextEditingController titleController;
   final TextEditingController descriptionController;
   final String category;
@@ -588,20 +826,22 @@ class _IdentificationStepContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionTitle(l10n.riskIdentificationTitle),
-        SizedBox(height: 24.h),
+        _SectionTitle(l10n.riskIdentificationTitle, metrics: metrics),
+        SizedBox(height: metrics.sectionGap),
         AppTextField(
           label: l10n.riskTitleLabel, isRequired: true, labelSpacing: 4,
           controller: titleController, hint: l10n.riskTitlePlaceholder,
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         AppTextField(
           label: l10n.assetDescription, isRequired: true, labelSpacing: 4,
           controller: descriptionController, hint: l10n.riskDescriptionPlaceholder,
           minLines: 3, maxLines: 6,
         ),
-        SizedBox(height: 16.h),
-        _TwoCol(gap: 16.w,
+        SizedBox(height: metrics.fieldGap),
+        _TwoCol(
+          metrics: metrics,
+          gap: 16.w,
           left: AppSelectField<String>(
             label: l10n.category, isRequired: true, value: category,
             items: categories, itemLabel: (v) => categoryLabel(context, v),
@@ -612,8 +852,10 @@ class _IdentificationStepContent extends StatelessWidget {
             controller: subcategoryController, hint: l10n.riskSubcategoryPlaceholder,
           ),
         ),
-        SizedBox(height: 16.h),
-        _TwoCol(gap: 16.w,
+        SizedBox(height: metrics.fieldGap),
+        _TwoCol(
+          metrics: metrics,
+          gap: 16.w,
           left: _AffectedAssetsField(
             label: l10n.affectedAssets, assets: mockAssets, selected: selectedAssets,
             hint: l10n.holdCtrlToSelectMultiple, onToggle: onToggleAsset,
@@ -627,8 +869,10 @@ class _IdentificationStepContent extends StatelessWidget {
             ],
           ]),
         ),
-        SizedBox(height: 24.h),
-        _TwoCol(gap: 24.w,
+        SizedBox(height: metrics.sectionGap),
+        _TwoCol(
+          metrics: metrics,
+          gap: 24.w,
           left: AppTextField(
             label: l10n.rootCause, labelSpacing: 4,
             controller: rootCauseController, hint: l10n.rootCausePlaceholder,
@@ -643,8 +887,10 @@ class _IdentificationStepContent extends StatelessWidget {
             ],
           ]),
         ),
-        SizedBox(height: 24.h),
-        _TwoCol(gap: 24.w,
+        SizedBox(height: metrics.sectionGap),
+        _TwoCol(
+          metrics: metrics,
+          gap: 24.w,
           left: _AddItemField(label: l10n.vulnerabilities, controller: vulnerabilityController,
             hint: l10n.addVulnerabilityPlaceholder, onAdd: onAddVulnerability),
           right: _AddItemField(label: l10n.threats, controller: threatController,
@@ -652,7 +898,9 @@ class _IdentificationStepContent extends StatelessWidget {
         ),
         if (vulnerabilities.isNotEmpty || threats.isNotEmpty) ...[
           SizedBox(height: 6.h),
-          _TwoCol(gap: 24.w,
+          _TwoCol(
+            metrics: metrics,
+            gap: 24.w,
             left: vulnerabilities.isNotEmpty
                 ? _TagsRow(items: vulnerabilities, color: AppColors.primaryTint)
                 : const SizedBox.shrink(),
@@ -661,15 +909,19 @@ class _IdentificationStepContent extends StatelessWidget {
                 : const SizedBox.shrink(),
           ),
         ],
-        SizedBox(height: 24.h),
-        _ThreeCol(gap: 16.w, children: [
-          AppTextField(label: l10n.riskOwner, isRequired: true, labelSpacing: 4,
-            controller: ownerController, hint: l10n.riskOwnerPlaceholder),
-          AppTextField(label: l10n.ownerRole, labelSpacing: 4,
-            controller: ownerRoleController, hint: l10n.ownerRolePlaceholder),
-          AppTextField(label: l10n.department, labelSpacing: 4,
-            controller: departmentController, hint: l10n.departmentPlaceholder),
-        ]),
+        SizedBox(height: metrics.sectionGap),
+        _ThreeCol(
+          metrics: metrics,
+          gap: 16.w,
+          children: [
+            AppTextField(label: l10n.riskOwner, isRequired: true, labelSpacing: 4,
+              controller: ownerController, hint: l10n.riskOwnerPlaceholder),
+            AppTextField(label: l10n.ownerRole, labelSpacing: 4,
+              controller: ownerRoleController, hint: l10n.ownerRolePlaceholder),
+            AppTextField(label: l10n.department, labelSpacing: 4,
+              controller: departmentController, hint: l10n.departmentPlaceholder),
+          ],
+        ),
       ],
     );
   }
@@ -681,6 +933,7 @@ class _IdentificationStepContent extends StatelessWidget {
 
 class _AssessmentStepContent extends StatelessWidget {
   const _AssessmentStepContent({
+    required this.metrics,
     required this.likelihood,
     required this.impact,
     required this.onLikelihoodChanged,
@@ -690,6 +943,7 @@ class _AssessmentStepContent extends StatelessWidget {
     required this.valueAtRisk,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final int likelihood;
   final int impact;
   final ValueChanged<int> onLikelihoodChanged;
@@ -717,72 +971,77 @@ class _AssessmentStepContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final textTheme = Theme.of(context).textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionTitle(l10n.riskAssessmentTitle),
-        SizedBox(height: 24.h),
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(child: _SelectionPanel(
+        _SectionTitle(l10n.riskAssessmentTitle, metrics: metrics),
+        SizedBox(height: metrics.sectionGap),
+        if (metrics.isWide)
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: _SelectionPanel(
+              title: l10n.inherentLikelihood,
+              metrics: metrics,
+              children: _likelihoodOpts.map((o) => _LikelihoodCard(
+                level: o.$1, label: o.$2, subtitle: o.$3,
+                isSelected: likelihood == o.$1,
+                onTap: () => onLikelihoodChanged(o.$1),
+              )).toList(),
+            )),
+            SizedBox(width: 24.w),
+            Expanded(child: _SelectionPanel(
+              title: l10n.inherentImpact,
+              metrics: metrics,
+              children: _impactOpts.map((o) => _ImpactCard(
+                level: o.$1, label: o.$2,
+                isSelected: impact == o.$1,
+                onTap: () => onImpactChanged(o.$1),
+              )).toList(),
+            )),
+          ])
+        else ...[
+          _SelectionPanel(
             title: l10n.inherentLikelihood,
+            metrics: metrics,
             children: _likelihoodOpts.map((o) => _LikelihoodCard(
               level: o.$1, label: o.$2, subtitle: o.$3,
               isSelected: likelihood == o.$1,
               onTap: () => onLikelihoodChanged(o.$1),
             )).toList(),
-          )),
-          SizedBox(width: 24.w),
-          Expanded(child: _SelectionPanel(
+          ),
+          SizedBox(height: metrics.sectionGap),
+          _SelectionPanel(
             title: l10n.inherentImpact,
+            metrics: metrics,
             children: _impactOpts.map((o) => _ImpactCard(
               level: o.$1, label: o.$2,
               isSelected: impact == o.$1,
               onTap: () => onImpactChanged(o.$1),
             )).toList(),
-          )),
-        ]),
-        SizedBox(height: 24.h),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(l10n.financialImpactUsd,
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textLabel, fontWeight: FontWeight.w500, letterSpacing: -0.154),
-            strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-            textHeightBehavior: AppTextMetrics.textHeight,
           ),
-          SizedBox(height: 4.h),
-          SizedBox(
-            height: AppTextField.fieldHeight.h,
-            child: TextField(
-              controller: financialImpactController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: AppTextField.decoration(
-                hint: '0',
-                prefixIcon: Padding(
-                  padding: EdgeInsetsDirectional.only(start: 12.w, end: 9.w),
-                  child: SvgPicture.asset(
-                    'assets/figma/risks/svg/dollar_icon.svg',
-                    width: 20.r, height: 20.r,
-                  ),
-                ),
-                contentPadding: EdgeInsets.fromLTRB(41.w, 9.h, 13.w, 9.h),
-              ),
-              style: textTheme.bodyLarge?.copyWith(
-                color: AppColors.textDark, letterSpacing: -0.32),
+        ],
+        SizedBox(height: metrics.sectionGap),
+        AppTextField.number(
+          label: l10n.financialImpactUsd,
+          labelSpacing: 4,
+          controller: financialImpactController,
+          hint: '0',
+          helperText: l10n.financialImpactHint,
+          prefixIcon: Padding(
+            padding: EdgeInsetsDirectional.only(start: 12.w, end: 9.w),
+            child: SvgPicture.asset(
+              'assets/figma/risks/svg/dollar_icon.svg',
+              width: 20.r,
+              height: 20.r,
             ),
           ),
-          SizedBox(height: 4.h),
-          Text(l10n.financialImpactHint,
-            style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary, fontWeight: FontWeight.w400, fontSize: 12.sp),
-            strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
-            textHeightBehavior: AppTextMetrics.textHeight,
-          ),
-        ]),
-        SizedBox(height: 24.h),
-        _InherentRiskScoreCard(score: riskScore, valueAtRisk: valueAtRisk),
+        ),
+        SizedBox(height: metrics.sectionGap),
+        _InherentRiskScoreCard(
+          score: riskScore,
+          valueAtRisk: valueAtRisk,
+          metrics: metrics,
+        ),
       ],
     );
   }
@@ -791,14 +1050,19 @@ class _AssessmentStepContent extends StatelessWidget {
 // ─── Selection panel wrapper ─────────────────────────────────────────────────
 
 class _SelectionPanel extends StatelessWidget {
-  const _SelectionPanel({required this.title, required this.children});
+  const _SelectionPanel({
+    required this.title,
+    required this.children,
+    required this.metrics,
+  });
   final String title;
   final List<Widget> children;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(24.r),
+      padding: EdgeInsets.all(metrics.isPhone ? 16.r : 24.r),
       decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(10.r)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title,
@@ -916,9 +1180,14 @@ class _ImpactCard extends StatelessWidget {
 // ─── Inherent Risk Score card ─────────────────────────────────────────────────
 
 class _InherentRiskScoreCard extends StatelessWidget {
-  const _InherentRiskScoreCard({required this.score, required this.valueAtRisk});
+  const _InherentRiskScoreCard({
+    required this.score,
+    required this.valueAtRisk,
+    required this.metrics,
+  });
   final int score;
   final double valueAtRisk;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
@@ -928,7 +1197,7 @@ class _InherentRiskScoreCard extends StatelessWidget {
     final (ratingBg, ratingFg) = _ratingColors(rating);
 
     return Container(
-      padding: EdgeInsets.all(24.r),
+      padding: EdgeInsets.all(metrics.isPhone ? 16.r : 24.r),
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [Color(0xFFFEF2F2), Color(0xFFFFF7ED)]),
         borderRadius: BorderRadius.circular(10.r),
@@ -942,38 +1211,77 @@ class _InherentRiskScoreCard extends StatelessWidget {
           textHeightBehavior: AppTextMetrics.textHeight,
         ),
         SizedBox(height: 16.h),
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(child: _ScoreColumn(label: l10n.score, child:
-            Text('$score',
-              style: textTheme.headlineMedium?.copyWith(
-                color: AppColors.textPrimary, fontWeight: FontWeight.w700,
-                fontSize: 24.sp, letterSpacing: 0.072),
-              strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-              textHeightBehavior: AppTextMetrics.textHeight,
-            ),
-          )),
-          Expanded(child: _ScoreColumn(label: l10n.rating, child:
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-              decoration: BoxDecoration(color: ratingBg, borderRadius: BorderRadius.circular(9999.r)),
-              child: Text(_ratingLabel(rating),
-                style: textTheme.bodyMedium?.copyWith(
-                  color: ratingFg, fontWeight: FontWeight.w500, letterSpacing: -0.154),
-                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+        if (metrics.isPhone)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ScoreColumn(label: l10n.score, child:
+                Text('$score',
+                  style: textTheme.headlineMedium?.copyWith(
+                    color: AppColors.textPrimary, fontWeight: FontWeight.w700,
+                    fontSize: 24.sp, letterSpacing: 0.072),
+                  strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+                  textHeightBehavior: AppTextMetrics.textHeight,
+                ),
+              ),
+              SizedBox(height: metrics.fieldGap),
+              _ScoreColumn(label: l10n.rating, child:
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                  decoration: BoxDecoration(color: ratingBg, borderRadius: BorderRadius.circular(9999.r)),
+                  child: Text(_ratingLabel(rating),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: ratingFg, fontWeight: FontWeight.w500, letterSpacing: -0.154),
+                    strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                    textHeightBehavior: AppTextMetrics.textHeight,
+                  ),
+                ),
+              ),
+              SizedBox(height: metrics.fieldGap),
+              _ScoreColumn(label: l10n.valueAtRisk, child:
+                Text(_formatVAR(valueAtRisk),
+                  style: textTheme.titleLarge?.copyWith(
+                    color: AppColors.textPrimary, fontWeight: FontWeight.w700,
+                    fontSize: 18.sp, letterSpacing: -0.45),
+                  strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
+                  textHeightBehavior: AppTextMetrics.textHeight,
+                ),
+              ),
+            ],
+          )
+        else
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: _ScoreColumn(label: l10n.score, child:
+              Text('$score',
+                style: textTheme.headlineMedium?.copyWith(
+                  color: AppColors.textPrimary, fontWeight: FontWeight.w700,
+                  fontSize: 24.sp, letterSpacing: 0.072),
+                strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
                 textHeightBehavior: AppTextMetrics.textHeight,
               ),
-            ),
-          )),
-          Expanded(child: _ScoreColumn(label: l10n.valueAtRisk, child:
-            Text(_formatVAR(valueAtRisk),
-              style: textTheme.titleLarge?.copyWith(
-                color: AppColors.textPrimary, fontWeight: FontWeight.w700,
-                fontSize: 18.sp, letterSpacing: -0.45),
-              strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
-              textHeightBehavior: AppTextMetrics.textHeight,
-            ),
-          )),
-        ]),
+            )),
+            Expanded(child: _ScoreColumn(label: l10n.rating, child:
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                decoration: BoxDecoration(color: ratingBg, borderRadius: BorderRadius.circular(9999.r)),
+                child: Text(_ratingLabel(rating),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: ratingFg, fontWeight: FontWeight.w500, letterSpacing: -0.154),
+                  strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                  textHeightBehavior: AppTextMetrics.textHeight,
+                ),
+              ),
+            )),
+            Expanded(child: _ScoreColumn(label: l10n.valueAtRisk, child:
+              Text(_formatVAR(valueAtRisk),
+                style: textTheme.titleLarge?.copyWith(
+                  color: AppColors.textPrimary, fontWeight: FontWeight.w700,
+                  fontSize: 18.sp, letterSpacing: -0.45),
+                strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
+                textHeightBehavior: AppTextMetrics.textHeight,
+              ),
+            )),
+          ]),
       ]),
     );
   }
@@ -1033,6 +1341,7 @@ class _ScoreColumn extends StatelessWidget {
 
 class _TreatmentStepContent extends StatelessWidget {
   const _TreatmentStepContent({
+    required this.metrics,
     required this.treatmentStrategy,
     required this.onStrategyChanged,
     required this.treatmentStatus,
@@ -1046,6 +1355,7 @@ class _TreatmentStepContent extends StatelessWidget {
     required this.appetites,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final String treatmentStrategy;
   final ValueChanged<String?> onStrategyChanged;
   final String treatmentStatus;
@@ -1063,9 +1373,11 @@ class _TreatmentStepContent extends StatelessWidget {
     final l10n = context.l10n;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _SectionTitle(l10n.riskTreatmentStrategyTitle),
-      SizedBox(height: 24.h),
-      _TwoCol(gap: 16.w,
+      _SectionTitle(l10n.riskTreatmentStrategyTitle, metrics: metrics),
+      SizedBox(height: metrics.sectionGap),
+      _TwoCol(
+        metrics: metrics,
+        gap: 16.w,
         left: AppSelectField<String>(
           label: l10n.treatmentStrategyLabel, isRequired: true,
           value: treatmentStrategy,
@@ -1081,8 +1393,10 @@ class _TreatmentStepContent extends StatelessWidget {
           onChanged: onStatusChanged,
         ),
       ),
-      SizedBox(height: 16.h),
-      _TwoCol(gap: 16.w,
+      SizedBox(height: metrics.fieldGap),
+      _TwoCol(
+        metrics: metrics,
+        gap: 16.w,
         left: AppSelectField<String>(
           label: l10n.riskAppetite,
           value: riskAppetite,
@@ -1097,7 +1411,7 @@ class _TreatmentStepContent extends StatelessWidget {
           keyboardType: TextInputType.number,
         ),
       ),
-      SizedBox(height: 16.h),
+      SizedBox(height: metrics.fieldGap),
       AppTextField(
         label: l10n.treatmentPlan, labelSpacing: 4,
         controller: treatmentPlanController,
@@ -1134,6 +1448,7 @@ class _TreatmentStepContent extends StatelessWidget {
 
 class _ControlsStepContent extends StatelessWidget {
   const _ControlsStepContent({
+    required this.metrics,
     required this.controlEffectiveness,
     required this.onEffectivenessChanged,
     required this.likelihood,
@@ -1143,6 +1458,7 @@ class _ControlsStepContent extends StatelessWidget {
     required this.reductionPct,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final double controlEffectiveness;
   final ValueChanged<double> onEffectivenessChanged;
   final int likelihood;
@@ -1159,8 +1475,8 @@ class _ControlsStepContent extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _SectionTitle(l10n.controlEffectivenessTitle),
-      SizedBox(height: 24.h),
+      _SectionTitle(l10n.controlEffectivenessTitle, metrics: metrics),
+      SizedBox(height: metrics.sectionGap),
       // ── Slider section ───────────────────────────────────────
       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(l10n.overallControlEffectiveness,
@@ -1209,10 +1525,10 @@ class _ControlsStepContent extends StatelessWidget {
           ),
         ]),
       ]),
-      SizedBox(height: 24.h),
+      SizedBox(height: metrics.sectionGap),
       // ── Residual Risk card ───────────────────────────────────
       Container(
-        padding: EdgeInsets.all(24.r),
+        padding: EdgeInsets.all(metrics.isPhone ? 16.r : 24.r),
         decoration: BoxDecoration(
           gradient: const LinearGradient(colors: [Color(0xFFFFF7ED), Color(0xFFFEFCE8)]),
           borderRadius: BorderRadius.circular(10.r),
@@ -1226,56 +1542,18 @@ class _ControlsStepContent extends StatelessWidget {
             textHeightBehavior: AppTextMetrics.textHeight,
           ),
           SizedBox(height: 16.h),
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // Likelihood
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _MiniLabel(l10n.likelihood),
-              SizedBox(height: 4.h),
-              _BoldValue(_levelLabels[likelihood.clamp(1, 5)]),
-            ])),
-            // Impact
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _MiniLabel(l10n.impact),
-              SizedBox(height: 4.h),
-              _BoldValue(_levelLabels[impact.clamp(1, 5)]),
-            ])),
-            // Score
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _MiniLabel(l10n.score),
-              SizedBox(height: 4.h),
-              Text('$residualScore',
-                style: textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary, fontWeight: FontWeight.w700,
-                  fontSize: 24.sp, letterSpacing: 0.072),
-                strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-              SizedBox(height: 4.h),
-              _RatingBadge(score: residualScore),
-            ])),
-            // VAR
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _MiniLabel(l10n.valueAtRisk),
-              SizedBox(height: 4.h),
-              Text(_InherentRiskScoreCard._formatVAR(residualVAR),
-                style: textTheme.titleLarge?.copyWith(
-                  color: _kResidualColor, fontWeight: FontWeight.w700,
-                  fontSize: 18.sp, letterSpacing: -0.45),
-                strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-              SizedBox(height: 2.h),
-              Text('↓ ${reductionPct.toStringAsFixed(1)}% reduction',
-                style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.statusLowFg, fontWeight: FontWeight.w400, fontSize: 12.sp),
-                strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-            ])),
-          ]),
+          _ResidualRiskMetrics(
+            metrics: metrics,
+            likelihood: likelihood,
+            impact: impact,
+            residualScore: residualScore,
+            residualVAR: residualVAR,
+            reductionPct: reductionPct,
+            levelLabels: _levelLabels,
+          ),
         ]),
       ),
-      SizedBox(height: 16.h),
+      SizedBox(height: metrics.fieldGap),
       // ── Note box ────────────────────────────────────────────
       Container(
         padding: EdgeInsets.all(16.r),
@@ -1295,6 +1573,150 @@ class _ControlsStepContent extends StatelessWidget {
         ),
       ),
     ]);
+  }
+}
+
+class _ResidualRiskMetrics extends StatelessWidget {
+  const _ResidualRiskMetrics({
+    required this.metrics,
+    required this.likelihood,
+    required this.impact,
+    required this.residualScore,
+    required this.residualVAR,
+    required this.reductionPct,
+    required this.levelLabels,
+  });
+
+  final AppResponsiveDialogMetrics metrics;
+  final int likelihood;
+  final int impact;
+  final int residualScore;
+  final double residualVAR;
+  final double reductionPct;
+  final List<String> levelLabels;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final textTheme = Theme.of(context).textTheme;
+
+    Widget likelihoodCol() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _MiniLabel(l10n.likelihood),
+            SizedBox(height: 4.h),
+            _BoldValue(levelLabels[likelihood.clamp(1, 5)]),
+          ],
+        );
+
+    Widget impactCol() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _MiniLabel(l10n.impact),
+            SizedBox(height: 4.h),
+            _BoldValue(levelLabels[impact.clamp(1, 5)]),
+          ],
+        );
+
+    Widget scoreCol() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _MiniLabel(l10n.score),
+            SizedBox(height: 4.h),
+            Text(
+              '$residualScore',
+              style: textTheme.headlineMedium?.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: 24.sp,
+                letterSpacing: 0.072,
+              ),
+              strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+              textHeightBehavior: AppTextMetrics.textHeight,
+            ),
+            SizedBox(height: 4.h),
+            _RatingBadge(score: residualScore),
+          ],
+        );
+
+    Widget varCol() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _MiniLabel(l10n.valueAtRisk),
+            SizedBox(height: 4.h),
+            Text(
+              _InherentRiskScoreCard._formatVAR(residualVAR),
+              style: textTheme.titleLarge?.copyWith(
+                color: _kResidualColor,
+                fontWeight: FontWeight.w700,
+                fontSize: 18.sp,
+                letterSpacing: -0.45,
+              ),
+              strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
+              textHeightBehavior: AppTextMetrics.textHeight,
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              '↓ ${reductionPct.toStringAsFixed(1)}% reduction',
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.statusLowFg,
+                fontWeight: FontWeight.w400,
+                fontSize: 12.sp,
+              ),
+              strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
+              textHeightBehavior: AppTextMetrics.textHeight,
+            ),
+          ],
+        );
+
+    if (metrics.isPhone) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          likelihoodCol(),
+          SizedBox(height: metrics.fieldGap),
+          impactCol(),
+          SizedBox(height: metrics.fieldGap),
+          scoreCol(),
+          SizedBox(height: metrics.fieldGap),
+          varCol(),
+        ],
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: likelihoodCol()),
+              SizedBox(width: 16.w),
+              Expanded(child: impactCol()),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: scoreCol()),
+              SizedBox(width: 16.w),
+              Expanded(child: varCol()),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: likelihoodCol()),
+        Expanded(child: impactCol()),
+        Expanded(child: scoreCol()),
+        Expanded(child: varCol()),
+      ],
+    );
   }
 }
 
@@ -1357,6 +1779,7 @@ class _RatingBadge extends StatelessWidget {
 
 class _MitigationStepContent extends StatelessWidget {
   const _MitigationStepContent({
+    required this.metrics,
     required this.notesController,
     required this.titleValue,
     required this.categoryValue,
@@ -1368,6 +1791,7 @@ class _MitigationStepContent extends StatelessWidget {
     required this.ownerValue,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final TextEditingController notesController;
   final String? titleValue;
   final String categoryValue;
@@ -1389,11 +1813,11 @@ class _MitigationStepContent extends StatelessWidget {
         _InherentRiskScoreCard._ratingFor(residualScore));
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _SectionTitle(l10n.mitigationActionsTitle),
-      SizedBox(height: 24.h),
+      _SectionTitle(l10n.mitigationActionsTitle, metrics: metrics),
+      SizedBox(height: metrics.sectionGap),
       // ── Info box ─────────────────────────────────────────────
       Container(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(metrics.isPhone ? 14.r : 16.r),
         decoration: BoxDecoration(
           color: AppColors.primaryLightBg,
           borderRadius: BorderRadius.circular(10.r),
@@ -1405,17 +1829,17 @@ class _MitigationStepContent extends StatelessWidget {
           textHeightBehavior: AppTextMetrics.textHeight,
         ),
       ),
-      SizedBox(height: 24.h),
+      SizedBox(height: metrics.sectionGap),
       // ── Notes textarea ────────────────────────────────────────
       AppTextField(
         label: l10n.notesLabel, labelSpacing: 4,
         controller: notesController, hint: l10n.notesPlaceholder,
         minLines: 4, maxLines: 7,
       ),
-      SizedBox(height: 24.h),
+      SizedBox(height: metrics.sectionGap),
       // ── Risk Summary card ─────────────────────────────────────
       Container(
-        padding: EdgeInsets.all(24.r),
+        padding: EdgeInsets.all(metrics.isPhone ? 16.r : 24.r),
         decoration: BoxDecoration(
           color: AppColors.bg, borderRadius: BorderRadius.circular(10.r)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1427,7 +1851,9 @@ class _MitigationStepContent extends StatelessWidget {
             textHeightBehavior: AppTextMetrics.textHeight,
           ),
           SizedBox(height: 16.h),
-          _TwoCol(gap: 16.w,
+          _TwoCol(
+            metrics: metrics,
+            gap: 16.w,
             left: _SummaryItem(
               term: l10n.summaryTitle,
               value: titleValue ?? l10n.notSet,
@@ -1439,8 +1865,10 @@ class _MitigationStepContent extends StatelessWidget {
               valueColor: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: 16.h),
-          _TwoCol(gap: 16.w,
+          SizedBox(height: metrics.fieldGap),
+          _TwoCol(
+            metrics: metrics,
+            gap: 16.w,
             left: _SummaryItem(
               term: l10n.inherentRisk,
               value: '$inherentScore ($inherentRating) - ${_InherentRiskScoreCard._formatVAR(inherentVAR)}',
@@ -1452,8 +1880,10 @@ class _MitigationStepContent extends StatelessWidget {
               valueColor: _kResidualColor,
             ),
           ),
-          SizedBox(height: 16.h),
-          _TwoCol(gap: 16.w,
+          SizedBox(height: metrics.fieldGap),
+          _TwoCol(
+            metrics: metrics,
+            gap: 16.w,
             left: _SummaryItem(
               term: l10n.summaryTreatment,
               value: treatmentValue,
@@ -1503,14 +1933,19 @@ class _SummaryItem extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.title);
+  const _SectionTitle(this.title, {required this.metrics});
   final String title;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Text(title,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        color: AppColors.textPrimary, fontWeight: FontWeight.w600, letterSpacing: -0.45),
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.45,
+        fontSize: metrics.isPhone ? 16.sp : null,
+      ),
       strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
       textHeightBehavior: AppTextMetrics.textHeight,
     );
@@ -1518,26 +1953,80 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _TwoCol extends StatelessWidget {
-  const _TwoCol({required this.left, required this.right, required this.gap});
+  const _TwoCol({
+    required this.metrics,
+    required this.left,
+    required this.right,
+    required this.gap,
+  });
+  final AppResponsiveDialogMetrics metrics;
   final Widget left;
   final Widget right;
   final double gap;
 
   @override
   Widget build(BuildContext context) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Expanded(child: left), SizedBox(width: gap), Expanded(child: right),
-    ]);
+    if (metrics.isWide) {
+      return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: left),
+        SizedBox(width: gap),
+        Expanded(child: right),
+      ]);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        left,
+        SizedBox(height: metrics.fieldGap),
+        right,
+      ],
+    );
   }
 }
 
 class _ThreeCol extends StatelessWidget {
-  const _ThreeCol({required this.children, required this.gap});
+  const _ThreeCol({
+    required this.metrics,
+    required this.children,
+    required this.gap,
+  });
+  final AppResponsiveDialogMetrics metrics;
   final List<Widget> children;
   final double gap;
 
   @override
   Widget build(BuildContext context) {
+    if (metrics.isPhone) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1) SizedBox(height: metrics.fieldGap),
+          ],
+        ],
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: children[0]),
+              SizedBox(width: gap),
+              Expanded(child: children[1]),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          children[2],
+        ],
+      );
+    }
+
     final items = <Widget>[];
     for (int i = 0; i < children.length; i++) {
       items.add(Expanded(child: children[i]));
@@ -1620,16 +2109,13 @@ class _AddItemField extends StatelessWidget {
       _FieldLabel(label: label),
       SizedBox(height: 4.h),
       Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Expanded(child: SizedBox(
-          height: AppTextField.fieldHeight.h,
-          child: TextField(
+        Expanded(
+          child: AppTextField(
             controller: controller,
+            hint: hint,
             onSubmitted: (_) => onAdd(),
-            decoration: AppTextField.decoration(hint: hint),
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textDark, letterSpacing: -0.32),
           ),
-        )),
+        ),
         SizedBox(width: 8.w),
         _PlusButton(onTap: onAdd),
       ]),

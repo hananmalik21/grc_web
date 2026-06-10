@@ -5,6 +5,7 @@ import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
 import 'package:grc_web/core/widgets/app_select_field.dart';
 import 'package:grc_web/core/widgets/app_text_field.dart';
+import 'package:grc_web/core/widgets/app_responsive_table.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
 import 'package:grc_web/features/controls/presentation/widgets/add_control_dialog.dart';
 import 'package:grc_web/features/controls/presentation/widgets/control_detail_dialog.dart';
@@ -335,18 +336,9 @@ class _FilterBarState extends State<_FilterBar> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: AppTextField(
+            child: AppTextField.search(
               controller: _searchController,
               hint: 'Search controls...',
-              prefixIcon: Padding(
-                padding: EdgeInsetsDirectional.only(start: 12.w, end: 9.w),
-                child: SvgPicture.asset(
-                  'assets/figma/assets/svg/search.svg',
-                  width: 32.r,
-                  height: 32.r,
-                ),
-              ),
-              contentPadding: EdgeInsets.fromLTRB(41.w, 11.5.h, 17.w, 11.5.h),
             ),
           ),
           SizedBox(width: 16.w),
@@ -402,18 +394,20 @@ class _ControlsTable extends StatelessWidget {
 
   final List<_ControlItem> controls;
 
-  static const _colWidths = <double>[
-    89.96,
-    226.30,
-    112.89,
-    180.00,
-    225.23,
-    135.42,
-    153.82,
-    120.23,
-    111.90,
-    120.02,
-  ];
+  static final _layout = AppResponsiveTableLayout(
+    columns: [
+      AppTableColumnSpec(minWidth: 89.96, dropPriority: 0), // Control ID
+      AppTableColumnSpec(minWidth: 226.30, dropPriority: 0), // Name
+      AppTableColumnSpec(minWidth: 112.89, dropPriority: 6), // Type
+      AppTableColumnSpec(minWidth: 180.00, dropPriority: 10), // Links
+      AppTableColumnSpec(minWidth: 225.23, dropPriority: 9), // Framework Mapping
+      AppTableColumnSpec(minWidth: 135.42, dropPriority: 4), // Effectiveness
+      AppTableColumnSpec(minWidth: 153.82, dropPriority: 3), // Status
+      AppTableColumnSpec(minWidth: 120.23, dropPriority: 5), // Owner
+      AppTableColumnSpec(minWidth: 111.90, dropPriority: 7), // Last Assessed
+      AppTableColumnSpec(minWidth: 120.02, dropPriority: 0), // Actions
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -426,23 +420,25 @@ class _ControlsTable extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tableMinWidth = _colWidths.fold<double>(0, (s, w) => s + w.w);
+          final visible = _layout.visibleIndicesForWidth(constraints.maxWidth);
+          final tableMinWidth = _layout.minWidthForIndices(visible);
 
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: constraints.maxWidth.clamp(tableMinWidth, double.infinity),
+                minWidth: constraints.maxWidth.clamp(
+                  tableMinWidth,
+                  double.infinity,
+                ),
               ),
               child: Table(
                 defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                columnWidths: {
-                  for (var i = 0; i < _colWidths.length; i++)
-                    i: FixedColumnWidth(_colWidths[i].w),
-                },
+                columnWidths: _layout.columnWidthsForIndices(visible),
                 children: [
-                  _headerRow(context),
-                  for (final control in controls) _dataRow(context, control),
+                  _headerRow(context, visible),
+                  for (final control in controls)
+                    _dataRow(context, control, visible),
                 ],
               ),
             ),
@@ -452,33 +448,35 @@ class _ControlsTable extends StatelessWidget {
     );
   }
 
-  TableRow _headerRow(BuildContext context) {
+  TableRow _headerRow(BuildContext context, List<int> visible) {
     final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: AppColors.textLabel,
           fontWeight: FontWeight.w500,
         );
+
+    final cells = [
+      _headerCell('Control ID', style),
+      _headerCell('Name', style),
+      _headerCell('Type', style),
+      _headerCell('Links', style),
+      _headerCell('Framework Mapping', style),
+      _headerCell('Effectiveness', style),
+      _headerCell('Status', style),
+      _headerCell('Owner', style),
+      _headerCell('Last Assessed', style),
+      _headerCell('Actions', style),
+    ];
 
     return TableRow(
       decoration: const BoxDecoration(
         color: AppColors.bg,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      children: [
-        _headerCell('Control ID', style),
-        _headerCell('Name', style),
-        _headerCell('Type', style),
-        _headerCell('Links', style),
-        _headerCell('Framework Mapping', style),
-        _headerCell('Effectiveness', style),
-        _headerCell('Status', style),
-        _headerCell('Owner', style),
-        _headerCell('Last Assessed', style),
-        _headerCell('Actions', style),
-      ],
+      children: _layout.cellsForIndices(cells, visible),
     );
   }
 
-  TableRow _dataRow(BuildContext context, _ControlItem control) {
+  TableRow _dataRow(BuildContext context, _ControlItem control, List<int> visible) {
     final textTheme = Theme.of(context).textTheme;
     final bodyStyle = textTheme.bodyMedium?.copyWith(
       color: AppColors.textLabel,
@@ -489,12 +487,7 @@ class _ControlsTable extends StatelessWidget {
       fontWeight: FontWeight.w400,
     );
 
-    return TableRow(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.rowDivider)),
-      ),
-      children: [
+    final cells = [
         _idCell(context, control),
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
@@ -542,7 +535,14 @@ class _ControlsTable extends StatelessWidget {
           ),
         ),
         _actionsCell(context, control),
-      ],
+      ];
+
+    return TableRow(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.rowDivider)),
+      ),
+      children: _layout.cellsForIndices(cells, visible),
     );
   }
 

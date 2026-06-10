@@ -621,18 +621,9 @@ class _FilterBarState extends State<_FilterBar> {
       child: Row(
         children: [
           Expanded(
-            child: AppTextField(
+            child: AppTextField.search(
               controller: _searchController,
               hint: 'Search vendors...',
-              prefixIcon: Padding(
-                padding: EdgeInsetsDirectional.only(start: 12.w, end: 9.w),
-                child: SvgPicture.asset(
-                  'assets/figma/assets/svg/search.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
-              contentPadding: EdgeInsets.fromLTRB(41.w, 11.5.h, 17.w, 11.5.h),
             ),
           ),
           SizedBox(width: 16.w),

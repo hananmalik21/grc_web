@@ -7,6 +7,7 @@ import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
 import 'package:grc_web/features/assets/domain/entities/asset_entities.dart';
 
@@ -27,134 +28,183 @@ class AssetDetailDialog extends StatelessWidget {
   final AssetItem asset;
 
   static const _textHeight = AppTextMetrics.textHeight;
-  static const _dialogWidth = 896.0;
+  static const double maxDialogWidth = 896;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final screen = MediaQuery.sizeOf(context);
-    final dialogWidth = math.min(_dialogWidth.w, screen.width - 48.w);
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-      child: SizedBox(
-        width: dialogWidth,
-        child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+          final useScrollableBody = !metrics.isWide;
+
+          final leftColumn = _DetailColumn(
+            metrics: metrics,
+            children: [
+              _SectionBlock(
+                title: l10n.basicInformation,
+                metrics: metrics,
+                children: [
+                  _DetailField(
+                    label: l10n.assetType,
+                    value: _typeLabel(l10n, asset.type),
+                    metrics: metrics,
+                  ),
+                  _DetailField(
+                    label: l10n.businessValue,
+                    value: asset.businessValue,
+                    metrics: metrics,
+                  ),
+                  _DetailField(
+                    label: l10n.assetOwner,
+                    value: asset.owner,
+                    metrics: metrics,
+                  ),
+                  _DetailField(
+                    label: l10n.tableEnvironment,
+                    value: asset.environment,
+                    metrics: metrics,
+                  ),
+                ],
+              ),
+              _SectionBlock(
+                title: l10n.securityInformation,
+                metrics: metrics,
+                children: [
+                  _DetailField(
+                    label: l10n.tableRiskLevel,
+                    looseValueSpacing: true,
+                    valueWidget: _RiskBadge(
+                      label: _riskLabel(l10n, asset.riskLevel),
+                      level: asset.riskLevel,
+                    ),
+                    metrics: metrics,
+                  ),
+                  _DetailField(
+                    label: l10n.tableClassification,
+                    value: _classificationLabel(l10n, asset.classification),
+                    metrics: metrics,
+                  ),
+                ],
+              ),
+            ],
+          );
+
+          final rightColumn = _DetailColumn(
+            metrics: metrics,
+            children: [
+              _SectionBlock(
+                title: l10n.infrastructure,
+                metrics: metrics,
+                children: [
+                  _DetailField(
+                    label: l10n.tableCloudProvider,
+                    value: asset.cloudProvider,
+                    metrics: metrics,
+                  ),
+                ],
+              ),
+              _SectionBlock(
+                title: l10n.relatedItems,
+                metrics: metrics,
+                children: [
+                  _DetailField(
+                    label: l10n.linkedRisks,
+                    looseValueSpacing: true,
+                    valueWidget: _ChipRow(
+                      items: asset.linkedRisks,
+                      backgroundColor: AppColors.statusCriticalBg,
+                      foregroundColor: AppColors.statusCriticalFg,
+                    ),
+                    metrics: metrics,
+                  ),
+                  _DetailField(
+                    label: l10n.appliedControls,
+                    looseValueSpacing: true,
+                    valueWidget: _ChipRow(
+                      items: asset.appliedControls,
+                      backgroundColor: AppColors.statusLowBg,
+                      foregroundColor: AppColors.statusLowFg,
+                    ),
+                    metrics: metrics,
+                  ),
+                ],
+              ),
+            ],
+          );
+
+          final bodyContent = metrics.isWide
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: leftColumn),
+                    SizedBox(width: 24.w),
+                    Expanded(child: rightColumn),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    leftColumn,
+                    SizedBox(height: 16.h),
+                    rightColumn,
+                  ],
+                );
+
+          final shell = DecoratedBox(
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(10.r),
               boxShadow: const [
-                BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20)),
-                BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 8)),
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 25,
+                  offset: Offset(0, 20),
+                ),
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 8),
+                ),
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize:
+                  useScrollableBody ? MainAxisSize.max : MainAxisSize.min,
               children: [
                 _DetailHeader(
                   title: asset.name,
                   subtitle: asset.id,
                   onClose: () => Navigator.of(context).pop(),
+                  metrics: metrics,
                 ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _SectionBlock(
-                                title: l10n.basicInformation,
-                                children: [
-                                  _DetailField(
-                                    label: l10n.assetType,
-                                    value: _typeLabel(l10n, asset.type),
-                                  ),
-                                  _DetailField(
-                                    label: l10n.businessValue,
-                                    value: asset.businessValue,
-                                  ),
-                                  _DetailField(
-                                    label: l10n.assetOwner,
-                                    value: asset.owner,
-                                  ),
-                                  _DetailField(
-                                    label: l10n.tableEnvironment,
-                                    value: asset.environment,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 16.h),
-                              _SectionBlock(
-                                title: l10n.securityInformation,
-                                children: [
-                                  _DetailField(
-                                    label: l10n.tableRiskLevel,
-                                    valueWidget: _RiskBadge(
-                                      label: _riskLabel(l10n, asset.riskLevel),
-                                      level: asset.riskLevel,
-                                    ),
-                                  ),
-                                  _DetailField(
-                                    label: l10n.tableClassification,
-                                    value: _classificationLabel(l10n, asset.classification),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 24.w),
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _SectionBlock(
-                                title: l10n.infrastructure,
-                                children: [
-                                  _DetailField(
-                                    label: l10n.tableCloudProvider,
-                                    value: asset.cloudProvider,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 16.h),
-                              _SectionBlock(
-                                title: l10n.relatedItems,
-                                children: [
-                                  _DetailField(
-                                    label: l10n.linkedRisks,
-                                    valueWidget: _ChipRow(
-                                      items: asset.linkedRisks,
-                                      backgroundColor: AppColors.statusCriticalBg,
-                                      foregroundColor: AppColors.statusCriticalFg,
-                                    ),
-                                  ),
-                                  _DetailField(
-                                    label: l10n.appliedControls,
-                                    valueWidget: _ChipRow(
-                                      items: asset.appliedControls,
-                                      backgroundColor: AppColors.statusLowBg,
-                                      foregroundColor: AppColors.statusLowFg,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                if (useScrollableBody)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: metrics.contentPadding,
+                      child: bodyContent,
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+                    child: bodyContent,
                   ),
-                ),
                 _DetailFooter(
                   editLabel: l10n.editAsset,
                   viewRisksLabel: l10n.viewRisks,
@@ -164,11 +214,34 @@ class AssetDetailDialog extends StatelessWidget {
                   onViewRisks: () {},
                   onViewControls: () {},
                   onDelete: () => Navigator.of(context).pop(),
+                  metrics: metrics,
                 ),
               ],
             ),
-          ),
-        ),
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: Material(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10.r),
+              clipBehavior: Clip.antiAlias,
+              child: useScrollableBody
+                  ? SizedBox(
+                      width: dialogWidth,
+                      height: metrics.maxHeight,
+                      child: shell,
+                    )
+                  : ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: dialogWidth,
+                        maxHeight: metrics.maxHeight,
+                      ),
+                      child: shell,
+                    ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -194,16 +267,41 @@ class AssetDetailDialog extends StatelessWidget {
       };
 }
 
+class _DetailColumn extends StatelessWidget {
+  const _DetailColumn({
+    required this.metrics,
+    required this.children,
+  });
+
+  final AppResponsiveDialogMetrics metrics;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (int i = 0; i < children.length; i++) ...[
+          children[i],
+          if (i != children.length - 1) SizedBox(height: 16.h),
+        ],
+      ],
+    );
+  }
+}
+
 class _DetailHeader extends StatelessWidget {
   const _DetailHeader({
     required this.title,
     required this.subtitle,
     required this.onClose,
+    required this.metrics,
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
@@ -211,12 +309,13 @@ class _DetailHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h),
+      padding: metrics.headerPadding,
       decoration: const BoxDecoration(
         color: AppColors.primary,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
@@ -228,7 +327,10 @@ class _DetailHeader extends StatelessWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                     letterSpacing: -0.46,
+                    fontSize: metrics.isPhone ? 18.sp : 20.sp,
                   ),
+                  maxLines: metrics.isWide ? 1 : 3,
+                  overflow: TextOverflow.ellipsis,
                   strutStyle: AppTextMetrics.strut(fontSize: 20, lineHeight: 28),
                   textHeightBehavior: AssetDetailDialog._textHeight,
                 ),
@@ -238,6 +340,7 @@ class _DetailHeader extends StatelessWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.w400,
                     letterSpacing: -0.154,
+                    fontSize: metrics.isPhone ? 13.sp : 14.sp,
                   ),
                   strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
                   textHeightBehavior: AssetDetailDialog._textHeight,
@@ -258,7 +361,10 @@ class _DetailHeader extends StatelessWidget {
                     'assets/figma/library/svg/close_white.svg',
                     width: 20.r,
                     height: 20.r,
-                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -271,10 +377,15 @@ class _DetailHeader extends StatelessWidget {
 }
 
 class _SectionBlock extends StatelessWidget {
-  const _SectionBlock({required this.title, required this.children});
+  const _SectionBlock({
+    required this.title,
+    required this.children,
+    required this.metrics,
+  });
 
   final String title;
   final List<Widget> children;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
@@ -287,12 +398,14 @@ class _SectionBlock extends StatelessWidget {
                 color: AppColors.textLabel,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.154,
+                fontSize: metrics.isPhone ? 13.sp : 14.sp,
               ),
           strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
           textHeightBehavior: AssetDetailDialog._textHeight,
         ),
         SizedBox(height: 12.h),
-        ...children.expand((child) => [child, SizedBox(height: 12.h)]).toList()..removeLast(),
+        ...children.expand((child) => [child, SizedBox(height: 12.h)]).toList()
+          ..removeLast(),
       ],
     );
   }
@@ -301,17 +414,22 @@ class _SectionBlock extends StatelessWidget {
 class _DetailField extends StatelessWidget {
   const _DetailField({
     required this.label,
+    required this.metrics,
     this.value,
     this.valueWidget,
+    this.looseValueSpacing = false,
   });
 
   final String label;
+  final AppResponsiveDialogMetrics metrics;
   final String? value;
   final Widget? valueWidget;
+  final bool looseValueSpacing;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final valueGap = looseValueSpacing ? 6.5.h : 2.5.h;
 
     return Padding(
       padding: EdgeInsets.only(top: 5.5.h),
@@ -323,13 +441,13 @@ class _DetailField extends StatelessWidget {
             style: textTheme.bodySmall?.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
-              fontSize: 12.sp,
+              fontSize: metrics.isPhone ? 11.sp : 12.sp,
               height: 16 / 12,
             ),
             strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
             textHeightBehavior: AssetDetailDialog._textHeight,
           ),
-          SizedBox(height: 2.5.h),
+          SizedBox(height: valueGap),
           if (valueWidget != null)
             valueWidget!
           else
@@ -339,6 +457,7 @@ class _DetailField extends StatelessWidget {
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w500,
                 letterSpacing: -0.154,
+                fontSize: metrics.isPhone ? 13.sp : 14.sp,
               ),
               strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
               textHeightBehavior: AssetDetailDialog._textHeight,
@@ -409,35 +528,38 @@ class _ChipRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const SizedBox.shrink();
+      return Text(
+        '—',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+      );
     }
 
-    return Padding(
-      padding: EdgeInsets.only(top: 4.h),
-      child: Wrap(
-        spacing: 4.w,
-        runSpacing: 4.h,
-        children: items
-            .map(
-              (item) => Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-                child: Text(
-                  item,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: foregroundColor,
-                        fontWeight: FontWeight.w400,
-                        fontSize: 12.sp,
-                        height: 16 / 12,
-                      ),
-                ),
+    return Wrap(
+      spacing: 4.w,
+      runSpacing: 4.h,
+      children: items
+          .map(
+            (item) => Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(4.r),
               ),
-            )
-            .toList(),
-      ),
+              child: Text(
+                item,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: foregroundColor,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12.sp,
+                      height: 16 / 12,
+                    ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -452,6 +574,7 @@ class _DetailFooter extends StatelessWidget {
     required this.onViewRisks,
     required this.onViewControls,
     required this.onDelete,
+    required this.metrics,
   });
 
   final String editLabel;
@@ -462,43 +585,103 @@ class _DetailFooter extends StatelessWidget {
   final VoidCallback onViewRisks;
   final VoidCallback onViewControls;
   final VoidCallback onDelete;
+  final AppResponsiveDialogMetrics metrics;
+
+  EdgeInsets get _footerPadding => metrics.isPhone
+      ? metrics.footerPadding
+      : metrics.isCompact
+          ? metrics.footerPadding
+          : EdgeInsets.fromLTRB(24.w, 25.h, 24.w, 22.h);
 
   @override
   Widget build(BuildContext context) {
+    final buttonSize = metrics.isPhone ? AppButtonSize.md : AppButtonSize.lg;
+
+    final editButton = AppButton(
+      label: editLabel,
+      variant: AppButtonVariant.outlined,
+      size: buttonSize,
+      fullWidth: !metrics.isWide,
+      onPressed: onEdit,
+    );
+
+    final viewRisksButton = AppButton(
+      label: viewRisksLabel,
+      variant: AppButtonVariant.outlined,
+      size: buttonSize,
+      fullWidth: !metrics.isWide,
+      onPressed: onViewRisks,
+    );
+
+    final viewControlsButton = AppButton(
+      label: viewControlsLabel,
+      variant: AppButtonVariant.outlined,
+      size: buttonSize,
+      fullWidth: !metrics.isWide,
+      onPressed: onViewControls,
+    );
+
+    final deleteButton = AppButton(
+      label: deleteLabel,
+      variant: AppButtonVariant.primary,
+      size: buttonSize,
+      backgroundColor: AppColors.deletePrimary,
+      fullWidth: !metrics.isWide,
+      onPressed: onDelete,
+    );
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(24.w, 25.h, 24.w, 22.h),
+      padding: _footerPadding,
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: Row(
-        children: [
-          AppButton(
-            label: editLabel,
-            variant: AppButtonVariant.outlined,
-            onPressed: onEdit,
-          ),
-          SizedBox(width: 12.w),
-          AppButton(
-            label: viewRisksLabel,
-            variant: AppButtonVariant.outlined,
-            onPressed: onViewRisks,
-          ),
-          SizedBox(width: 12.w),
-          AppButton(
-            label: viewControlsLabel,
-            variant: AppButtonVariant.outlined,
-            onPressed: onViewControls,
-          ),
-          const Spacer(),
-          AppButton(
-            label: deleteLabel,
-            variant: AppButtonVariant.primary,
-            backgroundColor: AppColors.deletePrimary,
-            onPressed: onDelete,
-          ),
-        ],
-      ),
+      child: metrics.useStackedFooter
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                editButton,
+                SizedBox(height: 10.h),
+                viewRisksButton,
+                SizedBox(height: 10.h),
+                viewControlsButton,
+                SizedBox(height: 10.h),
+                deleteButton,
+              ],
+            )
+          : metrics.isCompact
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: editButton),
+                        SizedBox(width: 12.w),
+                        Expanded(child: viewRisksButton),
+                      ],
+                    ),
+                    SizedBox(height: 12.h),
+                    Row(
+                      children: [
+                        Expanded(child: viewControlsButton),
+                        SizedBox(width: 12.w),
+                        Expanded(child: deleteButton),
+                      ],
+                    ),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    editButton,
+                    SizedBox(width: 12.w),
+                    viewRisksButton,
+                    SizedBox(width: 12.w),
+                    viewControlsButton,
+                    const Spacer(),
+                    deleteButton,
+                  ],
+                ),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
 import 'package:grc_web/core/widgets/app_field.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
 import 'package:grc_web/features/library/domain/entities/library_entities.dart';
 
@@ -175,230 +176,279 @@ class _QuestionFormDialogState extends State<QuestionFormDialog> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = Theme.of(context).textTheme;
-    final screen = MediaQuery.sizeOf(context);
-    final dialogWidth = math.min(936.w, screen.width - 48.w);
-    final dialogHeight = math.min(screen.height - 48.h, screen.height * 0.92);
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
     final criteria = _criteriaOptions(l10n);
-    final questionIdPlaceholder = widget.isAddMode ? l10n.questionIdPlaceholder : null;
+    final questionIdPlaceholder =
+        widget.isAddMode ? l10n.questionIdPlaceholder : null;
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-      child: SizedBox(
-        width: dialogWidth,
-        height: dialogHeight,
-        child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(10.r),
-              boxShadow: const [
-                BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20)),
-                BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 8)),
-              ],
-            ),
-            child: Column(
-              children: [
-                _EditDialogHeader(
-                  title: widget.isAddMode ? l10n.addNewQuestion : l10n.editQuestion,
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-                Expanded(
-                  child: ColoredBox(
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            AppResponsiveDialogMetrics.maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: dialogWidth,
+              height: metrics.maxHeight,
+              child: Material(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10.r),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
                     color: AppColors.surface,
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _SectionTitle(title: l10n.basicInformation),
-                          SizedBox(height: 16.h),
-                          AppField.text(
-                            label: l10n.questionId,
-                            isRequired: true,
-                            labelSpacing: 4,
-                            controller: _questionIdController,
-                            hint: widget.isAddMode ? questionIdPlaceholder : null,
-                            readOnly: !widget.isAddMode,
-                            helperText: widget.isAddMode ? null : l10n.questionIdHint,
-                          ),
-                          SizedBox(height: 16.h),
-                          AppField.text(
-                            label: l10n.questionText,
-                            isRequired: true,
-                            labelSpacing: 4,
-                            controller: _questionTextController,
-                            minLines: 3,
-                            hint: widget.isAddMode ? l10n.questionTextPlaceholder : null,
-                          ),
-                          SizedBox(height: 16.h),
-                          AppField.text(
-                            label: l10n.descriptionOptional,
-                            labelSpacing: 4,
-                            controller: _descriptionController,
-                            minLines: 2,
-                            hint: widget.isAddMode ? l10n.descriptionPlaceholder : null,
-                          ),
-                          SizedBox(height: 16.h),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: AppField.select<String>(
-                                  label: l10n.questionType,
-                                  isRequired: true,
-                                  labelSpacing: 4,
-                                  value: _questionType,
-                                  items: const ['yes-no'],
-                                  itemLabel: (value) =>
-                                      value == 'yes-no' ? l10n.questionTypeYesNo : value,
-                                  onChanged: (value) {
-                                    if (value != null) setState(() => _questionType = value);
-                                  },
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              Expanded(
-                                child: AppField.text(
-                                  label: l10n.weightRange,
-                                  isRequired: true,
-                                  labelSpacing: 4,
-                                  controller: _weightController,
-                                  keyboardType: TextInputType.number,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16.h),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: AppField.text(
-                                  label: l10n.category,
-                                  isRequired: true,
-                                  labelSpacing: 4,
-                                  controller: _categoryController,
-                                  hint: widget.isAddMode ? l10n.categoryPlaceholder : null,
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              Expanded(
-                                child: AppField.text(
-                                  label: l10n.subcategoryOptional,
-                                  labelSpacing: 4,
-                                  controller: _subcategoryController,
-                                  hint: widget.isAddMode ? l10n.subcategoryPlaceholder : null,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 32.h),
-                          _SectionTitle(title: l10n.evaluationCriteria),
-                          SizedBox(height: 16.h),
-                          Text(
-                            l10n.evaluationCriteriaHint,
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textBody,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: -0.154,
-                            ),
-                            strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-                            textHeightBehavior: QuestionFormDialog._textHeight,
-                          ),
-                          SizedBox(height: 16.h),
-                          for (final option in criteria) ...[
-                            _CriteriaCard(
-                              title: option.label,
-                              description: option.description,
-                              weightLabel: l10n.criteriaWeightLabel(option.weightPercent),
-                              selected: _selectedCriteria.contains(option.id),
-                              onTap: () => _toggleCriteria(option.id),
-                            ),
-                            if (option != criteria.last) SizedBox(height: 8.h),
-                          ],
-                          SizedBox(height: 32.h),
-                          _SectionTitle(title: l10n.tags),
-                          SizedBox(height: 16.h),
-                          _AddItemRow(
-                            controller: _tagInputController,
-                            hint: l10n.addTagPlaceholder,
-                            onAdd: _addTag,
-                          ),
-                          if (_tags.isNotEmpty) ...[
-                            SizedBox(height: 16.h),
-                            Wrap(
-                              spacing: 8.w,
-                              runSpacing: 8.h,
-                              children: [
-                                for (final tag in _tags)
-                                  _TagChip(
-                                    label: tag,
-                                    onRemove: () => setState(() => _tags.remove(tag)),
-                                  ),
-                              ],
-                            ),
-                          ],
-                          SizedBox(height: 32.h),
-                          _SectionTitle(title: l10n.relatedControlsOptional),
-                          SizedBox(height: 16.h),
-                          _AddItemRow(
-                            controller: _controlInputController,
-                            hint: l10n.addControlPlaceholder,
-                            onAdd: _addControl,
-                          ),
-                          if (_relatedControls.isNotEmpty) ...[
-                            SizedBox(height: 16.h),
-                            Wrap(
-                              spacing: 8.w,
-                              runSpacing: 8.h,
-                              children: [
-                                for (final control in _relatedControls)
-                                  _ControlChip(
-                                    label: control,
-                                    onRemove: () => setState(() => _relatedControls.remove(control)),
-                                  ),
-                              ],
-                            ),
-                          ],
-                          SizedBox(height: 32.h),
-                          _SectionTitle(title: l10n.additionalSettings),
-                          SizedBox(height: 16.h),
-                          _RequireEvidenceCard(
-                            title: l10n.requireEvidence,
-                            description: l10n.requireEvidenceDescription,
-                            selected: _requiresEvidence,
-                            onTap: () => setState(() => _requiresEvidence = !_requiresEvidence),
-                          ),
-                          SizedBox(height: 16.h),
-                          AppField.text(
-                            label: l10n.guidanceNotesOptional,
-                            labelSpacing: 4,
-                            controller: _guidanceNotesController,
-                            minLines: 3,
-                            hint: widget.isAddMode ? l10n.guidanceNotesPlaceholder : null,
-                          ),
-                        ],
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 25,
+                        offset: Offset(0, 20),
                       ),
-                    ),
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _EditDialogHeader(
+                        title: widget.isAddMode
+                            ? l10n.addNewQuestion
+                            : l10n.editQuestion,
+                        onClose: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                      Expanded(
+                        child: ColoredBox(
+                          color: AppColors.surface,
+                          child: SingleChildScrollView(
+                            padding: metrics.contentPadding,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _SectionTitle(title: l10n.basicInformation),
+                                SizedBox(height: metrics.fieldGap),
+                                AppField.text(
+                                  label: l10n.questionId,
+                                  isRequired: true,
+                                  controller: _questionIdController,
+                                  hint: widget.isAddMode
+                                      ? questionIdPlaceholder
+                                      : null,
+                                  readOnly: !widget.isAddMode,
+                                  helperText: widget.isAddMode
+                                      ? null
+                                      : l10n.questionIdHint,
+                                ),
+                                SizedBox(height: metrics.fieldGap),
+                                AppField.text(
+                                  label: l10n.questionText,
+                                  isRequired: true,
+                                  controller: _questionTextController,
+                                  minLines: 3,
+                                  hint: widget.isAddMode
+                                      ? l10n.questionTextPlaceholder
+                                      : null,
+                                ),
+                                SizedBox(height: metrics.fieldGap),
+                                AppField.text(
+                                  label: l10n.descriptionOptional,
+                                  controller: _descriptionController,
+                                  minLines: 2,
+                                  hint: widget.isAddMode
+                                      ? l10n.descriptionPlaceholder
+                                      : null,
+                                ),
+                                SizedBox(height: metrics.fieldGap),
+                                _ResponsiveFieldRow(
+                                  metrics: metrics,
+                                  left: AppField.select<String>(
+                                    label: l10n.questionType,
+                                    isRequired: true,
+                                    value: _questionType,
+                                    items: const ['yes-no'],
+                                    itemLabel: (value) => value == 'yes-no'
+                                        ? l10n.questionTypeYesNo
+                                        : value,
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setState(() => _questionType = value);
+                                      }
+                                    },
+                                  ),
+                                  right: AppField.text(
+                                    label: l10n.weightRange,
+                                    isRequired: true,
+                                    controller: _weightController,
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                                SizedBox(height: metrics.fieldGap),
+                                _ResponsiveFieldRow(
+                                  metrics: metrics,
+                                  left: AppField.text(
+                                    label: l10n.category,
+                                    isRequired: true,
+                                    controller: _categoryController,
+                                    hint: widget.isAddMode
+                                        ? l10n.categoryPlaceholder
+                                        : null,
+                                  ),
+                                  right: AppField.text(
+                                    label: l10n.subcategoryOptional,
+                                    controller: _subcategoryController,
+                                    hint: widget.isAddMode
+                                        ? l10n.subcategoryPlaceholder
+                                        : null,
+                                  ),
+                                ),
+                                SizedBox(height: metrics.majorSectionGap),
+                                _SectionTitle(title: l10n.evaluationCriteria),
+                                SizedBox(height: metrics.fieldGap),
+                                Text(
+                                  l10n.evaluationCriteriaHint,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.textBody,
+                                    fontWeight: FontWeight.w400,
+                                    letterSpacing: -0.154,
+                                    fontSize: metrics.isPhone ? 13.sp : null,
+                                  ),
+                                  strutStyle: AppTextMetrics.strut(
+                                    fontSize: 14,
+                                    lineHeight: 20,
+                                  ),
+                                  textHeightBehavior:
+                                      QuestionFormDialog._textHeight,
+                                ),
+                                SizedBox(height: metrics.fieldGap),
+                                for (final option in criteria) ...[
+                                  _CriteriaCard(
+                                    title: option.label,
+                                    description: option.description,
+                                    weightLabel: l10n.criteriaWeightLabel(
+                                      option.weightPercent,
+                                    ),
+                                    selected:
+                                        _selectedCriteria.contains(option.id),
+                                    onTap: () => _toggleCriteria(option.id),
+                                    metrics: metrics,
+                                  ),
+                                  if (option != criteria.last)
+                                    SizedBox(height: 8.h),
+                                ],
+                                SizedBox(height: metrics.majorSectionGap),
+                                _SectionTitle(title: l10n.tags),
+                                SizedBox(height: metrics.fieldGap),
+                                _AddItemRow(
+                                  controller: _tagInputController,
+                                  hint: l10n.addTagPlaceholder,
+                                  onAdd: _addTag,
+                                  metrics: metrics,
+                                ),
+                                if (_tags.isNotEmpty) ...[
+                                  SizedBox(height: metrics.fieldGap),
+                                  Wrap(
+                                    spacing: 8.w,
+                                    runSpacing: 8.h,
+                                    children: [
+                                      for (final tag in _tags)
+                                        _TagChip(
+                                          label: tag,
+                                          onRemove: () =>
+                                              setState(() => _tags.remove(tag)),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                                SizedBox(height: metrics.majorSectionGap),
+                                _SectionTitle(
+                                  title: l10n.relatedControlsOptional,
+                                ),
+                                SizedBox(height: metrics.fieldGap),
+                                _AddItemRow(
+                                  controller: _controlInputController,
+                                  hint: l10n.addControlPlaceholder,
+                                  onAdd: _addControl,
+                                  metrics: metrics,
+                                ),
+                                if (_relatedControls.isNotEmpty) ...[
+                                  SizedBox(height: metrics.fieldGap),
+                                  Wrap(
+                                    spacing: 8.w,
+                                    runSpacing: 8.h,
+                                    children: [
+                                      for (final control in _relatedControls)
+                                        _ControlChip(
+                                          label: control,
+                                          onRemove: () => setState(
+                                            () => _relatedControls.remove(
+                                              control,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                                SizedBox(height: metrics.majorSectionGap),
+                                _SectionTitle(title: l10n.additionalSettings),
+                                SizedBox(height: metrics.fieldGap),
+                                _RequireEvidenceCard(
+                                  title: l10n.requireEvidence,
+                                  description: l10n.requireEvidenceDescription,
+                                  selected: _requiresEvidence,
+                                  onTap: () => setState(
+                                    () => _requiresEvidence = !_requiresEvidence,
+                                  ),
+                                  metrics: metrics,
+                                ),
+                                SizedBox(height: metrics.fieldGap),
+                                AppField.text(
+                                  label: l10n.guidanceNotesOptional,
+                                  controller: _guidanceNotesController,
+                                  minLines: 3,
+                                  hint: widget.isAddMode
+                                      ? l10n.guidanceNotesPlaceholder
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      _EditDialogFooter(
+                        cancelLabel: l10n.cancel,
+                        saveLabel: widget.isAddMode
+                            ? l10n.addQuestion
+                            : l10n.saveChanges,
+                        saveIconAsset: widget.isAddMode
+                            ? 'assets/figma/library/svg/add_question.svg'
+                            : 'assets/figma/library/svg/save_changes.svg',
+                        onCancel: () => Navigator.of(context).pop(),
+                        onSave: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                    ],
                   ),
                 ),
-                _EditDialogFooter(
-                  cancelLabel: l10n.cancel,
-                  saveLabel: widget.isAddMode ? l10n.addQuestion : l10n.saveChanges,
-                  saveIconAsset: widget.isAddMode
-                      ? 'assets/figma/library/svg/add_question.svg'
-                      : 'assets/figma/library/svg/save_changes.svg',
-                  onCancel: () => Navigator.of(context).pop(),
-                  onSave: () => Navigator.of(context).pop(),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -413,18 +463,58 @@ class _CriteriaOption {
   final int weightPercent;
 }
 
+class _ResponsiveFieldRow extends StatelessWidget {
+  const _ResponsiveFieldRow({
+    required this.metrics,
+    required this.left,
+    required this.right,
+  });
+
+  final AppResponsiveDialogMetrics metrics;
+  final Widget left;
+  final Widget right;
+
+  @override
+  Widget build(BuildContext context) {
+    if (metrics.isWide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: left),
+          SizedBox(width: 16.w),
+          Expanded(child: right),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        left,
+        SizedBox(height: metrics.fieldGap),
+        right,
+      ],
+    );
+  }
+}
+
 class _EditDialogHeader extends StatelessWidget {
-  const _EditDialogHeader({required this.title, required this.onClose});
+  const _EditDialogHeader({
+    required this.title,
+    required this.onClose,
+    required this.metrics,
+  });
 
   final String title;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h),
+      padding: metrics.headerPadding,
       decoration: const BoxDecoration(
         color: AppColors.primary,
         border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -438,6 +528,7 @@ class _EditDialogHeader extends StatelessWidget {
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.46,
+                fontSize: metrics.isPhone ? 18.sp : null,
               ),
               strutStyle: AppTextMetrics.strut(fontSize: 20, lineHeight: 28),
               textHeightBehavior: QuestionFormDialog._textHeight,
@@ -456,7 +547,10 @@ class _EditDialogHeader extends StatelessWidget {
                     'assets/figma/library/svg/close_white.svg',
                     width: 20.r,
                     height: 20.r,
-                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -475,6 +569,7 @@ class _EditDialogFooter extends StatelessWidget {
     required this.saveIconAsset,
     required this.onCancel,
     required this.onSave,
+    required this.metrics,
   });
 
   final String cancelLabel;
@@ -482,11 +577,76 @@ class _EditDialogFooter extends StatelessWidget {
   final String saveIconAsset;
   final VoidCallback onCancel;
   final VoidCallback onSave;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    if (metrics.useStackedFooter) {
+      return Container(
+        padding: metrics.footerPadding,
+        decoration: const BoxDecoration(
+          color: AppColors.bg,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppButton(
+              label: saveLabel,
+              iconAsset: saveIconAsset,
+              iconColor: Colors.white,
+              size: AppButtonSize.md,
+              fullWidth: true,
+              onPressed: onSave,
+            ),
+            SizedBox(height: 10.h),
+            AppButton(
+              label: cancelLabel,
+              variant: AppButtonVariant.outlined,
+              size: AppButtonSize.md,
+              fullWidth: true,
+              onPressed: onCancel,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Container(
+        padding: metrics.footerPadding,
+        decoration: const BoxDecoration(
+          color: AppColors.bg,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                label: cancelLabel,
+                variant: AppButtonVariant.outlined,
+                fullWidth: true,
+                onPressed: onCancel,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: AppButton(
+                label: saveLabel,
+                iconAsset: saveIconAsset,
+                iconColor: Colors.white,
+                size: AppButtonSize.save,
+                fullWidth: true,
+                onPressed: onSave,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 17.h, 24.w, 16.h),
+      padding: metrics.footerPadding,
       decoration: const BoxDecoration(
         color: AppColors.bg,
         border: Border(top: BorderSide(color: AppColors.border)),
@@ -520,12 +680,16 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final isPhone = width < 640;
+
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.45,
+            fontSize: isPhone ? 16.sp : null,
           ),
       strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
       textHeightBehavior: QuestionFormDialog._textHeight,
@@ -540,6 +704,7 @@ class _CriteriaCard extends StatelessWidget {
     required this.weightLabel,
     required this.selected,
     required this.onTap,
+    required this.metrics,
   });
 
   final String title;
@@ -547,10 +712,12 @@ class _CriteriaCard extends StatelessWidget {
   final String weightLabel;
   final bool selected;
   final VoidCallback onTap;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final padding = metrics.isPhone ? 14.w : 18.w;
 
     return Material(
       color: selected ? AppColors.primaryLightBg : AppColors.surface,
@@ -559,7 +726,7 @@ class _CriteriaCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10.r),
         child: Container(
-          padding: EdgeInsets.all(18.w),
+          padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(
@@ -585,8 +752,12 @@ class _CriteriaCard extends StatelessWidget {
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.32,
+                        fontSize: metrics.isPhone ? 15.sp : null,
                       ),
-                      strutStyle: AppTextMetrics.strut(fontSize: 16, lineHeight: 24),
+                      strutStyle: AppTextMetrics.strut(
+                        fontSize: 16,
+                        lineHeight: 24,
+                      ),
                       textHeightBehavior: QuestionFormDialog._textHeight,
                     ),
                     Text(
@@ -595,8 +766,12 @@ class _CriteriaCard extends StatelessWidget {
                         color: AppColors.textBody,
                         fontWeight: FontWeight.w500,
                         letterSpacing: -0.154,
+                        fontSize: metrics.isPhone ? 13.sp : null,
                       ),
-                      strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                      strutStyle: AppTextMetrics.strut(
+                        fontSize: 14,
+                        lineHeight: 20,
+                      ),
                       textHeightBehavior: QuestionFormDialog._textHeight,
                     ),
                     SizedBox(height: 4.h),
@@ -606,7 +781,10 @@ class _CriteriaCard extends StatelessWidget {
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
-                      strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
+                      strutStyle: AppTextMetrics.strut(
+                        fontSize: 12,
+                        lineHeight: 16,
+                      ),
                       textHeightBehavior: QuestionFormDialog._textHeight,
                     ),
                   ],
@@ -626,16 +804,19 @@ class _RequireEvidenceCard extends StatelessWidget {
     required this.description,
     required this.selected,
     required this.onTap,
+    required this.metrics,
   });
 
   final String title;
   final String description;
   final bool selected;
   final VoidCallback onTap;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final padding = metrics.isPhone ? 14.w : 17.w;
 
     return Material(
       color: AppColors.weightWarningBg,
@@ -644,13 +825,13 @@ class _RequireEvidenceCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10.r),
         child: Container(
-          padding: EdgeInsets.all(17.w),
+          padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(color: AppColors.weightWarningBorder),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _CheckboxIndicator(selected: selected, size: 16.r),
               SizedBox(width: 12.w),
@@ -664,8 +845,12 @@ class _RequireEvidenceCard extends StatelessWidget {
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.32,
+                        fontSize: metrics.isPhone ? 15.sp : null,
                       ),
-                      strutStyle: AppTextMetrics.strut(fontSize: 16, lineHeight: 24),
+                      strutStyle: AppTextMetrics.strut(
+                        fontSize: 16,
+                        lineHeight: 24,
+                      ),
                       textHeightBehavior: QuestionFormDialog._textHeight,
                     ),
                     Text(
@@ -674,8 +859,12 @@ class _RequireEvidenceCard extends StatelessWidget {
                         color: AppColors.textBody,
                         fontWeight: FontWeight.w500,
                         letterSpacing: -0.154,
+                        fontSize: metrics.isPhone ? 13.sp : null,
                       ),
-                      strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                      strutStyle: AppTextMetrics.strut(
+                        fontSize: 14,
+                        lineHeight: 20,
+                      ),
                       textHeightBehavior: QuestionFormDialog._textHeight,
                     ),
                   ],
@@ -714,14 +903,20 @@ class _AddItemRow extends StatelessWidget {
     required this.controller,
     required this.hint,
     required this.onAdd,
+    required this.metrics,
   });
 
   final TextEditingController controller;
   final String hint;
   final VoidCallback onAdd;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final buttonPadding = metrics.isPhone
+        ? EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h)
+        : EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -740,12 +935,15 @@ class _AddItemRow extends StatelessWidget {
             onTap: onAdd,
             borderRadius: BorderRadius.circular(10.r),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
+              padding: buttonPadding,
               child: SvgPicture.asset(
                 'assets/figma/library/svg/add_plus.svg',
                 width: 16.r,
                 height: 16.r,
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),
