@@ -6,7 +6,10 @@ import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
 import 'package:grc_web/core/widgets/app_text_field.dart';
+import 'package:grc_web/features/assessments/presentation/widgets/assessment_page_layout.dart';
 import 'package:grc_web/features/library/presentation/widgets/edit_question_dialog.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
@@ -240,16 +243,17 @@ class _AssessmentQuestionnairePageState
       }
     }
     final overallScore = _roundDiv(scoreNum, scoreDen);
+    final sectionGap = AssessmentPageLayout.sectionGap(context);
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: AssessmentPageLayout.pagePadding(context),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: AssessmentPageLayout.contentConstraints(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _TitleBar(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _StatsRow(
               l10n: l10n,
               answered: answeredCount,
@@ -257,7 +261,7 @@ class _AssessmentQuestionnairePageState
               overallScore: overallScore,
               categories: _kCategories.length,
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _CategoryProgress(
               l10n: l10n,
               categories: _kCategories,
@@ -266,14 +270,14 @@ class _AssessmentQuestionnairePageState
               percentOf: _categoryPercent,
               onSelect: _goTo,
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _SectionCard(
               l10n: l10n,
               category: category,
               responses: _responses,
               onAnswer: _answer,
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _Footer(
               l10n: l10n,
               current: _selected,
@@ -299,187 +303,98 @@ class _TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessmentHub),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: AppColors.borderInput),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                  colorFilter: const ColorFilter.mode(
-                      AppColors.textPrimary, BlendMode.srcIn),
-                ),
-              ),
+    final layout = context.screenLayout;
+
+    return AssessmentPageLayout.detailTitleBar(
+      context: context,
+      backButton: AppButton.back(
+        iconAsset: '$_kAssetsDir/back_arrow.svg',
+        onPressed: () => context.deferGo(AppRoutes.assessmentHub),
+      ),
+      titleSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SOX Compliance Question Library',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: AssessmentPageLayout.titleFontSize(context),
+              fontWeight: FontWeight.w600,
+              height: 32 / 24,
+              letterSpacing: 0.072,
             ),
           ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'SOX Compliance Question Library',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 32 / 24,
-                  letterSpacing: 0.072,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'Comprehensive framework assessment',
-                style: TextStyle(
-                  color: AppColors.textBody,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-            ],
+          SizedBox(height: 4.h),
+          Text(
+            'Comprehensive framework assessment',
+            style: TextStyle(
+              color: AppColors.textBody,
+              fontSize: AssessmentPageLayout.subtitleFontSize(context),
+              fontWeight: FontWeight.w400,
+              height: 20 / 14,
+              letterSpacing: -0.154,
+            ),
           ),
-        ),
-        SizedBox(width: 16.w),
-        _OutlinedButton(
-          icon: 'plus.svg',
-          iconColor: AppColors.textDark,
-          label: l10n.addQuestion,
-          onTap: () => showAddQuestionDialog(context: context),
-        ),
-        SizedBox(width: 8.w),
-        _OutlinedButton(
-          icon: 'ql_save.svg',
-          iconColor: AppColors.textDark,
-          label: l10n.qlibSaveDraft,
-          onTap: () {},
-        ),
-        SizedBox(width: 8.w),
-        _PrimaryButton(
-          icon: 'ql_send.svg',
-          label: l10n.qlibSubmit,
-          onTap: () {},
-        ),
-      ],
-    );
-  }
-}
-
-class _OutlinedButton extends StatelessWidget {
-  const _OutlinedButton({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.onTap,
-  });
-
-  final String icon;
-  final Color iconColor;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(10.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.borderInput),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                '$_kAssetsDir/$icon',
-                width: 16.r,
-                height: 16.r,
-                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                label,
-                style: TextStyle(
-                  color: AppColors.textDark,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  height: 24 / 16,
-                  letterSpacing: -0.32,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
-    );
-  }
-}
-
-class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final String icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.primary,
-      borderRadius: BorderRadius.circular(10.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 9.h),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                '$_kAssetsDir/$icon',
-                width: 16.r,
-                height: 16.r,
-                colorFilter:
-                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  height: 24 / 16,
-                  letterSpacing: -0.32,
+      trailing: layout.isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppButton.outline(
+                  label: l10n.addQuestion,
+                  iconAsset: '$_kAssetsDir/plus.svg',
+                  iconColor: AppColors.textDark,
+                  iconSize: 16.r,
+                  fullWidth: true,
+                  onPressed: () => showAddQuestionDialog(context: context),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
+                SizedBox(height: 8.h),
+                AppButton.outline(
+                  label: l10n.qlibSaveDraft,
+                  iconAsset: '$_kAssetsDir/ql_save.svg',
+                  iconColor: AppColors.textDark,
+                  iconSize: 16.r,
+                  fullWidth: true,
+                  onPressed: () {},
+                ),
+                SizedBox(height: 8.h),
+                AppButton.primary(
+                  label: l10n.qlibSubmit,
+                  iconAsset: '$_kAssetsDir/ql_send.svg',
+                  iconSize: 16.r,
+                  fullWidth: true,
+                  onPressed: () {},
+                ),
+              ],
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppButton.outline(
+                  label: l10n.addQuestion,
+                  iconAsset: '$_kAssetsDir/plus.svg',
+                  iconColor: AppColors.textDark,
+                  iconSize: 16.r,
+                  onPressed: () => showAddQuestionDialog(context: context),
+                ),
+                SizedBox(width: 8.w),
+                AppButton.outline(
+                  label: l10n.qlibSaveDraft,
+                  iconAsset: '$_kAssetsDir/ql_save.svg',
+                  iconColor: AppColors.textDark,
+                  iconSize: 16.r,
+                  onPressed: () {},
+                ),
+                SizedBox(width: 8.w),
+                AppButton.primary(
+                  label: l10n.qlibSubmit,
+                  iconAsset: '$_kAssetsDir/ql_send.svg',
+                  iconSize: 16.r,
+                  onPressed: () {},
+                ),
+              ],
+            ),
     );
   }
 }
@@ -540,17 +455,7 @@ class _StatsRow extends StatelessWidget {
       ),
     ];
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < cards.length; i++) ...[
-            Expanded(child: cards[i]),
-            if (i != cards.length - 1) SizedBox(width: 16.w),
-          ],
-        ],
-      ),
-    );
+    return AssessmentPageLayout.statsRow(context, cards);
   }
 }
 
@@ -691,8 +596,10 @@ class _CategoryProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardPadding = AssessmentPageLayout.cardPadding(context);
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -712,25 +619,19 @@ class _CategoryProgress extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < categories.length; i++) ...[
-                  Expanded(
-                    child: _CategoryCard(
-                      l10n: l10n,
-                      data: categories[i],
-                      selected: i == selected,
-                      answered: answeredOf(categories[i]),
-                      percent: percentOf(categories[i]),
-                      onTap: () => onSelect(i),
-                    ),
-                  ),
-                  if (i != categories.length - 1) SizedBox(width: 16.w),
-                ],
-              ],
-            ),
+          AssessmentPageLayout.twoColumnGrid(
+            context,
+            children: [
+              for (var i = 0; i < categories.length; i++)
+                _CategoryCard(
+                  l10n: l10n,
+                  data: categories[i],
+                  selected: i == selected,
+                  answered: answeredOf(categories[i]),
+                  percent: percentOf(categories[i]),
+                  onTap: () => onSelect(i),
+                ),
+            ],
           ),
         ],
       ),
@@ -863,6 +764,8 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardPadding = AssessmentPageLayout.cardPadding(context);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -876,7 +779,7 @@ class _SectionCard extends StatelessWidget {
             decoration: const BoxDecoration(
               border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
-            padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 25.h),
+            padding: EdgeInsets.all(cardPadding),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -925,7 +828,7 @@ class _SectionCard extends StatelessWidget {
                     : const Border(
                         bottom: BorderSide(color: AppColors.border)),
               ),
-              padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 25.h),
+              padding: EdgeInsets.all(cardPadding),
               child: _QuestionCard(
                 l10n: l10n,
                 index: i + 1,
@@ -1106,7 +1009,7 @@ class _QuestionCard extends StatelessWidget {
               SizedBox(height: 16.h),
               _label(l10n.qlibResponse),
               SizedBox(height: 8.h),
-              _responseField(),
+              _responseField(context),
               if (data.hasEvidence) ...[
                 SizedBox(height: 16.h),
                 _evidenceLabel(l10n),
@@ -1126,7 +1029,9 @@ class _QuestionCard extends StatelessWidget {
     );
   }
 
-  Widget _responseField() {
+  Widget _responseField(BuildContext context) {
+    final layout = context.screenLayout;
+
     switch (data.kind) {
       case _ResponseKind.yesNo:
         final options = [
@@ -1135,31 +1040,64 @@ class _QuestionCard extends StatelessWidget {
           l10n.answerNo,
           l10n.answerNa,
         ];
-        return Row(
-          children: [
-            for (var i = 0; i < options.length; i++) ...[
-              _ResponseButton(
-                label: options[i],
-                selected: selectedIndex == i,
-                onTap: () => onSelect(i),
-              ),
-              if (i != options.length - 1) SizedBox(width: 8.w),
+        final buttons = [
+          for (var i = 0; i < options.length; i++)
+            _ResponseButton(
+              label: options[i],
+              selected: selectedIndex == i,
+              onTap: () => onSelect(i),
+              fullWidth: layout.isMobile,
+            ),
+        ];
+        if (layout.isMobile) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < buttons.length; i++) ...[
+                buttons[i],
+                if (i != buttons.length - 1) SizedBox(height: 8.h),
+              ],
             ],
-          ],
+          );
+        }
+        return Wrap(
+          spacing: 8.w,
+          runSpacing: 8.h,
+          children: buttons,
         );
       case _ResponseKind.maturity:
+        final maturityButtons = [
+          for (var i = 0; i < _kMaturityLabels.length; i++)
+            _MaturityButton(
+              number: i + 1,
+              label: _kMaturityLabels[i],
+              selected: selectedIndex == i,
+              onTap: () => onSelect(i),
+            ),
+        ];
+        if (layout.isMobile) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < maturityButtons.length; i++) ...[
+                maturityButtons[i],
+                if (i != maturityButtons.length - 1) SizedBox(height: 8.h),
+              ],
+            ],
+          );
+        }
+        if (layout.isCompact) {
+          return Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
+            children: maturityButtons,
+          );
+        }
         return Row(
           children: [
-            for (var i = 0; i < _kMaturityLabels.length; i++) ...[
-              Expanded(
-                child: _MaturityButton(
-                  number: i + 1,
-                  label: _kMaturityLabels[i],
-                  selected: selectedIndex == i,
-                  onTap: () => onSelect(i),
-                ),
-              ),
-              if (i != _kMaturityLabels.length - 1) SizedBox(width: 8.w),
+            for (var i = 0; i < maturityButtons.length; i++) ...[
+              Expanded(child: maturityButtons[i]),
+              if (i != maturityButtons.length - 1) SizedBox(width: 8.w),
             ],
           ],
         );
@@ -1261,11 +1199,13 @@ class _ResponseButton extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.fullWidth = false,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool fullWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -1276,6 +1216,8 @@ class _ResponseButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10.r),
         child: Container(
+          width: fullWidth ? double.infinity : null,
+          alignment: fullWidth ? Alignment.center : null,
           padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.r),
@@ -1436,72 +1378,94 @@ class _Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     final isFirst = current == 0;
     final isLast = current == total - 1;
+    final isMobile = context.screenLayout.isMobile;
+
+    final prevButton = Opacity(
+      opacity: isFirst ? 0.5 : 1,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10.r),
+        child: InkWell(
+          onTap: isFirst ? null : onPrev,
+          borderRadius: BorderRadius.circular(10.r),
+          child: Container(
+            width: isMobile ? double.infinity : null,
+            alignment: isMobile ? Alignment.center : null,
+            padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: AppColors.borderInput),
+            ),
+            child: Text(
+              l10n.qlibPreviousCategory,
+              style: TextStyle(
+                color: AppColors.textDark,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                height: 24 / 16,
+                letterSpacing: -0.32,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final categoryLabel = Text(
+      l10n.qlibCategoryOf(current + 1, total),
+      textAlign: isMobile ? TextAlign.center : TextAlign.start,
+      style: TextStyle(
+        color: AppColors.textBody,
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w400,
+        height: 20 / 14,
+        letterSpacing: -0.154,
+      ),
+    );
+
+    final nextButton = Opacity(
+      opacity: isLast ? 0.5 : 1,
+      child: Material(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(10.r),
+        child: InkWell(
+          onTap: isLast ? null : onNext,
+          borderRadius: BorderRadius.circular(10.r),
+          child: Container(
+            width: isMobile ? double.infinity : null,
+            alignment: isMobile ? Alignment.center : null,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            child: Text(
+              l10n.qlibNextCategory,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                height: 24 / 16,
+                letterSpacing: -0.32,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          prevButton,
+          SizedBox(height: 12.h),
+          categoryLabel,
+          SizedBox(height: 12.h),
+          nextButton,
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Opacity(
-          opacity: isFirst ? 0.5 : 1,
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(10.r),
-            child: InkWell(
-              onTap: isFirst ? null : onPrev,
-              borderRadius: BorderRadius.circular(10.r),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(color: AppColors.borderInput),
-                ),
-                child: Text(
-                  l10n.qlibPreviousCategory,
-                  style: TextStyle(
-                    color: AppColors.textDark,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 24 / 16,
-                    letterSpacing: -0.32,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Text(
-          l10n.qlibCategoryOf(current + 1, total),
-          style: TextStyle(
-            color: AppColors.textBody,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
-            height: 20 / 14,
-            letterSpacing: -0.154,
-          ),
-        ),
-        Opacity(
-          opacity: isLast ? 0.5 : 1,
-          child: Material(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(10.r),
-            child: InkWell(
-              onTap: isLast ? null : onNext,
-              borderRadius: BorderRadius.circular(10.r),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                child: Text(
-                  l10n.qlibNextCategory,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 24 / 16,
-                    letterSpacing: -0.32,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+      children: [prevButton, categoryLabel, nextButton],
     );
   }
 }

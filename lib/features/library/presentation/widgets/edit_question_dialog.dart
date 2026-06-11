@@ -534,27 +534,10 @@ class _EditDialogHeader extends StatelessWidget {
               textHeightBehavior: QuestionFormDialog._textHeight,
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: SizedBox(
-                width: 32.r,
-                height: 32.r,
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/figma/library/svg/close_white.svg',
-                    width: 20.r,
-                    height: 20.r,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          AppButton.close(
+            onPressed: onClose,
+            iconSize: 20.r,
+            padding: EdgeInsets.all(6.r),
           ),
         ],
       ),

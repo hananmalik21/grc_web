@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
 import 'package:grc_web/core/widgets/app_select_field.dart';
 import 'package:grc_web/core/widgets/app_text_field.dart';
 
@@ -122,7 +123,7 @@ class AddControlDialog extends StatefulWidget {
 
   final ControlFormData? initialData;
 
-  static const _dialogWidth = 896.0;
+  static const maxDialogWidth = 896.0;
 
   @override
   State<AddControlDialog> createState() => _AddControlDialogState();
@@ -202,94 +203,131 @@ class _AddControlDialogState extends State<AddControlDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-    final dialogWidth = math.min(AddControlDialog._dialogWidth.w, screen.width - 48.w);
-    final dialogHeight = math.min(1147.h, screen.height * 0.92);
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-      child: SizedBox(
-        width: dialogWidth,
-        height: dialogHeight,
-        child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(10.r),
-              boxShadow: const [
-                BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20)),
-                BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 8)),
-              ],
-            ),
-            child: Column(
-              children: [
-                _DialogHeader(
-                  title: _isEditing ? 'Edit Control' : 'Add New Control',
-                  subtitle: _isEditing
-                      ? 'Editing ${widget.initialData!.id}'
-                      : 'Create a new security control',
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(24.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _BasicInformationSection(
-                          nameController: _nameController,
-                          descriptionController: _descriptionController,
-                          controlType: _controlType,
-                          status: _status,
-                          onControlTypeChanged: (v) {
-                            if (v != null) setState(() => _controlType = v);
-                          },
-                          onStatusChanged: (v) {
-                            if (v != null) setState(() => _status = v);
-                          },
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            AddControlDialog.maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: dialogWidth,
+              height: metrics.maxHeight,
+              child: Material(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10.r),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 25,
+                        offset: Offset(0, 20),
+                      ),
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _DialogHeader(
+                        title: _isEditing ? 'Edit Control' : 'Add New Control',
+                        subtitle: _isEditing
+                            ? 'Editing ${widget.initialData!.id}'
+                            : 'Create a new security control',
+                        onClose: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: metrics.contentPadding,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _BasicInformationSection(
+                                metrics: metrics,
+                                nameController: _nameController,
+                                descriptionController: _descriptionController,
+                                controlType: _controlType,
+                                status: _status,
+                                onControlTypeChanged: (v) {
+                                  if (v != null) setState(() => _controlType = v);
+                                },
+                                onStatusChanged: (v) {
+                                  if (v != null) setState(() => _status = v);
+                                },
+                              ),
+                              _OwnershipSection(
+                                metrics: metrics,
+                                owner: _owner,
+                                testFrequency: _testFrequency,
+                                effectiveness: _effectiveness,
+                                onOwnerChanged: (v) => setState(() => _owner = v),
+                                onFrequencyChanged: (v) {
+                                  if (v != null) setState(() => _testFrequency = v);
+                                },
+                                onEffectivenessChanged: (v) =>
+                                    setState(() => _effectiveness = v),
+                              ),
+                              _FrameworkMappingsSection(
+                                metrics: metrics,
+                                controller: _frameworkController,
+                                mappings: _frameworkMappings,
+                                onAdd: _addFrameworkMapping,
+                                onRemove: _removeFrameworkMapping,
+                              ),
+                              _IntegrationSection(
+                                metrics: metrics,
+                                risksController: _linkedRisksController,
+                                assetsController: _linkedAssetsController,
+                                assessmentsController: _linkedAssessmentsController,
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(height: 24.h),
-                        _OwnershipSection(
-                          owner: _owner,
-                          testFrequency: _testFrequency,
-                          effectiveness: _effectiveness,
-                          onOwnerChanged: (v) => setState(() => _owner = v),
-                          onFrequencyChanged: (v) {
-                            if (v != null) setState(() => _testFrequency = v);
-                          },
-                          onEffectivenessChanged: (v) => setState(() => _effectiveness = v),
+                      ),
+                      Container(
+                        color: AppColors.surface,
+                        padding: EdgeInsets.fromLTRB(
+                          metrics.contentPadding.left,
+                          0,
+                          metrics.contentPadding.right,
+                          metrics.contentPadding.bottom,
                         ),
-                        SizedBox(height: 24.h),
-                        _FrameworkMappingsSection(
-                          controller: _frameworkController,
-                          mappings: _frameworkMappings,
-                          onAdd: _addFrameworkMapping,
-                          onRemove: _removeFrameworkMapping,
-                        ),
-                        SizedBox(height: 24.h),
-                        _IntegrationSection(
-                          risksController: _linkedRisksController,
-                          assetsController: _linkedAssetsController,
-                          assessmentsController: _linkedAssessmentsController,
-                        ),
-                        SizedBox(height: 24.h),
-                        _DialogFooter(
+                        child: _DialogFooter(
                           isEditing: _isEditing,
                           onCancel: () => Navigator.of(context).pop(),
                           onSubmit: () => Navigator.of(context).pop(),
+                          metrics: metrics,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -300,16 +338,18 @@ class _DialogHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onClose,
+    required this.metrics,
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h),
+      padding: metrics.headerPadding,
       decoration: const BoxDecoration(
         color: AppColors.primary,
         border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -325,7 +365,7 @@ class _DialogHeader extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20.sp,
+                    fontSize: metrics.isPhone ? 18.sp : 20.sp,
                     fontWeight: FontWeight.w600,
                     height: 28 / 20,
                     letterSpacing: -0.46,
@@ -336,7 +376,7 @@ class _DialogHeader extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14.sp,
+                    fontSize: metrics.isPhone ? 13.sp : 14.sp,
                     fontWeight: FontWeight.w400,
                     height: 20 / 14,
                     letterSpacing: -0.154,
@@ -345,22 +385,7 @@ class _DialogHeader extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: SvgPicture.asset(
-                  'assets/figma/library/svg/close_white.svg',
-                  width: 28.r,
-                  height: 28.r,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-              ),
-            ),
-          ),
+          AppButton.close(onPressed: onClose),
         ],
       ),
     );
@@ -396,6 +421,7 @@ class _SectionHeader extends StatelessWidget {
 
 class _BasicInformationSection extends StatelessWidget {
   const _BasicInformationSection({
+    required this.metrics,
     required this.nameController,
     required this.descriptionController,
     required this.controlType,
@@ -404,6 +430,7 @@ class _BasicInformationSection extends StatelessWidget {
     required this.onStatusChanged,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final TextEditingController nameController;
   final TextEditingController descriptionController;
   final String controlType;
@@ -420,7 +447,7 @@ class _BasicInformationSection extends StatelessWidget {
           iconAsset: 'assets/figma/controls/svg/section_basic.svg',
           title: 'Basic Information',
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         AppTextField(
           label: 'Control Name',
           isRequired: true,
@@ -428,7 +455,7 @@ class _BasicInformationSection extends StatelessWidget {
           controller: nameController,
           hint: 'e.g., Multi-Factor Authentication',
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         AppTextField(
           label: 'Description',
           isRequired: true,
@@ -438,8 +465,9 @@ class _BasicInformationSection extends StatelessWidget {
           minLines: 3,
           maxLines: 5,
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _TwoColumnRow(
+          metrics: metrics,
           left: AppSelectField<String>(
             label: 'Control Type',
             isRequired: true,
@@ -466,6 +494,7 @@ class _BasicInformationSection extends StatelessWidget {
 
 class _OwnershipSection extends StatelessWidget {
   const _OwnershipSection({
+    required this.metrics,
     required this.owner,
     required this.testFrequency,
     required this.effectiveness,
@@ -474,6 +503,7 @@ class _OwnershipSection extends StatelessWidget {
     required this.onEffectivenessChanged,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final String? owner;
   final String testFrequency;
   final double effectiveness;
@@ -486,14 +516,14 @@ class _OwnershipSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         const _SectionHeader(
           iconAsset: 'assets/figma/controls/svg/section_ownership.svg',
           title: 'Ownership & Testing',
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _TwoColumnRow(
+          metrics: metrics,
           left: AppSelectField<String?>(
             label: 'Control Owner',
             isRequired: true,
@@ -557,12 +587,14 @@ class _OwnershipSection extends StatelessWidget {
 
 class _FrameworkMappingsSection extends StatelessWidget {
   const _FrameworkMappingsSection({
+    required this.metrics,
     required this.controller,
     required this.mappings,
     required this.onAdd,
     required this.onRemove,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final TextEditingController controller;
   final List<String> mappings;
   final VoidCallback onAdd;
@@ -570,34 +602,45 @@ class _FrameworkMappingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final addButton = AppButton(
+      label: 'Add',
+      variant: AppButtonVariant.primary,
+      fullWidth: metrics.isPhone,
+      onPressed: onAdd,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         const _SectionHeader(
           iconAsset: 'assets/figma/controls/svg/section_framework.svg',
           title: 'Framework Mappings',
         ),
-        SizedBox(height: 16.h),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: AppTextField(
-                controller: controller,
-                hint: 'e.g., ISO 27001: A.9.4.2 or NIST: PR.AC-7',
-                onSubmitted: (_) => onAdd(),
+        SizedBox(height: metrics.fieldGap),
+        if (metrics.isPhone) ...[
+          AppTextField(
+            controller: controller,
+            hint: 'e.g., ISO 27001: A.9.4.2 or NIST: PR.AC-7',
+            onSubmitted: (_) => onAdd(),
+          ),
+          SizedBox(height: metrics.fieldGap),
+          addButton,
+        ] else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: AppTextField(
+                  controller: controller,
+                  hint: 'e.g., ISO 27001: A.9.4.2 or NIST: PR.AC-7',
+                  onSubmitted: (_) => onAdd(),
+                ),
               ),
-            ),
-            SizedBox(width: 8.w),
-            AppButton(
-              label: 'Add',
-              variant: AppButtonVariant.primary,
-              onPressed: onAdd,
-            ),
-          ],
-        ),
+              SizedBox(width: 8.w),
+              addButton,
+            ],
+          ),
         if (mappings.isNotEmpty) ...[
           SizedBox(height: 12.h),
           Wrap(
@@ -629,11 +672,13 @@ class _FrameworkMappingsSection extends StatelessWidget {
 
 class _IntegrationSection extends StatelessWidget {
   const _IntegrationSection({
+    required this.metrics,
     required this.risksController,
     required this.assetsController,
     required this.assessmentsController,
   });
 
+  final AppResponsiveDialogMetrics metrics;
   final TextEditingController risksController;
   final TextEditingController assetsController;
   final TextEditingController assessmentsController;
@@ -643,41 +688,32 @@ class _IntegrationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         const _SectionHeader(
           iconAsset: 'assets/figma/controls/svg/section_integration.svg',
           title: 'Integration (Optional)',
         ),
-        SizedBox(height: 16.h),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        SizedBox(height: metrics.fieldGap),
+        _ThreeColumnRow(
+          metrics: metrics,
           children: [
-            Expanded(
-              child: AppTextField(
-                label: 'Linked Risks',
-                labelSpacing: 8,
-                controller: risksController,
-                hint: 'e.g., R-001, R-002',
-              ),
+            AppTextField(
+              label: 'Linked Risks',
+              labelSpacing: 8,
+              controller: risksController,
+              hint: 'e.g., R-001, R-002',
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: AppTextField(
-                label: 'Linked Assets',
-                labelSpacing: 8,
-                controller: assetsController,
-                hint: 'e.g., AST-001, AST-002',
-              ),
+            AppTextField(
+              label: 'Linked Assets',
+              labelSpacing: 8,
+              controller: assetsController,
+              hint: 'e.g., AST-001, AST-002',
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: AppTextField(
-                label: 'Linked Assessments',
-                labelSpacing: 8,
-                controller: assessmentsController,
-                hint: 'e.g., ASSESS-001',
-              ),
+            AppTextField(
+              label: 'Linked Assessments',
+              labelSpacing: 8,
+              controller: assessmentsController,
+              hint: 'e.g., ASSESS-001',
             ),
           ],
         ),
@@ -701,34 +737,64 @@ class _DialogFooter extends StatelessWidget {
     required this.isEditing,
     required this.onCancel,
     required this.onSubmit,
+    required this.metrics,
   });
 
   final bool isEditing;
   final VoidCallback onCancel;
   final VoidCallback onSubmit;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final submitButton = AppButton(
+      label: isEditing ? 'Update Control' : 'Create Control',
+      variant: AppButtonVariant.primary,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onSubmit,
+    );
+
+    final cancelButton = AppButton(
+      label: 'Cancel',
+      variant: AppButtonVariant.outlined,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onCancel,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 17.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            AppButton(
-              label: 'Cancel',
-              variant: AppButtonVariant.outlined,
-              onPressed: onCancel,
-            ),
-            SizedBox(width: 12.w),
-            AppButton(
-              label: isEditing ? 'Update Control' : 'Create Control',
-              variant: AppButtonVariant.primary,
-              onPressed: onSubmit,
-            ),
-          ],
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          padding: EdgeInsets.only(top: metrics.isPhone ? 20.h : 25.h),
+          child: metrics.useStackedFooter
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    submitButton,
+                    SizedBox(height: 10.h),
+                    cancelButton,
+                  ],
+                )
+              : metrics.isCompact
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        submitButton,
+                        SizedBox(height: 10.h),
+                        cancelButton,
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        cancelButton,
+                        SizedBox(width: 12.w),
+                        submitButton,
+                      ],
+                    ),
         ),
       ],
     );
@@ -736,28 +802,103 @@ class _DialogFooter extends StatelessWidget {
 }
 
 class _SectionDivider extends StatelessWidget {
-  const _SectionDivider();
+  const _SectionDivider({required this.metrics});
+
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(color: AppColors.border, height: 1, thickness: 1);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: metrics.majorSectionGap),
+        const Divider(color: AppColors.border, height: 1, thickness: 1),
+        SizedBox(height: metrics.isPhone ? 20.h : 25.h),
+      ],
+    );
   }
 }
 
 class _TwoColumnRow extends StatelessWidget {
-  const _TwoColumnRow({required this.left, required this.right});
+  const _TwoColumnRow({
+    required this.metrics,
+    required this.left,
+    required this.right,
+  });
 
+  final AppResponsiveDialogMetrics metrics;
   final Widget left;
   final Widget right;
 
   @override
   Widget build(BuildContext context) {
+    if (metrics.isWide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: left),
+          SizedBox(width: 16.w),
+          Expanded(child: right),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        left,
+        SizedBox(height: metrics.fieldGap),
+        right,
+      ],
+    );
+  }
+}
+
+class _ThreeColumnRow extends StatelessWidget {
+  const _ThreeColumnRow({required this.metrics, required this.children});
+
+  final AppResponsiveDialogMetrics metrics;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    if (metrics.isPhone) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1) SizedBox(height: metrics.fieldGap),
+          ],
+        ],
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: children[0]),
+              SizedBox(width: 16.w),
+              Expanded(child: children[1]),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          children[2],
+        ],
+      );
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: left),
-        SizedBox(width: 16.w),
-        Expanded(child: right),
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) SizedBox(width: 16.w),
+          Expanded(child: children[i]),
+        ],
       ],
     );
   }

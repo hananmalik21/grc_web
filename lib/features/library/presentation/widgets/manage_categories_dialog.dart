@@ -1,9 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
@@ -132,10 +130,14 @@ class _ManageCategoriesDialogState extends State<ManageCategoriesDialog> {
                                   metrics: metrics,
                                 )
                               else
-                                _AddCategoryButton(
+                                AppButton.dotted(
                                   label: l10n.addNewCategory,
-                                  onTap: _openNewCategoryForm,
-                                  metrics: metrics,
+                                  iconAsset:
+                                      'assets/figma/library/svg/add_category.svg',
+                                  iconSize: metrics.isPhone ? 20.r : 24.r,
+                                  fullWidth: true,
+                                  height: metrics.isPhone ? 48.h : 52.h,
+                                  onPressed: _openNewCategoryForm,
                                 ),
                               SizedBox(height: metrics.sectionGap),
                               for (int i = 0; i < data.sections.length; i++) ...[
@@ -242,27 +244,10 @@ class _DialogHeader extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: SizedBox(
-                width: 32.r,
-                height: 32.r,
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/figma/library/svg/close_white.svg',
-                    width: 20.r,
-                    height: 20.r,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          AppButton.close(
+            onPressed: onClose,
+            iconSize: 20.r,
+            padding: EdgeInsets.all(6.r),
           ),
         ],
       ),
@@ -343,79 +328,6 @@ class _WeightSummaryBanner extends StatelessWidget {
             textHeightBehavior: ManageCategoriesDialog._textHeight,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AddCategoryButton extends StatelessWidget {
-  const _AddCategoryButton({
-    required this.label,
-    required this.onTap,
-    required this.metrics,
-  });
-
-  final String label;
-  final VoidCallback onTap;
-  final AppResponsiveDialogMetrics metrics;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return DottedBorder(
-      options: RoundedRectDottedBorderOptions(
-        radius: Radius.circular(10.r),
-        color: AppColors.borderInput,
-        strokeWidth: 2,
-        dashPattern: const [6, 4],
-        padding: EdgeInsets.zero,
-        stackFit: StackFit.passthrough,
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: metrics.isPhone ? 48.h : 52.h,
-        child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(10.r),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    'assets/figma/library/svg/add_category.svg',
-                    width: metrics.isPhone ? 20.r : 24.r,
-                    height: metrics.isPhone ? 20.r : 24.r,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.primary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    label,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.32,
-                      height: 24 / 16,
-                      fontSize: metrics.isPhone ? 14.sp : null,
-                    ),
-                    strutStyle: AppTextMetrics.strut(
-                      fontSize: 16,
-                      lineHeight: 24,
-                    ),
-                    textHeightBehavior: ManageCategoriesDialog._textHeight,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

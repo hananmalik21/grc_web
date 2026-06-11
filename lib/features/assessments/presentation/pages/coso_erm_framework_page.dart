@@ -6,7 +6,10 @@ import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/features/assessments/presentation/widgets/assessment_page_layout.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
 
@@ -107,18 +110,18 @@ class CosoErmFrameworkPage extends StatelessWidget {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: AssessmentPageLayout.pagePadding(context),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: AssessmentPageLayout.contentConstraints(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _TitleBar(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: AssessmentPageLayout.sectionGap(context)),
             const _StatsRow(),
-            SizedBox(height: 24.h),
+            SizedBox(height: AssessmentPageLayout.sectionGap(context)),
             const _ChartsRow(components: _components),
-            SizedBox(height: 24.h),
+            SizedBox(height: AssessmentPageLayout.sectionGap(context)),
             for (final c in _components) ...[
               _ComponentCard(data: c),
               SizedBox(height: 16.h),
@@ -142,99 +145,48 @@ class _TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessments),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
+    final layout = context.screenLayout;
+
+    return AssessmentPageLayout.detailTitleBar(
+      context: context,
+      backButton: AppButton.back(
+        iconAsset: '$_kAssetsDir/back_arrow.svg',
+        borderColor: _kBorderInput,
+        onPressed: () => context.deferGo(AppRoutes.assessments),
+      ),
+      titleSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'COSO ERM Framework',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: AssessmentPageLayout.titleFontSize(context),
+              fontWeight: FontWeight.w600,
+              height: 32 / 24,
+              letterSpacing: 0.072,
             ),
           ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'COSO ERM Framework',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 32 / 24,
-                  letterSpacing: 0.072,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'Enterprise Risk Management - Integrated Framework',
-                style: TextStyle(
-                  color: AppColors.textBody,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    '$_kAssetsDir/export.svg',
-                    width: 16.r,
-                    height: 16.r,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Export Assessment',
-                    style: TextStyle(
-                      color: _kExportText,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 24 / 16,
-                      letterSpacing: -0.32,
-                    ),
-                  ),
-                ],
-              ),
+          SizedBox(height: 4.h),
+          Text(
+            'Enterprise Risk Management - Integrated Framework',
+            style: TextStyle(
+              color: AppColors.textBody,
+              fontSize: AssessmentPageLayout.subtitleFontSize(context),
+              fontWeight: FontWeight.w400,
+              height: 20 / 14,
+              letterSpacing: -0.154,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+      trailing: AppButton.export(
+        label: 'Export Assessment',
+        iconAsset: '$_kAssetsDir/export.svg',
+        foregroundColor: _kExportText,
+        fullWidth: layout.isCompact,
+        onPressed: () {},
+      ),
     );
   }
 }
@@ -248,50 +200,34 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(
-            child: _StatCard(
-              icon: 'coso_score.svg',
-              iconBg: _kBgPurple,
-              value: '4.1',
-              label: 'Avg Maturity Score',
-              sublabel: 'Out of 5.0',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              icon: 'coso_components.svg',
-              iconBg: _kBgGreen,
-              value: '5',
-              label: 'Components',
-              sublabel: 'All assessed',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '10',
-              valueColor: _kGreen,
-              label: 'Strong Controls',
-              sublabel: 'Out of 20 total',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '82%',
-              valueColor: _kPrimary,
-              label: 'Maturity Level',
-              sublabel: 'Optimized at 100%',
-            ),
-          ),
-        ],
+    return AssessmentPageLayout.statsRow(context, const [
+      _StatCard(
+        icon: 'coso_score.svg',
+        iconBg: _kBgPurple,
+        value: '4.1',
+        label: 'Avg Maturity Score',
+        sublabel: 'Out of 5.0',
       ),
-    );
+      _StatCard(
+        icon: 'coso_components.svg',
+        iconBg: _kBgGreen,
+        value: '5',
+        label: 'Components',
+        sublabel: 'All assessed',
+      ),
+      _StatCard(
+        value: '10',
+        valueColor: _kGreen,
+        label: 'Strong Controls',
+        sublabel: 'Out of 20 total',
+      ),
+      _StatCard(
+        value: '82%',
+        valueColor: _kPrimary,
+        label: 'Maturity Level',
+        sublabel: 'Optimized at 100%',
+      ),
+    ]);
   }
 }
 
@@ -315,7 +251,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -389,25 +325,19 @@ class _ChartsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: _ChartCard(
-              title: 'Maturity by Component',
-              child: _MaturityBarChart(components: components),
-            ),
-          ),
-          SizedBox(width: 24.w),
-          Expanded(
-            child: _ChartCard(
-              title: 'ERM Maturity Assessment',
-              child: _MaturityRadarChart(components: components),
-            ),
-          ),
-        ],
-      ),
+    return AssessmentPageLayout.twoColumnGrid(
+      context,
+      columnGap: 24,
+      children: [
+        _ChartCard(
+          title: 'Maturity by Component',
+          child: _MaturityBarChart(components: components),
+        ),
+        _ChartCard(
+          title: 'ERM Maturity Assessment',
+          child: _MaturityRadarChart(components: components),
+        ),
+      ],
     );
   }
 }
@@ -421,7 +351,7 @@ class _ChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -619,7 +549,7 @@ class _ComponentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -741,7 +671,7 @@ class _RecommendationsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),

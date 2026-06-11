@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/localization/app_localizations_ext.dart';
+import 'package:grc_web/features/assessments/presentation/pages/vendor_assessment_tab.dart';
+import 'package:grc_web/features/assessments/presentation/widgets/assessment_page_layout.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
 
@@ -130,28 +133,30 @@ class _CloudVendorRiskPageState extends State<CloudVendorRiskPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
+    final gap = AssessmentPageLayout.sectionGap(context);
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: AssessmentPageLayout.pagePadding(context),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: AssessmentPageLayout.contentConstraints(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _TitleBar(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: gap),
             _TabSwitcher(
               selected: _tab,
               onChanged: (i) => setState(() => _tab = i),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: gap),
             if (_tab == 0) ...[
               const _StatsRow(),
-              SizedBox(height: 24.h),
+              SizedBox(height: gap),
               const _ProvidersGrid(providers: _providers),
-              SizedBox(height: 24.h),
+              SizedBox(height: gap),
               const _RecentFindingsCard(findings: _findings),
             ] else
-              const _VendorPlaceholder(),
+              const VendorAssessmentTab(),
           ],
         ),
       ),
@@ -170,99 +175,45 @@ class _TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessments),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
+    return AssessmentPageLayout.detailTitleBar(
+      context: context,
+      backButton: AppButton.back(
+        iconAsset: '$_kAssetsDir/back_arrow.svg',
+        borderColor: _kBorderInput,
+        onPressed: () => context.deferGo(AppRoutes.assessments),
+      ),
+      titleSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Cloud & Vendor Risk Management',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: AssessmentPageLayout.titleFontSize(context),
+              fontWeight: FontWeight.w600,
+              height: 32 / 24,
+              letterSpacing: 0.072,
             ),
           ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Cloud & Vendor Risk Management',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 32 / 24,
-                  letterSpacing: 0.072,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'Multi-cloud security and third-party risk assessment',
-                style: TextStyle(
-                  color: AppColors.textBody,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    '$_kAssetsDir/export.svg',
-                    width: 16.r,
-                    height: 16.r,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Export Report',
-                    style: TextStyle(
-                      color: _kExportText,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 24 / 16,
-                      letterSpacing: -0.32,
-                    ),
-                  ),
-                ],
-              ),
+          SizedBox(height: 4.h),
+          Text(
+            'Multi-cloud security and third-party risk assessment',
+            style: TextStyle(
+              color: AppColors.textBody,
+              fontSize: AssessmentPageLayout.subtitleFontSize(context),
+              fontWeight: FontWeight.w400,
+              height: 20 / 14,
+              letterSpacing: -0.154,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+      trailing: AppButton.export(
+        label: l10n.exportReport,
+        iconAsset: '$_kAssetsDir/export.svg',
+        foregroundColor: _kExportText,
+        onPressed: () {},
+      ),
     );
   }
 }
@@ -286,24 +237,20 @@ class _TabSwitcher extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _TabButton(
-              icon: 'cloud_tab.svg',
-              label: 'Cloud Security Posture',
-              active: selected == 0,
-              onTap: () => onChanged(0),
-            ),
+      child: AssessmentPageLayout.tabSwitcher(
+        context: context,
+        tabs: [
+          _TabButton(
+            icon: 'cloud_tab.svg',
+            label: 'Cloud Security Posture',
+            active: selected == 0,
+            onTap: () => onChanged(0),
           ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: _TabButton(
-              icon: 'vendor_tab.svg',
-              label: 'Vendor Assessment',
-              active: selected == 1,
-              onTap: () => onChanged(1),
-            ),
+          _TabButton(
+            icon: 'vendor_tab.svg',
+            label: 'Vendor Assessment',
+            active: selected == 1,
+            onTap: () => onChanged(1),
           ),
         ],
       ),
@@ -376,44 +323,31 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(
-            child: _StatCard(
-              value: '83%',
-              label: 'Avg Cloud Security Score',
-              progressPercent: 83,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '4',
-              label: 'Cloud Providers',
-              sublabel: 'Active environments',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '100',
-              label: 'Cloud Assets',
-              sublabel: 'Across all providers',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '12',
-              valueColor: _kGreen,
-              label: 'Critical Findings',
-              sublabel: 'Resolved this month',
-            ),
-          ),
-        ],
-      ),
+    return AssessmentPageLayout.statsRow(
+      context,
+      const [
+        _StatCard(
+          value: '83%',
+          label: 'Avg Cloud Security Score',
+          progressPercent: 83,
+        ),
+        _StatCard(
+          value: '4',
+          label: 'Cloud Providers',
+          sublabel: 'Active environments',
+        ),
+        _StatCard(
+          value: '100',
+          label: 'Cloud Assets',
+          sublabel: 'Across all providers',
+        ),
+        _StatCard(
+          value: '12',
+          valueColor: _kGreen,
+          label: 'Critical Findings',
+          sublabel: 'Resolved this month',
+        ),
+      ],
     );
   }
 }
@@ -436,7 +370,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -499,29 +433,12 @@ class _ProvidersGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return AssessmentPageLayout.twoColumnGrid(
+      context,
+      columnGap: 24,
+      rowGap: 24,
       children: [
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _ProviderCard(data: providers[0])),
-              SizedBox(width: 24.w),
-              Expanded(child: _ProviderCard(data: providers[1])),
-            ],
-          ),
-        ),
-        SizedBox(height: 24.h),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _ProviderCard(data: providers[2])),
-              SizedBox(width: 24.w),
-              Expanded(child: _ProviderCard(data: providers[3])),
-            ],
-          ),
-        ),
+        for (final provider in providers) _ProviderCard(data: provider),
       ],
     );
   }
@@ -543,7 +460,7 @@ class _ProviderCardState extends State<_ProviderCard> {
   Widget build(BuildContext context) {
     final data = widget.data;
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -783,7 +700,7 @@ class _RecentFindingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -890,36 +807,6 @@ class _FindingItem extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Vendor placeholder (tab 2 — design not provided)
-// ---------------------------------------------------------------------------
-
-class _VendorPlaceholder extends StatelessWidget {
-  const _VendorPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 80.h),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Center(
-        child: Text(
-          'Vendor Assessment',
-          style: TextStyle(
-            color: _kSubLabel,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
       ),
     );
   }

@@ -386,22 +386,10 @@ class _AddRiskHeader extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: SizedBox(
-                width: 32.r, height: 32.r,
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/figma/library/svg/close_white.svg',
-                    width: 20.r, height: 20.r,
-                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                  ),
-                ),
-              ),
-            ),
+          AppButton.close(
+            onPressed: onClose,
+            iconSize: 20.r,
+            padding: EdgeInsets.all(6.r),
           ),
         ],
       ),
@@ -2117,34 +2105,16 @@ class _AddItemField extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8.w),
-        _PlusButton(onTap: onAdd),
+        AppButton.icon(
+          iconAsset: 'assets/figma/risks/svg/add_risk.svg',
+          onPressed: onAdd,
+          backgroundColor: AppColors.primary,
+          borderColor: AppColors.primary,
+          iconColor: Colors.white,
+          iconSize: 16.r,
+        ),
       ]),
     ]);
-  }
-}
-
-class _PlusButton extends StatelessWidget {
-  const _PlusButton({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.primary,
-      borderRadius: BorderRadius.circular(10.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10.r),
-        child: SizedBox(
-          width: AppTextField.fieldHeight.h, height: AppTextField.fieldHeight.h,
-          child: Center(child: SvgPicture.asset(
-            'assets/figma/risks/svg/add_risk.svg',
-            width: 16.r, height: 16.r,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          )),
-        ),
-      ),
-    );
   }
 }
 

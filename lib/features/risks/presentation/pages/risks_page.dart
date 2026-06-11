@@ -570,10 +570,9 @@ class _RisksFilterBarState extends State<_RisksFilterBar> {
       contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
     );
 
-    final exportButton = AppButton(
+    final exportButton = AppButton.export(
       label: l10n.export,
       iconAsset: 'assets/figma/assets/svg/export.svg',
-      variant: AppButtonVariant.outlined,
       iconSize: isMobile ? 20.r : 20.r,
       size: isMobile ? AppButtonSize.md : AppButtonSize.lg,
       fullWidth: isMobile,
@@ -1000,19 +999,22 @@ class _RisksTable extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/assets/svg/edit_asset.svg',
             onPressed: () {},
+            bordered: false,
           ),
           SizedBox(width: 4.w),
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/risks/svg/view_risk.svg',
             onPressed: () => showRiskDetailDialog(context: context, risk: risk),
+            bordered: false,
           ),
           SizedBox(width: 4.w),
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/assets/svg/delete_asset.svg',
             onPressed: () {},
+            bordered: false,
           ),
         ],
       ),
@@ -1153,20 +1155,23 @@ class _RiskMobileCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              _TableIconButton(
+              AppButton.icon(
                 iconAsset: 'assets/figma/assets/svg/edit_asset.svg',
                 onPressed: () {},
+                bordered: false,
               ),
               SizedBox(width: 4.w),
-              _TableIconButton(
+              AppButton.icon(
                 iconAsset: 'assets/figma/risks/svg/view_risk.svg',
                 onPressed: () =>
                     showRiskDetailDialog(context: context, risk: risk),
+                bordered: false,
               ),
               SizedBox(width: 4.w),
-              _TableIconButton(
+              AppButton.icon(
                 iconAsset: 'assets/figma/assets/svg/delete_asset.svg',
                 onPressed: () {},
+                bordered: false,
               ),
             ],
           ),
@@ -1236,35 +1241,6 @@ class _StatusBadge extends StatelessWidget {
               fontWeight: FontWeight.w500,
               fontSize: 12.sp,
             ),
-      ),
-    );
-  }
-}
-
-class _TableIconButton extends StatelessWidget {
-  const _TableIconButton({
-    required this.iconAsset,
-    this.onPressed,
-  });
-
-  final String iconAsset;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4.r),
-        child: Padding(
-          padding: EdgeInsets.all(2.r),
-          child: SvgPicture.asset(
-            iconAsset,
-            width: 24.r,
-            height: 24.r,
-          ),
-        ),
       ),
     );
   }

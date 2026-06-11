@@ -6,8 +6,11 @@ import 'package:grc_web/core/errors/failure.dart';
 import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
 import 'package:grc_web/core/widgets/app_error_view.dart';
+import 'package:grc_web/core/widgets/app_horizontal_scroll_row.dart';
 import 'package:grc_web/core/widgets/app_loading_indicator.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
 import 'package:grc_web/features/assessments/application/providers/assessments_providers.dart';
@@ -57,19 +60,31 @@ class _AssessmentsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+    final sectionGap = compact
+        ? ResponsiveHelper.getTabSectionSpacing(context)
+        : 24.h;
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: layout.isMobile
+          ? EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h)
+          : compact
+              ? ResponsiveHelper.getDetailScreenPadding(context)
+              : EdgeInsets.all(24.w),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: BoxConstraints(
+          maxWidth: compact ? context.responsiveMaxContentWidth : 1512.w,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _TitleSection(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _AssessmentHubBanner(hub: data.hub),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _StatsRow(summary: data.summary),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _FrameworksGrid(frameworks: data.frameworks),
           ],
         ),
@@ -89,6 +104,7 @@ class _TitleSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = Theme.of(context).textTheme;
+    final isMobile = context.screenLayout.isMobile;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,6 +115,7 @@ class _TitleSection extends StatelessWidget {
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.072,
+            fontSize: isMobile ? 20.sp : null,
           ),
           strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
           textHeightBehavior: AppTextMetrics.textHeight,
@@ -106,7 +123,10 @@ class _TitleSection extends StatelessWidget {
         SizedBox(height: 4.h),
         Text(
           l10n.frameworkAssessmentsSubtitle,
-          style: textTheme.bodyMedium?.copyWith(color: AppColors.textBody),
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppColors.textBody,
+            fontSize: isMobile ? 13.sp : null,
+          ),
           strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
           textHeightBehavior: AppTextMetrics.textHeight,
         ),
@@ -127,10 +147,78 @@ class _AssessmentHubBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+    final padding = compact
+        ? ResponsiveHelper.libraryCardPadding(context)
+        : EdgeInsets.all(24.w);
+
+    final launchButton = AppButton(
+      label: l10n.launchAssessmentHub,
+      backgroundColor: Colors.white,
+      foregroundColor: AppColors.primary,
+      fullWidth: compact,
+      fontSize: layout.isMobile ? 13.sp : (compact ? 14.sp : 16.sp),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 12.w : 24.w,
+        vertical: compact ? 12.h : 10.h,
+      ),
+      onPressed: () => context.deferGo(AppRoutes.assessmentHub),
+    );
+
+    final statsPanel = Container(
+      width: compact ? double.infinity : null,
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 8.w : 16.w,
+        vertical: compact ? 12.h : 8.h,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: compact
+          ? Row(
+              children: [
+                Expanded(
+                  child: _HubStat(
+                    value: '${hub.libraries}',
+                    label: l10n.hubLibraries,
+                    compact: true,
+                  ),
+                ),
+                _hubDivider(compact: true),
+                Expanded(
+                  child: _HubStat(
+                    value: '${hub.questions}',
+                    label: l10n.hubQuestions,
+                    compact: true,
+                  ),
+                ),
+                _hubDivider(compact: true),
+                Expanded(
+                  child: _HubStat(
+                    value: '${hub.criteria}',
+                    label: l10n.hubCriteria,
+                    compact: true,
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _HubStat(value: '${hub.libraries}', label: l10n.hubLibraries),
+                _hubDivider(),
+                _HubStat(value: '${hub.questions}', label: l10n.hubQuestions),
+                _hubDivider(),
+                _HubStat(value: '${hub.criteria}', label: l10n.hubCriteria),
+              ],
+            ),
+    );
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(24.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(10.r),
@@ -142,8 +230,8 @@ class _AssessmentHubBanner extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 48.r,
-                height: 48.r,
+                width: compact ? 40.r : 48.r,
+                height: compact ? 40.r : 48.r,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10.r),
@@ -151,122 +239,101 @@ class _AssessmentHubBanner extends StatelessWidget {
                 child: Center(
                   child: SvgPicture.asset(
                     '$_kAssetsDir/hub_icon.svg',
-                    width: 24.r,
-                    height: 24.r,
+                    width: compact ? 20.r : 24.r,
+                    height: compact ? 20.r : 24.r,
                   ),
                 ),
               ),
               SizedBox(width: 12.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l10n.assessmentHubTitle,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
-                      height: 28 / 20,
-                      letterSpacing: -0.46,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.assessmentHubTitle,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: compact ? 18.sp : 20.sp,
+                        fontWeight: FontWeight.w600,
+                        height: 28 / 20,
+                        letterSpacing: -0.46,
+                      ),
                     ),
-                  ),
-                  Text(
-                    l10n.assessmentHubSubtitle,
-                    style: TextStyle(
-                      color: _kHubSubtitle,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      height: 20 / 14,
-                      letterSpacing: -0.154,
+                    Text(
+                      l10n.assessmentHubSubtitle,
+                      style: TextStyle(
+                        color: _kHubSubtitle,
+                        fontSize: compact ? 13.sp : 14.sp,
+                        fontWeight: FontWeight.w400,
+                        height: 20 / 14,
+                        letterSpacing: -0.154,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
           SizedBox(height: 8.h),
           Text(
             l10n.assessmentHubDescription,
+            maxLines: layout.isMobile ? 2 : null,
+            overflow: layout.isMobile ? TextOverflow.ellipsis : null,
             style: TextStyle(
               color: _kHubSubtitle,
-              fontSize: 14.sp,
+              fontSize: compact ? 13.sp : 14.sp,
               fontWeight: FontWeight.w400,
               height: 20 / 14,
               letterSpacing: -0.154,
             ),
           ),
           SizedBox(height: 16.h),
-          IntrinsicHeight(
-            child: Row(
+          if (compact)
+            Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: InkWell(
-                    onTap: () => context.deferGo(AppRoutes.assessmentHub),
-                    borderRadius: BorderRadius.circular(10.r),
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w,),
-                        child: Text(
-                          l10n.launchAssessmentHub,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            height: 24 / 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _HubStat(value: '${hub.libraries}', label: l10n.hubLibraries),
-                      _hubDivider(),
-                      _HubStat(value: '${hub.questions}', label: l10n.hubQuestions),
-                      _hubDivider(),
-                      _HubStat(value: '${hub.criteria}', label: l10n.hubCriteria),
-                    ],
-                  ),
-                ),
+                launchButton,
+                SizedBox(height: 12.h),
+                statsPanel,
               ],
+            )
+          else
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  launchButton,
+                  SizedBox(width: 12.w),
+                  Expanded(child: statsPanel),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _hubDivider() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Container(
-        width: 1,
-        height: 32.h,
-        color: Colors.white.withValues(alpha: 0.2),
-      ),
+  Widget _hubDivider({bool compact = false}) {
+    return Container(
+      width: 1,
+      height: compact ? 36.h : 32.h,
+      margin: EdgeInsets.symmetric(horizontal: compact ? 4.w : 16.w),
+      color: Colors.white.withValues(alpha: 0.2),
     );
   }
 }
 
 class _HubStat extends StatelessWidget {
-  const _HubStat({required this.value, required this.label});
+  const _HubStat({
+    required this.value,
+    required this.label,
+    this.compact = false,
+  });
 
   final String value;
   final String label;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -276,21 +343,27 @@ class _HubStat extends StatelessWidget {
       children: [
         Text(
           value,
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white,
-            fontSize: 18.sp,
+            fontSize: compact ? 16.sp : 18.sp,
             fontWeight: FontWeight.w600,
             height: 28 / 18,
             letterSpacing: -0.45,
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(
-            color: _kHubSubtitle,
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w400,
-            height: 16 / 12,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            style: TextStyle(
+              color: _kHubSubtitle,
+              fontSize: compact ? 11.sp : 12.sp,
+              fontWeight: FontWeight.w400,
+              height: 16 / 12,
+            ),
           ),
         ),
       ],
@@ -310,44 +383,61 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final layout = context.screenLayout;
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: _StatCard(
-              value: '${summary.totalFrameworks}',
-              label: l10n.statTotalFrameworks,
-              iconAsset: '$_kAssetsDir/stat_total_frameworks.svg',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _StatCard(
-              value: '${summary.avgCompliance}%',
-              label: l10n.statAvgCompliance,
-              iconAsset: '$_kAssetsDir/stat_avg_compliance.svg',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _StatCard(
-              value: '${summary.totalControls}',
-              label: l10n.statTotalControls,
-              iconAsset: '$_kAssetsDir/stat_total_controls.svg',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _StatCard(
-              value: '${summary.activeFrameworks}',
-              label: l10n.statActiveFrameworks,
-              iconAsset: '$_kAssetsDir/stat_active_frameworks.svg',
-            ),
-          ),
-        ],
+    final cards = [
+      _StatCard(
+        value: '${summary.totalFrameworks}',
+        label: l10n.statTotalFrameworks,
+        iconAsset: '$_kAssetsDir/stat_total_frameworks.svg',
       ),
+      _StatCard(
+        value: '${summary.avgCompliance}%',
+        label: l10n.statAvgCompliance,
+        iconAsset: '$_kAssetsDir/stat_avg_compliance.svg',
+      ),
+      _StatCard(
+        value: '${summary.totalControls}',
+        label: l10n.statTotalControls,
+        iconAsset: '$_kAssetsDir/stat_total_controls.svg',
+      ),
+      _StatCard(
+        value: '${summary.activeFrameworks}',
+        label: l10n.statActiveFrameworks,
+        iconAsset: '$_kAssetsDir/stat_active_frameworks.svg',
+      ),
+    ];
+
+    if (layout.isCompact) {
+      final cardWidth = layout.isMobile
+          ? MediaQuery.sizeOf(context).width * 0.86
+          : ResponsiveHelper.getResponsiveWidth(
+              context,
+              mobile: 220,
+              tablet: 240,
+              web: 260,
+            );
+      final spacing = context.responsive(
+        mobile: 12.0,
+        tablet: 14.0,
+        desktop: 16.0,
+      );
+
+      return AppHorizontalScrollRow(
+        spacing: spacing,
+        children: [
+          for (final card in cards) SizedBox(width: cardWidth, child: card),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        for (int i = 0; i < cards.length; i++) ...[
+          Expanded(child: cards[i]),
+          if (i != cards.length - 1) SizedBox(width: 16.w),
+        ],
+      ],
     );
   }
 }
@@ -366,9 +456,10 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final padding = ResponsiveHelper.getCardPadding(context);
 
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -422,6 +513,21 @@ class _FrameworksGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final gap = layout.isCompact ? 16.h : 24.h;
+
+    if (layout.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < frameworks.length; i++) ...[
+            _FrameworkCard(framework: frameworks[i]),
+            if (i != frameworks.length - 1) SizedBox(height: gap),
+          ],
+        ],
+      );
+    }
+
     final rows = <Widget>[];
     for (var i = 0; i < frameworks.length; i += 2) {
       final left = frameworks[i];
@@ -432,7 +538,7 @@ class _FrameworksGrid extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(child: _FrameworkCard(framework: left)),
-              SizedBox(width: 24.w),
+              SizedBox(width: gap),
               Expanded(
                 child: right == null
                     ? const SizedBox.shrink()
@@ -442,7 +548,7 @@ class _FrameworksGrid extends StatelessWidget {
           ),
         ),
       );
-      if (i + 2 < frameworks.length) rows.add(SizedBox(height: 24.h));
+      if (i + 2 < frameworks.length) rows.add(SizedBox(height: gap));
     }
 
     return Column(
@@ -476,7 +582,7 @@ class _FrameworkCard extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10.r),
         child: Container(
-          padding: EdgeInsets.all(25.w),
+          padding: EdgeInsets.all(ResponsiveHelper.getCardPadding(context)),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(color: AppColors.border),
@@ -658,80 +764,109 @@ class _FrameworkCard extends StatelessWidget {
         ),
     };
 
+    final statusColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _footerLabel(l10n.frameworkStatusLabel),
+        SizedBox(height: 4.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+          decoration: BoxDecoration(
+            color: statusBg,
+            borderRadius: BorderRadius.circular(999.r),
+          ),
+          child: Text(
+            statusLabel,
+            style: TextStyle(
+              color: statusFg,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              height: 16 / 12,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    final controlsColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _footerLabel(l10n.frameworkControlsLabel),
+        SizedBox(height: 4.h),
+        Text(
+          '${framework.controls}',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            height: 20 / 14,
+            letterSpacing: -0.154,
+          ),
+        ),
+      ],
+    );
+
+    final lastAssessmentColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _footerLabel(l10n.lastAssessmentLabel),
+        SizedBox(height: 4.h),
+        Text(
+          framework.lastAssessment,
+          style: TextStyle(
+            color: AppColors.textLabel,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            height: 16 / 12,
+          ),
+        ),
+      ],
+    );
+
+    final layout = context.screenLayout;
+
     return Container(
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       padding: EdgeInsets.only(top: 17.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: layout.isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _footerLabel(l10n.frameworkStatusLabel),
-                SizedBox(height: 4.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: statusBg,
-                    borderRadius: BorderRadius.circular(999.r),
-                  ),
-                  child: Text(
-                    statusLabel,
-                    style: TextStyle(
-                      color: statusFg,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 16 / 12,
+                statusColumn,
+                SizedBox(height: 12.h),
+                controlsColumn,
+                SizedBox(height: 12.h),
+                lastAssessmentColumn,
+              ],
+            )
+          : layout.isTabletSmall
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: statusColumn),
+                        SizedBox(width: 16.w),
+                        Expanded(child: controlsColumn),
+                      ],
                     ),
-                  ),
+                    SizedBox(height: 12.h),
+                    lastAssessmentColumn,
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: statusColumn),
+                    SizedBox(width: 16.w),
+                    Expanded(child: controlsColumn),
+                    SizedBox(width: 16.w),
+                    Expanded(child: lastAssessmentColumn),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _footerLabel(l10n.frameworkControlsLabel),
-                SizedBox(height: 4.h),
-                Text(
-                  '${framework.controls}',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    height: 20 / 14,
-                    letterSpacing: -0.154,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _footerLabel(l10n.lastAssessmentLabel),
-                SizedBox(height: 4.h),
-                Text(
-                  framework.lastAssessment,
-                  style: TextStyle(
-                    color: AppColors.textLabel,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    height: 16 / 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 

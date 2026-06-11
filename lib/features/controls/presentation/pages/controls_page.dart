@@ -1,14 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_horizontal_scroll_row.dart';
 import 'package:grc_web/core/widgets/app_select_field.dart';
 import 'package:grc_web/core/widgets/app_text_field.dart';
 import 'package:grc_web/core/widgets/app_responsive_table.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
 import 'package:grc_web/features/controls/presentation/widgets/add_control_dialog.dart';
 import 'package:grc_web/features/controls/presentation/widgets/control_detail_dialog.dart';
+
+Widget _compactFourCardGrid({
+  required BuildContext context,
+  required List<Widget> cards,
+}) {
+  assert(cards.length == 4);
+  final gap = context.screenLayout.isMobile ? 12.w : 14.w;
+
+  return Column(
+    children: [
+      IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: cards[0]),
+            SizedBox(width: gap),
+            Expanded(child: cards[1]),
+          ],
+        ),
+      ),
+      SizedBox(height: gap),
+      IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: cards[2]),
+            SizedBox(width: gap),
+            Expanded(child: cards[3]),
+          ],
+        ),
+      ),
+    ],
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Page
@@ -17,25 +53,39 @@ import 'package:grc_web/features/controls/presentation/widgets/control_detail_di
 class ControlsPage extends StatelessWidget {
   const ControlsPage({super.key});
 
+  static const _textHeight = AppTextMetrics.textHeight;
+
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+    final sectionGap = compact
+        ? ResponsiveHelper.getTabSectionSpacing(context)
+        : 24.h;
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: layout.isMobile
+          ? EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h)
+          : compact
+              ? ResponsiveHelper.getDetailScreenPadding(context)
+              : EdgeInsets.all(24.w),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: BoxConstraints(
+          maxWidth: compact ? context.responsiveMaxContentWidth : 1512.w,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _TitleBar(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _StatsRow(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _FrameworkCoverageCard(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _FilterBar(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _ControlsTable(controls: _controls),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _IntegrationSection(),
           ],
         ),
@@ -54,36 +104,58 @@ class _TitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+
+    final titleSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Security Controls',
+          style: textTheme.displaySmall?.copyWith(
+            fontSize: isMobile ? 20.sp : null,
+          ),
+          strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+          textHeightBehavior: ControlsPage._textHeight,
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          'Manage controls mapped to ISO 27001, NIST CSF, and CIS',
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppColors.textBody,
+            fontSize: layout.isCompact ? 13.sp : null,
+          ),
+          strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+          textHeightBehavior: ControlsPage._textHeight,
+        ),
+      ],
+    );
+
+    final addButton = AppButton(
+      label: 'Add Control',
+      iconAsset: 'assets/figma/controls/svg/add_control.svg',
+      variant: AppButtonVariant.primary,
+      iconSize: layout.isCompact ? 20.r : 28.r,
+      size: layout.isCompact ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: layout.isCompact,
+      onPressed: () => showAddControlDialog(context: context),
+    );
+
+    if (layout.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          titleSection,
+          SizedBox(height: 16.h),
+          addButton,
+        ],
+      );
+    }
 
     return Row(
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Security Controls',
-                style: textTheme.displaySmall,
-                strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'Manage controls mapped to ISO 27001, NIST CSF, and CIS',
-                style: textTheme.bodyMedium?.copyWith(color: AppColors.textBody),
-                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-            ],
-          ),
-        ),
-        AppButton(
-          label: 'Add Control',
-          iconAsset: 'assets/figma/controls/svg/add_control.svg',
-          variant: AppButtonVariant.primary,
-          iconSize: 28.r,
-          onPressed: () => showAddControlDialog(context: context),
-        ),
+        Expanded(child: titleSection),
+        addButton,
       ],
     );
   }
@@ -98,43 +170,65 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+
+    const cards = [
+      _StatCard(
+        value: '10',
+        label: 'Total Controls',
+        iconAsset: 'assets/figma/controls/svg/stat_check.svg',
+        iconBg: AppColors.primaryTint,
+      ),
+      _StatCard(
+        value: '9',
+        label: 'Implemented',
+        iconAsset: 'assets/figma/controls/svg/stat_check.svg',
+        iconBg: AppColors.primaryTint,
+      ),
+      _StatCard(
+        value: '86%',
+        label: 'Avg Effectiveness',
+        iconAsset: 'assets/figma/controls/svg/stat_check.svg',
+        iconBg: AppColors.primaryTint,
+      ),
+      _StatCard(
+        value: '1',
+        label: 'Pending',
+        iconAsset: 'assets/figma/controls/svg/stat_pending.svg',
+        iconBg: AppColors.statusHighBg,
+      ),
+    ];
+
+    if (compact) {
+      final cardWidth = layout.isMobile
+          ? MediaQuery.sizeOf(context).width * 0.86
+          : ResponsiveHelper.getResponsiveWidth(
+              context,
+              mobile: 220,
+              tablet: 240,
+              web: 260,
+            );
+      final spacing = context.responsive(
+        mobile: 12.0,
+        tablet: 14.0,
+        desktop: 16.0,
+      );
+
+      return AppHorizontalScrollRow(
+        spacing: spacing,
+        children: [
+          for (final card in cards) SizedBox(width: cardWidth, child: card),
+        ],
+      );
+    }
+
     return Row(
       children: [
-        const Expanded(
-          child: _StatCard(
-            value: '10',
-            label: 'Total Controls',
-            iconAsset: 'assets/figma/controls/svg/stat_check.svg',
-            iconBg: AppColors.primaryTint,
-          ),
-        ),
-        SizedBox(width: 16.w),
-        const Expanded(
-          child: _StatCard(
-            value: '9',
-            label: 'Implemented',
-            iconAsset: 'assets/figma/controls/svg/stat_check.svg',
-            iconBg: AppColors.primaryTint,
-          ),
-        ),
-        SizedBox(width: 16.w),
-        const Expanded(
-          child: _StatCard(
-            value: '86%',
-            label: 'Avg Effectiveness',
-            iconAsset: 'assets/figma/controls/svg/stat_check.svg',
-            iconBg: AppColors.primaryTint,
-          ),
-        ),
-        SizedBox(width: 16.w),
-        const Expanded(
-          child: _StatCard(
-            value: '1',
-            label: 'Pending',
-            iconAsset: 'assets/figma/controls/svg/stat_pending.svg',
-            iconBg: AppColors.statusHighBg,
-          ),
-        ),
+        for (int i = 0; i < cards.length; i++) ...[
+          Expanded(child: cards[i]),
+          if (i != cards.length - 1) SizedBox(width: 16.w),
+        ],
       ],
     );
   }
@@ -156,50 +250,80 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+    final padding = compact ? EdgeInsets.all(12.w) : ResponsiveHelper.libraryCardPadding(context);
+    final iconBoxSize = compact ? 36.r : 56.r;
+    final iconSize = compact ? 20.r : 32.r;
+
+    final icon = Container(
+      width: iconBoxSize,
+      height: iconBoxSize,
+      decoration: BoxDecoration(
+        color: iconBg,
+        borderRadius: BorderRadius.circular(compact ? 8.r : 10.r),
+      ),
+      child: Center(
+        child: SvgPicture.asset(iconAsset, width: iconSize, height: iconSize),
+      ),
+    );
+
+    final valueText = Text(
+      value,
+      style: textTheme.headlineSmall?.copyWith(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.072,
+        fontSize: compact ? 20.sp : null,
+      ),
+      strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+      textHeightBehavior: ControlsPage._textHeight,
+    );
+
+    final labelText = Text(
+      label,
+      style: textTheme.bodyMedium?.copyWith(
+        color: AppColors.textBody,
+        fontWeight: FontWeight.w400,
+        fontSize: compact ? 12.sp : null,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+      textHeightBehavior: ControlsPage._textHeight,
+    );
 
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 56.r,
-            height: 56.r,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(10.r),
+      child: compact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    icon,
+                    SizedBox(width: 8.w),
+                    Expanded(child: valueText),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                labelText,
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                icon,
+                SizedBox(height: 8.h),
+                valueText,
+                labelText,
+              ],
             ),
-            child: Center(
-              child: SvgPicture.asset(iconAsset, width: 32.r, height: 32.r),
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            value,
-            style: textTheme.headlineSmall?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.072,
-            ),
-            strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-            textHeightBehavior: AppTextMetrics.textHeight,
-          ),
-          Text(
-            label,
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textBody,
-              fontWeight: FontWeight.w400,
-            ),
-            strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-            textHeightBehavior: AppTextMetrics.textHeight,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -220,9 +344,11 @@ class _FrameworkCoverageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final isMobile = context.screenLayout.isMobile;
+    final padding = ResponsiveHelper.libraryCardPadding(context);
 
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -237,9 +363,10 @@ class _FrameworkCoverageCard extends StatelessWidget {
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.45,
+              fontSize: isMobile ? 16.sp : null,
             ),
             strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
-            textHeightBehavior: AppTextMetrics.textHeight,
+            textHeightBehavior: ControlsPage._textHeight,
           ),
           SizedBox(height: 16.h),
           for (var i = 0; i < _frameworks.length; i++) ...[
@@ -261,33 +388,63 @@ class _FrameworkRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final percent = (data.mapped / data.total * 100).round();
+    final countText = '${data.mapped} / ${data.total} ($percent%)';
+
+    final stackLabels = context.screenLayout.isCompact;
+
+    final labelRow = stackLabels
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                data.name,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textBody,
+                  fontWeight: FontWeight.w400,
+                ),
+                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                textHeightBehavior: ControlsPage._textHeight,
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                countText,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textBody,
+                  fontWeight: FontWeight.w400,
+                ),
+                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                textHeightBehavior: ControlsPage._textHeight,
+              ),
+            ],
+          )
+        : Row(
+            children: [
+              Text(
+                data.name,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textBody,
+                  fontWeight: FontWeight.w400,
+                ),
+                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                textHeightBehavior: ControlsPage._textHeight,
+              ),
+              const Spacer(),
+              Text(
+                countText,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textBody,
+                  fontWeight: FontWeight.w400,
+                ),
+                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+                textHeightBehavior: ControlsPage._textHeight,
+              ),
+            ],
+          );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(
-              data.name,
-              style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.textBody,
-                fontWeight: FontWeight.w400,
-              ),
-              strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-              textHeightBehavior: AppTextMetrics.textHeight,
-            ),
-            const Spacer(),
-            Text(
-              '${data.mapped} / ${data.total} ($percent%)',
-              style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.textBody,
-                fontWeight: FontWeight.w400,
-              ),
-              strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-              textHeightBehavior: AppTextMetrics.textHeight,
-            ),
-          ],
-        ),
+        labelRow,
         SizedBox(height: 8.h),
         ClipRRect(
           borderRadius: BorderRadius.circular(4.r),
@@ -325,64 +482,178 @@ class _FilterBarState extends State<_FilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+    final isTabletSmall = layout.isTabletSmall;
+    final padding = ResponsiveHelper.libraryCardPadding(context);
+
+    final searchField = AppTextField.search(
+      controller: _searchController,
+      hint: 'Search controls...',
+    );
+
+    final typeField = AppSelectField<String>(
+      value: 'all',
+      items: const ['all'],
+      itemLabel: (_) => 'All Types',
+      onChanged: (_) {},
+      contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
+    );
+
+    final statusField = AppSelectField<String>(
+      value: 'all',
+      items: const ['all'],
+      itemLabel: (_) => 'All Status',
+      onChanged: (_) {},
+      contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
+    );
+
+    final compact = layout.isCompact;
+
+    final moreFiltersButton = AppButton(
+      label: 'More Filters',
+      iconAsset: 'assets/figma/assets/svg/filter.svg',
+      variant: AppButtonVariant.outlined,
+      iconSize: compact ? 20.r : 28.r,
+      size: compact ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: compact,
+      onPressed: () {},
+    );
+
+    final exportButton = AppButton.export(
+      label: 'Export',
+      iconAsset: 'assets/figma/assets/svg/export.svg',
+      iconSize: compact ? 20.r : 28.r,
+      size: compact ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: compact,
+      onPressed: () {},
+    );
+
     return Container(
-      padding: EdgeInsets.all(17.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: AppTextField.search(
-              controller: _searchController,
-              hint: 'Search controls...',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          SizedBox(
-            width: 130.w,
-            child: AppSelectField<String>(
-              value: 'all',
-              items: const ['all'],
-              itemLabel: (_) => 'All Types',
-              onChanged: (_) {},
-              contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          SizedBox(
-            width: 211.w,
-            child: AppSelectField<String>(
-              value: 'all',
-              items: const ['all'],
-              itemLabel: (_) => 'All Status',
-              onChanged: (_) {},
-              contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          AppButton(
-            label: 'More Filters',
-            iconAsset: 'assets/figma/assets/svg/filter.svg',
-            variant: AppButtonVariant.outlined,
-            iconSize: 28.r,
-            onPressed: () {},
-          ),
-          SizedBox(width: 8.w),
-          AppButton(
-            label: 'Export',
-            iconAsset: 'assets/figma/assets/svg/export.svg',
-            variant: AppButtonVariant.outlined,
-            iconSize: 28.r,
-            onPressed: () {},
-          ),
-        ],
-      ),
+      child: isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                searchField,
+                SizedBox(height: 12.h),
+                typeField,
+                SizedBox(height: 12.h),
+                statusField,
+                SizedBox(height: 12.h),
+                moreFiltersButton,
+                SizedBox(height: 12.h),
+                exportButton,
+              ],
+            )
+          : isTabletSmall
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    searchField,
+                    SizedBox(height: 12.h),
+                    typeField,
+                    SizedBox(height: 12.h),
+                    statusField,
+                    SizedBox(height: 12.h),
+                    moreFiltersButton,
+                    SizedBox(height: 12.h),
+                    exportButton,
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(child: searchField),
+                    SizedBox(width: 16.w),
+                    SizedBox(width: 130.w, child: typeField),
+                    SizedBox(width: 8.w),
+                    SizedBox(width: 211.w, child: statusField),
+                    SizedBox(width: 8.w),
+                    moreFiltersButton,
+                    SizedBox(width: 8.w),
+                    exportButton,
+                  ],
+                ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Control display helpers (shared by table + mobile cards)
+// ---------------------------------------------------------------------------
+
+(Color bg, Color fg, String label) _controlStatusProps(_ControlStatus status) {
+  return switch (status) {
+    _ControlStatus.implemented => (
+        AppColors.statusLowBg,
+        AppColors.statusLowFg,
+        'Implemented',
+      ),
+    _ControlStatus.partiallyImplemented => (
+        AppColors.statusMediumBg,
+        AppColors.statusMediumFg,
+        'Partially Implemented',
+      ),
+  };
+}
+
+void _openControlEdit(BuildContext context, _ControlItem control) {
+  final statusKey = switch (control.status) {
+    _ControlStatus.implemented => 'implemented',
+    _ControlStatus.partiallyImplemented => 'partiallyImplemented',
+  };
+  final typeKey = switch (control.type) {
+    _ControlType.preventive => 'preventive',
+    _ControlType.detective => 'detective',
+    _ControlType.corrective => 'corrective',
+  };
+
+  showEditControlDialog(
+    context: context,
+    data: ControlFormData.fromSummary(
+      id: control.id,
+      name: control.name,
+      description: control.description,
+      controlType: typeKey,
+      status: statusKey,
+      owner: control.owner,
+      frameworks: control.frameworks,
+      effectiveness: control.effectiveness,
+      riskLinks: control.links.risks,
+      assetLinks: control.links.assets,
+      assessmentLinks: control.links.assessments,
+    ),
+  );
+}
+
+void _openControlDetail(BuildContext context, _ControlItem control) {
+  final (statusBg, statusFg, statusLabel) = _controlStatusProps(control.status);
+
+  showControlDetailDialog(
+    context: context,
+    data: ControlDetailData.sample(
+      id: control.id,
+      name: control.name,
+      description: control.description,
+      typeLabel: control.type.label,
+      statusLabel: statusLabel,
+      statusBg: statusBg,
+      statusFg: statusFg,
+      owner: control.owner,
+      lastAssessed: control.lastAssessed,
+      frameworks: control.frameworks,
+      effectiveness: control.effectiveness,
+      riskLinks: control.links.risks,
+      assetLinks: control.links.assets,
+      assessmentLinks: control.links.assessments,
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -411,6 +682,8 @@ class _ControlsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final useMobileCards = context.screenLayout.isCompact;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -418,33 +691,50 @@ class _ControlsTable extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final visible = _layout.visibleIndicesForWidth(constraints.maxWidth);
-          final tableMinWidth = _layout.minWidthForIndices(visible);
-
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: constraints.maxWidth.clamp(
-                  tableMinWidth,
-                  double.infinity,
-                ),
-              ),
-              child: Table(
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                columnWidths: _layout.columnWidthsForIndices(visible),
-                children: [
-                  _headerRow(context, visible),
-                  for (final control in controls)
-                    _dataRow(context, control, visible),
+      child: useMobileCards
+          ? Column(
+              children: [
+                for (int i = 0; i < controls.length; i++) ...[
+                  _ControlMobileCard(control: controls[i]),
+                  if (i != controls.length - 1)
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.rowDivider.withValues(alpha: 0.8),
+                    ),
                 ],
-              ),
+              ],
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final visible = _layout.visibleIndicesForWidth(
+                  constraints.maxWidth,
+                );
+                final tableMinWidth = _layout.minWidthForIndices(visible);
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth.clamp(
+                        tableMinWidth,
+                        double.infinity,
+                      ),
+                    ),
+                    child: Table(
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      columnWidths: _layout.columnWidthsForIndices(visible),
+                      children: [
+                        _headerRow(context, visible),
+                        for (final control in controls)
+                          _dataRow(context, control, visible),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 
@@ -577,70 +867,6 @@ class _ControlsTable extends StatelessWidget {
     );
   }
 
-  void _openControlEdit(BuildContext context, _ControlItem control) {
-    final statusKey = switch (control.status) {
-      _ControlStatus.implemented => 'implemented',
-      _ControlStatus.partiallyImplemented => 'partiallyImplemented',
-    };
-    final typeKey = switch (control.type) {
-      _ControlType.preventive => 'preventive',
-      _ControlType.detective => 'detective',
-      _ControlType.corrective => 'corrective',
-    };
-
-    showEditControlDialog(
-      context: context,
-      data: ControlFormData.fromSummary(
-        id: control.id,
-        name: control.name,
-        description: control.description,
-        controlType: typeKey,
-        status: statusKey,
-        owner: control.owner,
-        frameworks: control.frameworks,
-        effectiveness: control.effectiveness,
-        riskLinks: control.links.risks,
-        assetLinks: control.links.assets,
-        assessmentLinks: control.links.assessments,
-      ),
-    );
-  }
-
-  void _openControlDetail(BuildContext context, _ControlItem control) {
-    final (statusBg, statusFg, statusLabel) = switch (control.status) {
-      _ControlStatus.implemented => (
-          AppColors.statusLowBg,
-          AppColors.statusLowFg,
-          'Implemented',
-        ),
-      _ControlStatus.partiallyImplemented => (
-          AppColors.statusMediumBg,
-          AppColors.statusMediumFg,
-          'Partially Implemented',
-        ),
-    };
-
-    showControlDetailDialog(
-      context: context,
-      data: ControlDetailData.sample(
-        id: control.id,
-        name: control.name,
-        description: control.description,
-        typeLabel: control.type.label,
-        statusLabel: statusLabel,
-        statusBg: statusBg,
-        statusFg: statusFg,
-        owner: control.owner,
-        lastAssessed: control.lastAssessed,
-        frameworks: control.frameworks,
-        effectiveness: control.effectiveness,
-        riskLinks: control.links.risks,
-        assetLinks: control.links.assets,
-        assessmentLinks: control.links.assessments,
-      ),
-    );
-  }
-
   Widget _typeCell(_ControlType type) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
@@ -762,18 +988,7 @@ class _ControlsTable extends StatelessWidget {
   }
 
   Widget _statusCell(_ControlStatus status) {
-    final (bg, fg, label) = switch (status) {
-      _ControlStatus.implemented => (
-          AppColors.statusLowBg,
-          AppColors.statusLowFg,
-          'Implemented',
-        ),
-      _ControlStatus.partiallyImplemented => (
-          AppColors.statusMediumBg,
-          AppColors.statusMediumFg,
-          'Partially Implemented',
-        ),
-    };
+    final (bg, fg, label) = _controlStatusProps(status);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
@@ -802,21 +1017,252 @@ class _ControlsTable extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/controls/svg/action_view.svg',
             onPressed: () => _openControlDetail(context, control),
+            bordered: false,
           ),
           SizedBox(width: 8.w),
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/controls/svg/action_edit.svg',
             onPressed: () => _openControlEdit(context, control),
+            bordered: false,
           ),
           SizedBox(width: 8.w),
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/controls/svg/action_link.svg',
             onPressed: () {},
+            bordered: false,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ControlMobileCard extends StatelessWidget {
+  const _ControlMobileCard({required this.control});
+
+  final _ControlItem control;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final (statusBg, statusFg, statusLabel) =
+        _controlStatusProps(control.status);
+
+    final linkBadges = <Widget>[
+      if (control.links.risks > 0)
+        _LinkBadge(
+          count: control.links.risks,
+          bg: AppColors.statusCriticalBg,
+          fg: AppColors.statusCriticalFg,
+          iconAsset: 'assets/figma/controls/svg/link_risk.svg',
+        ),
+      if (control.links.assets > 0)
+        _LinkBadge(
+          count: control.links.assets,
+          bg: AppColors.primaryTint,
+          fg: AppColors.weightBadgeFg,
+          iconAsset: 'assets/figma/controls/svg/link_asset.svg',
+        ),
+      if (control.links.assessments > 0)
+        _LinkBadge(
+          count: control.links.assessments,
+          bg: AppColors.primaryTint,
+          fg: AppColors.weightBadgeFg,
+          iconAsset: 'assets/figma/controls/svg/link_assessment.svg',
+        ),
+    ];
+
+    return Padding(
+      padding: EdgeInsets.all(16.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _openControlDetail(context, control),
+                      borderRadius: BorderRadius.circular(4.r),
+                      child: Text(
+                        control.id,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  _ControlStatusBadge(
+                    label: statusLabel,
+                    backgroundColor: statusBg,
+                    foregroundColor: statusFg,
+                  ),
+                ],
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                control.name,
+                style: textTheme.titleSmall?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                control.description,
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _ControlMobileField(
+                  label: 'Type',
+                  value: control.type.label,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _ControlMobileField(
+                  label: 'Effectiveness',
+                  value: '${control.effectiveness}%',
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            children: [
+              Expanded(
+                child: _ControlMobileField(
+                  label: 'Owner',
+                  value: control.owner,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _ControlMobileField(
+                  label: 'Last Assessed',
+                  value: control.lastAssessed,
+                ),
+              ),
+            ],
+          ),
+          if (control.frameworks.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            _ControlMobileField(
+              label: 'Framework Mapping',
+              value: control.frameworks.join(', '),
+            ),
+          ],
+          if (linkBadges.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 4.h,
+              children: linkBadges,
+            ),
+          ],
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              AppButton.icon(
+                iconAsset: 'assets/figma/controls/svg/action_view.svg',
+                onPressed: () => _openControlDetail(context, control),
+                bordered: false,
+              ),
+              SizedBox(width: 4.w),
+              AppButton.icon(
+                iconAsset: 'assets/figma/controls/svg/action_edit.svg',
+                onPressed: () => _openControlEdit(context, control),
+                bordered: false,
+              ),
+              SizedBox(width: 4.w),
+              AppButton.icon(
+                iconAsset: 'assets/figma/controls/svg/action_link.svg',
+                onPressed: () {},
+                bordered: false,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ControlMobileField extends StatelessWidget {
+  const _ControlMobileField({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          value,
+          style: textTheme.bodyMedium,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}
+
+class _ControlStatusBadge extends StatelessWidget {
+  const _ControlStatusBadge({
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4.r),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.w500,
+              fontSize: 12.sp,
+            ),
       ),
     );
   }
@@ -863,31 +1309,6 @@ class _LinkBadge extends StatelessWidget {
   }
 }
 
-class _TableIconButton extends StatelessWidget {
-  const _TableIconButton({
-    required this.iconAsset,
-    this.onPressed,
-  });
-
-  final String iconAsset;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4.r),
-        child: Padding(
-          padding: EdgeInsets.all(2.r),
-          child: SvgPicture.asset(iconAsset, width: 32.r, height: 32.r),
-        ),
-      ),
-    );
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Integration section
 // ---------------------------------------------------------------------------
@@ -929,9 +1350,72 @@ class _IntegrationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+    final padding = ResponsiveHelper.libraryCardPadding(context);
+
+    const typeDistribution = _DistributionCard(
+      title: 'Control Type Distribution',
+      rows: [
+        _DistributionRow(label: 'Preventive', value: '4 (40%)'),
+        _DistributionRow(label: 'Detective', value: '4 (40%)'),
+        _DistributionRow(label: 'Corrective', value: '2 (20%)'),
+      ],
+    );
+
+    const testingStatus = _DistributionCard(
+      title: 'Testing Status',
+      rows: [
+        _DistributionRow(label: 'Continuous Monitoring', value: '5 controls'),
+        _DistributionRow(label: 'Periodic Testing', value: '5 controls'),
+        _DistributionRow(label: 'Avg Days Since Test', value: '50 days'),
+      ],
+    );
+
+    Widget integrationStats() {
+      if (layout.isCompact) {
+        return _compactFourCardGrid(
+          context: context,
+          cards: [
+            for (final card in _cards) _IntegrationStatCard(data: card),
+          ],
+        );
+      }
+
+      return Row(
+        children: [
+          for (var i = 0; i < _cards.length; i++) ...[
+            Expanded(child: _IntegrationStatCard(data: _cards[i])),
+            if (i != _cards.length - 1) SizedBox(width: 16.w),
+          ],
+        ],
+      );
+    }
+
+    Widget distributionCards() {
+      if (layout.isCompact) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            typeDistribution,
+            SizedBox(height: 16.h),
+            testingStatus,
+          ],
+        );
+      }
+
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Expanded(child: typeDistribution),
+          SizedBox(width: 16.w),
+          const Expanded(child: testingStatus),
+        ],
+      );
+    }
 
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.primaryLightBg,
         borderRadius: BorderRadius.circular(10.r),
@@ -944,58 +1428,29 @@ class _IntegrationSection extends StatelessWidget {
             children: [
               SvgPicture.asset(
                 'assets/figma/controls/svg/integration_header.svg',
-                width: 32.r,
-                height: 32.r,
+                width: isMobile ? 28.r : 32.r,
+                height: isMobile ? 28.r : 32.r,
               ),
               SizedBox(width: 8.w),
-              Text(
-                'Control Integration & Coverage',
-                style: textTheme.titleMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.45,
+              Expanded(
+                child: Text(
+                  'Control Integration & Coverage',
+                  style: textTheme.titleMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.45,
+                    fontSize: isMobile ? 16.sp : null,
+                  ),
+                  strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
+                  textHeightBehavior: ControlsPage._textHeight,
                 ),
-                strutStyle: AppTextMetrics.strut(fontSize: 18, lineHeight: 28),
-                textHeightBehavior: AppTextMetrics.textHeight,
               ),
             ],
           ),
           SizedBox(height: 16.h),
-          Row(
-            children: [
-              for (var i = 0; i < _cards.length; i++) ...[
-                Expanded(child: _IntegrationStatCard(data: _cards[i])),
-                if (i != _cards.length - 1) SizedBox(width: 16.w),
-              ],
-            ],
-          ),
+          integrationStats(),
           SizedBox(height: 16.h),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _DistributionCard(
-                  title: 'Control Type Distribution',
-                  rows: const [
-                    _DistributionRow(label: 'Preventive', value: '4 (40%)'),
-                    _DistributionRow(label: 'Detective', value: '4 (40%)'),
-                    _DistributionRow(label: 'Corrective', value: '2 (20%)'),
-                  ],
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: _DistributionCard(
-                  title: 'Testing Status',
-                  rows: const [
-                    _DistributionRow(label: 'Continuous Monitoring', value: '5 controls'),
-                    _DistributionRow(label: 'Periodic Testing', value: '5 controls'),
-                    _DistributionRow(label: 'Avg Days Since Test', value: '50 days'),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          distributionCards(),
         ],
       ),
     );
@@ -1010,9 +1465,13 @@ class _IntegrationStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final compact = context.screenLayout.isCompact;
+    final iconBoxSize = compact ? 36.r : 56.r;
+    final iconSize = compact ? 20.r : 32.r;
+    final padding = compact ? EdgeInsets.all(12.w) : EdgeInsets.all(16.w);
 
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -1033,55 +1492,68 @@ class _IntegrationStatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 56.r,
-                height: 56.r,
+                width: iconBoxSize,
+                height: iconBoxSize,
                 decoration: BoxDecoration(
                   color: data.iconBg,
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(compact ? 8.r : 10.r),
                 ),
                 child: Center(
-                  child: SvgPicture.asset(data.iconAsset, width: 32.r, height: 32.r),
+                  child: SvgPicture.asset(
+                    data.iconAsset,
+                    width: iconSize,
+                    height: iconSize,
+                  ),
                 ),
               ),
-              SizedBox(width: 12.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    data.value,
-                    style: textTheme.headlineSmall?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.072,
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data.value,
+                      style: textTheme.headlineSmall?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.072,
+                        fontSize: compact ? 18.sp : null,
+                      ),
+                      strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+                      textHeightBehavior: ControlsPage._textHeight,
                     ),
-                    strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-                    textHeightBehavior: AppTextMetrics.textHeight,
-                  ),
-                  Text(
-                    data.title,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: AppColors.textBody,
-                      fontWeight: FontWeight.w400,
+                    Text(
+                      data.title,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: AppColors.textBody,
+                        fontWeight: FontWeight.w400,
+                        fontSize: compact ? 11.sp : null,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
+                      textHeightBehavior: ControlsPage._textHeight,
                     ),
-                    strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
-                    textHeightBehavior: AppTextMetrics.textHeight,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
-          Text(
-            data.subtitle,
-            style: textTheme.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w400,
+          if (!compact) ...[
+            SizedBox(height: 8.h),
+            Text(
+              data.subtitle,
+              style: textTheme.labelSmall?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w400,
+              ),
+              strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
+              textHeightBehavior: ControlsPage._textHeight,
             ),
-            strutStyle: AppTextMetrics.strut(fontSize: 12, lineHeight: 16),
-            textHeightBehavior: AppTextMetrics.textHeight,
-          ),
+          ],
         ],
       ),
     );

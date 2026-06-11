@@ -211,21 +211,9 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(10.r),
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: SvgPicture.asset(
-                  'assets/figma/library/svg/close_white.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
-            ),
+          AppButton.close(
+            onPressed: onClose,
+            iconSize: 20.r,
           ),
         ],
       ),

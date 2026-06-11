@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
 import 'package:grc_web/features/tprm/presentation/widgets/add_vendor_dialog.dart';
 
 const _kKpiCardBg = Color(0xFFE1EEFF);
@@ -211,87 +212,158 @@ class VendorDetailDialog extends StatelessWidget {
   final VendorDetailData data;
   final VoidCallback? onEdit;
 
-  static const _dialogWidth = 1152.0;
+  static const maxDialogWidth = 1152.0;
 
   @override
   Widget build(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-    final dialogWidth = math.min(_dialogWidth.w, screen.width - 48.w);
-    final dialogHeight = math.min(1784.h, screen.height * 0.92);
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-      child: SizedBox(
-        width: dialogWidth,
-        height: dialogHeight,
-        child: Material(
-          color: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10.r),
-              boxShadow: const [
-                BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20)),
-                BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 8)),
-              ],
-            ),
-            child: Column(
-              children: [
-                _Header(
-                  name: data.name,
-                  subtitle: '${data.id} • ${data.category}',
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-                Expanded(
-                  child: ColoredBox(
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: dialogWidth,
+              height: metrics.maxHeight,
+              child: Material(
+                color: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                borderRadius: BorderRadius.circular(10.r),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.all(24.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _KpiRow(data: data),
-                          _SectionDivider(title: 'Vendor Information'),
-                          _VendorInfoSection(data: data),
-                          _SectionDivider(title: 'Risk Assessment'),
-                          _RiskAssessmentSection(data: data),
-                          _SectionDivider(title: 'Assessment Scores'),
-                          SizedBox(height: 16.h),
-                          _AssessmentRadarChart(scores: data.assessmentScores),
-                          _SectionDivider(title: 'Security Certifications & Compliance'),
-                          _CertificationsSection(certifications: data.certifications),
-                          _SectionDivider(title: 'GRC Integration'),
-                          _GrcIntegrationSection(data: data),
-                          if (data.openIssues.isNotEmpty) ...[
-                            _SectionDivider(title: 'Open Issues'),
-                            for (final issue in data.openIssues) ...[
-                              _OpenIssueCard(issue: issue),
-                              if (issue != data.openIssues.last) SizedBox(height: 12.h),
-                            ],
-                          ],
-                          _SectionDivider(title: 'SLA Performance'),
-                          _SlaPerformanceSection(data: data),
-                        ],
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 25,
+                        offset: Offset(0, 20),
                       ),
-                    ),
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _Header(
+                        name: data.name,
+                        subtitle: '${data.id} • ${data.category}',
+                        onClose: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                      Expanded(
+                        child: ColoredBox(
+                          color: Colors.white,
+                          child: SingleChildScrollView(
+                            padding: metrics.contentPadding,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _KpiRow(data: data, metrics: metrics),
+                                _SectionDivider(
+                                  title: 'Vendor Information',
+                                  metrics: metrics,
+                                ),
+                                _VendorInfoSection(
+                                  data: data,
+                                  metrics: metrics,
+                                ),
+                                _SectionDivider(
+                                  title: 'Risk Assessment',
+                                  metrics: metrics,
+                                ),
+                                _RiskAssessmentSection(
+                                  data: data,
+                                  metrics: metrics,
+                                ),
+                                _SectionDivider(
+                                  title: 'Assessment Scores',
+                                  metrics: metrics,
+                                ),
+                                SizedBox(height: 16.h),
+                                _AssessmentRadarChart(
+                                  scores: data.assessmentScores,
+                                  metrics: metrics,
+                                ),
+                                _SectionDivider(
+                                  title: 'Security Certifications & Compliance',
+                                  metrics: metrics,
+                                ),
+                                _CertificationsSection(
+                                  certifications: data.certifications,
+                                ),
+                                _SectionDivider(
+                                  title: 'GRC Integration',
+                                  metrics: metrics,
+                                ),
+                                _GrcIntegrationSection(
+                                  data: data,
+                                  metrics: metrics,
+                                ),
+                                if (data.openIssues.isNotEmpty) ...[
+                                  _SectionDivider(
+                                    title: 'Open Issues',
+                                    metrics: metrics,
+                                  ),
+                                  for (final issue in data.openIssues) ...[
+                                    _OpenIssueCard(issue: issue),
+                                    if (issue != data.openIssues.last)
+                                      SizedBox(height: 12.h),
+                                  ],
+                                ],
+                                _SectionDivider(
+                                  title: 'SLA Performance',
+                                  metrics: metrics,
+                                ),
+                                _SlaPerformanceSection(
+                                  data: data,
+                                  metrics: metrics,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.fromLTRB(
+                          metrics.contentPadding.left,
+                          0,
+                          metrics.contentPadding.right,
+                          metrics.contentPadding.bottom,
+                        ),
+                        child: _Footer(
+                          onEdit: onEdit,
+                          onClose: () => Navigator.of(context).pop(),
+                          metrics: metrics,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
-                  child: _Footer(
-                    onEdit: onEdit,
-                    onClose: () => Navigator.of(context).pop(),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -302,16 +374,18 @@ class _Header extends StatelessWidget {
     required this.name,
     required this.subtitle,
     required this.onClose,
+    required this.metrics,
   });
 
   final String name;
   final String subtitle;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h),
+      padding: metrics.headerPadding,
       decoration: const BoxDecoration(
         color: AppColors.primary,
         border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -327,7 +401,7 @@ class _Header extends StatelessWidget {
                   name,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20.sp,
+                    fontSize: metrics.isPhone ? 18.sp : 20.sp,
                     fontWeight: FontWeight.w600,
                     height: 28 / 20,
                     letterSpacing: -0.46,
@@ -338,7 +412,7 @@ class _Header extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14.sp,
+                    fontSize: metrics.isPhone ? 13.sp : 14.sp,
                     fontWeight: FontWeight.w400,
                     height: 20 / 14,
                     letterSpacing: -0.154,
@@ -347,22 +421,7 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: SvgPicture.asset(
-                  'assets/figma/library/svg/close_white.svg',
-                  width: 28.r,
-                  height: 28.r,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-              ),
-            ),
-          ),
+          AppButton.close(onPressed: onClose),
         ],
       ),
     );
@@ -370,18 +429,19 @@ class _Header extends StatelessWidget {
 }
 
 class _SectionDivider extends StatelessWidget {
-  const _SectionDivider({required this.title});
+  const _SectionDivider({required this.title, required this.metrics});
 
   final String title;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(height: 24.h),
+        SizedBox(height: metrics.majorSectionGap),
         Container(
-          padding: EdgeInsets.only(top: 25.h),
+          padding: EdgeInsets.only(top: metrics.isPhone ? 20.h : 25.h),
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: AppColors.border)),
           ),
@@ -389,7 +449,7 @@ class _SectionDivider extends StatelessWidget {
             title,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 14.sp,
+              fontSize: metrics.isPhone ? 13.sp : 14.sp,
               fontWeight: FontWeight.w600,
               height: 20 / 14,
               letterSpacing: -0.154,
@@ -403,55 +463,85 @@ class _SectionDivider extends StatelessWidget {
 }
 
 class _KpiRow extends StatelessWidget {
-  const _KpiRow({required this.data});
+  const _KpiRow({required this.data, required this.metrics});
 
   final VendorDetailData data;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: _KpiCard(
-              label: 'Risk Rating',
-              value: '${data.riskRating}',
-              badge: data.riskLevelLabel,
-              badgeBg: _kLowRiskBadgeBg,
-              badgeFg: _kLowRiskBadgeFg,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _KpiCard(
-              label: 'Contract Value',
-              value: data.contractValue,
-              sublabel: 'Annual Spend',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _KpiCard(
-              label: 'Control Effectiveness',
-              value: '${data.controlEffectiveness}%',
-              progress: data.controlEffectiveness / 100,
-              progressTrack: _kProgressTrackGreen,
-              progressFill: _kProgressFillGreen,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _KpiCard(
-              label: 'Open Issues',
-              value: '${data.openIssuesCount}',
-              badge: '${data.tierLabel} Tier',
-              badgeBg: _kCriticalTierBg,
-              badgeFg: _kCriticalTierFg,
-            ),
-          ),
-        ],
+    final cards = [
+      _KpiCard(
+        label: 'Risk Rating',
+        value: '${data.riskRating}',
+        badge: data.riskLevelLabel,
+        badgeBg: _kLowRiskBadgeBg,
+        badgeFg: _kLowRiskBadgeFg,
+        compact: !metrics.isWide,
       ),
+      _KpiCard(
+        label: 'Contract Value',
+        value: data.contractValue,
+        sublabel: 'Annual Spend',
+        compact: !metrics.isWide,
+      ),
+      _KpiCard(
+        label: 'Control Effectiveness',
+        value: '${data.controlEffectiveness}%',
+        progress: data.controlEffectiveness / 100,
+        progressTrack: _kProgressTrackGreen,
+        progressFill: _kProgressFillGreen,
+        compact: !metrics.isWide,
+      ),
+      _KpiCard(
+        label: 'Open Issues',
+        value: '${data.openIssuesCount}',
+        badge: '${data.tierLabel} Tier',
+        badgeBg: _kCriticalTierBg,
+        badgeFg: _kCriticalTierFg,
+        compact: !metrics.isWide,
+      ),
+    ];
+
+    if (metrics.isWide) {
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (int i = 0; i < cards.length; i++) ...[
+              Expanded(child: cards[i]),
+              if (i != cards.length - 1) SizedBox(width: 16.w),
+            ],
+          ],
+        ),
+      );
+    }
+
+    final gap = metrics.isPhone ? 12.w : 14.w;
+    return Column(
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: cards[0]),
+              SizedBox(width: gap),
+              Expanded(child: cards[1]),
+            ],
+          ),
+        ),
+        SizedBox(height: gap),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: cards[2]),
+              SizedBox(width: gap),
+              Expanded(child: cards[3]),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -467,6 +557,7 @@ class _KpiCard extends StatelessWidget {
     this.progress,
     this.progressTrack,
     this.progressFill,
+    this.compact = false,
   });
 
   final String label;
@@ -478,11 +569,12 @@ class _KpiCard extends StatelessWidget {
   final double? progress;
   final Color? progressTrack;
   final Color? progressFill;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(compact ? 12.w : 16.w),
       decoration: BoxDecoration(
         color: _kKpiCardBg,
         borderRadius: BorderRadius.circular(10.r),
@@ -504,7 +596,7 @@ class _KpiCard extends StatelessWidget {
             value,
             style: TextStyle(
               color: _kKpiValue,
-              fontSize: 24.sp,
+              fontSize: compact ? 20.sp : 24.sp,
               fontWeight: FontWeight.w700,
               height: 32 / 24,
               letterSpacing: 0.072,
@@ -560,40 +652,101 @@ class _KpiCard extends StatelessWidget {
 }
 
 class _VendorInfoSection extends StatelessWidget {
-  const _VendorInfoSection({required this.data});
+  const _VendorInfoSection({required this.data, required this.metrics});
 
   final VendorDetailData data;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final row1 = [
+      _InfoField(label: 'Business Owner', value: data.businessOwner),
+      _InfoField(label: 'Vendor Manager', value: data.vendorManager),
+      _InfoField(label: 'Geography', value: data.geography),
+      _InfoField(label: 'Data Access', value: data.dataAccess),
+    ];
+
+    final row2 = [
+      _InfoField(label: 'Services Provided', value: data.servicesProvided),
+      _InfoField(label: 'Last Assessment', value: data.lastAssessment),
+      _InfoField(label: 'Next Assessment', value: data.nextAssessment),
+    ];
+
+    if (metrics.isWide) {
+      return Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < row1.length; i++) ...[
+                Expanded(child: row1[i]),
+                if (i != row1.length - 1) SizedBox(width: 16.w),
+              ],
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 2, child: row2[0]),
+              SizedBox(width: 16.w),
+              Expanded(child: row2[1]),
+              SizedBox(width: 16.w),
+              Expanded(child: row2[2]),
+            ],
+          ),
+        ],
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: row1[0]),
+              SizedBox(width: 16.w),
+              Expanded(child: row1[1]),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: row1[2]),
+              SizedBox(width: 16.w),
+              Expanded(child: row1[3]),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          row2[0],
+          SizedBox(height: metrics.fieldGap),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: row2[1]),
+              SizedBox(width: 16.w),
+              Expanded(child: row2[2]),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: _InfoField(label: 'Business Owner', value: data.businessOwner)),
-            SizedBox(width: 16.w),
-            Expanded(child: _InfoField(label: 'Vendor Manager', value: data.vendorManager)),
-            SizedBox(width: 16.w),
-            Expanded(child: _InfoField(label: 'Geography', value: data.geography)),
-            SizedBox(width: 16.w),
-            Expanded(child: _InfoField(label: 'Data Access', value: data.dataAccess)),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: _InfoField(label: 'Services Provided', value: data.servicesProvided),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(child: _InfoField(label: 'Last Assessment', value: data.lastAssessment)),
-            SizedBox(width: 16.w),
-            Expanded(child: _InfoField(label: 'Next Assessment', value: data.nextAssessment)),
-          ],
-        ),
+        for (int i = 0; i < row1.length; i++) ...[
+          row1[i],
+          if (i != row1.length - 1) SizedBox(height: metrics.fieldGap),
+        ],
+        SizedBox(height: metrics.fieldGap),
+        for (int i = 0; i < row2.length; i++) ...[
+          row2[i],
+          if (i != row2.length - 1) SizedBox(height: metrics.fieldGap),
+        ],
       ],
     );
   }
@@ -635,83 +788,132 @@ class _InfoField extends StatelessWidget {
 }
 
 class _RiskAssessmentSection extends StatelessWidget {
-  const _RiskAssessmentSection({required this.data});
+  const _RiskAssessmentSection({required this.data, required this.metrics});
 
   final VendorDetailData data;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
+    final inherent = _RiskCard(
+      label: 'Inherent Risk',
+      value: '${data.inherentRisk}%',
+      labelColor: _kInherentLabel,
+      valueColor: _kInherentValue,
+      bg: _kInherentBg,
+      progress: data.inherentRisk / 100,
+      track: _kInherentTrack,
+      fill: _kInherentFill,
+      compact: !metrics.isWide,
+    );
+
+    final residual = _RiskCard(
+      label: 'Residual Risk',
+      value: '${data.residualRisk}%',
+      labelColor: _kResidualLabel,
+      valueColor: _kResidualValue,
+      bg: _kResidualBg,
+      progress: data.residualRisk / 100,
+      track: _kResidualTrack,
+      fill: _kResidualFill,
+      compact: !metrics.isWide,
+    );
+
+    final reduction = _RiskReductionCard(
+      value: data.riskReduction,
+      compact: !metrics.isWide,
+    );
+
+    if (metrics.isWide) {
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: inherent),
+            SizedBox(width: 16.w),
+            Expanded(child: residual),
+            SizedBox(width: 16.w),
+            Expanded(child: reduction),
+          ],
+        ),
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: _RiskCard(
-              label: 'Inherent Risk',
-              value: '${data.inherentRisk}%',
-              labelColor: _kInherentLabel,
-              valueColor: _kInherentValue,
-              bg: _kInherentBg,
-              progress: data.inherentRisk / 100,
-              track: _kInherentTrack,
-              fill: _kInherentFill,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: inherent),
+              SizedBox(width: 16.w),
+              Expanded(child: residual),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          reduction,
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        inherent,
+        SizedBox(height: metrics.fieldGap),
+        residual,
+        SizedBox(height: metrics.fieldGap),
+        reduction,
+      ],
+    );
+  }
+}
+
+class _RiskReductionCard extends StatelessWidget {
+  const _RiskReductionCard({required this.value, this.compact = false});
+
+  final int value;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(compact ? 12.w : 16.w),
+      decoration: BoxDecoration(
+        color: _kReductionBg,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Risk Reduction',
+            style: TextStyle(
+              color: _kReductionLabel,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+              height: 16 / 12,
             ),
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _RiskCard(
-              label: 'Residual Risk',
-              value: '${data.residualRisk}%',
-              labelColor: _kResidualLabel,
-              valueColor: _kResidualValue,
-              bg: _kResidualBg,
-              progress: data.residualRisk / 100,
-              track: _kResidualTrack,
-              fill: _kResidualFill,
+          SizedBox(height: 4.h),
+          Text(
+            '$value%',
+            style: TextStyle(
+              color: _kReductionValue,
+              fontSize: compact ? 20.sp : 24.sp,
+              fontWeight: FontWeight.w700,
+              height: 32 / 24,
+              letterSpacing: 0.072,
             ),
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: _kReductionBg,
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Risk Reduction',
-                    style: TextStyle(
-                      color: _kReductionLabel,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      height: 16 / 12,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    '${data.riskReduction}%',
-                    style: TextStyle(
-                      color: _kReductionValue,
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w700,
-                      height: 32 / 24,
-                      letterSpacing: 0.072,
-                    ),
-                  ),
-                  Text(
-                    'Through Controls',
-                    style: TextStyle(
-                      color: _kReductionLabel,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      height: 16 / 12,
-                    ),
-                  ),
-                ],
-              ),
+          Text(
+            'Through Controls',
+            style: TextStyle(
+              color: _kReductionLabel,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+              height: 16 / 12,
             ),
           ),
         ],
@@ -730,6 +932,7 @@ class _RiskCard extends StatelessWidget {
     required this.progress,
     required this.track,
     required this.fill,
+    this.compact = false,
   });
 
   final String label;
@@ -740,11 +943,17 @@ class _RiskCard extends StatelessWidget {
   final double progress;
   final Color track;
   final Color fill;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 12.w : 16.w,
+        compact ? 12.h : 16.h,
+        compact ? 12.w : 16.w,
+        compact ? 16.h : 20.h,
+      ),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(10.r),
@@ -766,7 +975,7 @@ class _RiskCard extends StatelessWidget {
             value,
             style: TextStyle(
               color: valueColor,
-              fontSize: 24.sp,
+              fontSize: compact ? 20.sp : 24.sp,
               fontWeight: FontWeight.w700,
               height: 32 / 24,
               letterSpacing: 0.072,
@@ -789,14 +998,17 @@ class _RiskCard extends StatelessWidget {
 }
 
 class _AssessmentRadarChart extends StatelessWidget {
-  const _AssessmentRadarChart({required this.scores});
+  const _AssessmentRadarChart({required this.scores, required this.metrics});
 
   final List<VendorAssessmentScore> scores;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final chartHeight = metrics.isPhone ? 220.h : (metrics.isCompact ? 260.h : 300.h);
+
     return SizedBox(
-      height: 300.h,
+      height: chartHeight,
       child: RadarChart(
         RadarChartData(
           radarShape: RadarShape.polygon,
@@ -873,57 +1085,95 @@ class _CertificationsSection extends StatelessWidget {
 }
 
 class _GrcIntegrationSection extends StatelessWidget {
-  const _GrcIntegrationSection({required this.data});
+  const _GrcIntegrationSection({required this.data, required this.metrics});
 
   final VendorDetailData data;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final columns = [
+      _GrcColumn(
+        iconAsset: 'assets/figma/tprm/svg/link_asset.svg',
+        title: 'Linked Assets (${data.linkedAssets.length})',
+        items: data.linkedAssets,
+        isRisk: false,
+        viewLabel: 'View Assets',
+      ),
+      _GrcColumn(
+        iconAsset: 'assets/figma/tprm/svg/link_risk.svg',
+        title: 'Linked Risks (${data.linkedRisks.length})',
+        items: data.linkedRisks,
+        isRisk: true,
+        viewLabel: 'View Risks',
+      ),
+      _GrcColumn(
+        iconAsset: 'assets/figma/tprm/svg/integration_controls.svg',
+        title: 'Linked Controls (${data.linkedControls.length})',
+        items: data.linkedControls,
+        isRisk: false,
+        viewLabel: 'View Controls',
+      ),
+      _GrcColumn(
+        iconAsset: 'assets/figma/tprm/svg/integration_programs.svg',
+        title: 'Linked Programs (${data.linkedPrograms.length})',
+        items: data.linkedPrograms,
+        isRisk: false,
+        viewLabel: 'View Programs',
+      ),
+    ];
+
+    if (metrics.isWide) {
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (int i = 0; i < columns.length; i++) ...[
+              Expanded(child: columns[i]),
+              if (i != columns.length - 1) SizedBox(width: 16.w),
+            ],
+          ],
+        ),
+      );
+    }
+
+    if (metrics.isCompact) {
+      final gap = metrics.isPhone ? 12.w : 14.w;
+      return Column(
         children: [
-          Expanded(
-            child: _GrcColumn(
-              iconAsset: 'assets/figma/tprm/svg/link_asset.svg',
-              title: 'Linked Assets (${data.linkedAssets.length})',
-              items: data.linkedAssets,
-              isRisk: false,
-              viewLabel: 'View Assets',
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: columns[0]),
+                SizedBox(width: gap),
+                Expanded(child: columns[1]),
+              ],
             ),
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _GrcColumn(
-              iconAsset: 'assets/figma/tprm/svg/link_risk.svg',
-              title: 'Linked Risks (${data.linkedRisks.length})',
-              items: data.linkedRisks,
-              isRisk: true,
-              viewLabel: 'View Risks',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _GrcColumn(
-              iconAsset: 'assets/figma/tprm/svg/integration_controls.svg',
-              title: 'Linked Controls (${data.linkedControls.length})',
-              items: data.linkedControls,
-              isRisk: false,
-              viewLabel: 'View Controls',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _GrcColumn(
-              iconAsset: 'assets/figma/tprm/svg/integration_programs.svg',
-              title: 'Linked Programs (${data.linkedPrograms.length})',
-              items: data.linkedPrograms,
-              isRisk: false,
-              viewLabel: 'View Programs',
+          SizedBox(height: gap),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: columns[2]),
+                SizedBox(width: gap),
+                Expanded(child: columns[3]),
+              ],
             ),
           ),
         ],
-      ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (int i = 0; i < columns.length; i++) ...[
+          columns[i],
+          if (i != columns.length - 1) SizedBox(height: metrics.fieldGap),
+        ],
+      ],
     );
   }
 }
@@ -1121,41 +1371,74 @@ class _OpenIssueCard extends StatelessWidget {
 }
 
 class _SlaPerformanceSection extends StatelessWidget {
-  const _SlaPerformanceSection({required this.data});
+  const _SlaPerformanceSection({required this.data, required this.metrics});
 
   final VendorDetailData data;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
+    final cards = [
+      _SlaCard(
+        label: 'Availability',
+        value: '${data.slaAvailability}%',
+        progress: data.slaAvailability / 100,
+        compact: !metrics.isWide,
+      ),
+      _SlaCard(
+        label: 'Response Time SLA',
+        value: '${data.slaResponseTime}%',
+        progress: data.slaResponseTime / 100,
+        compact: !metrics.isWide,
+      ),
+      _SlaCard(
+        label: 'Incident Resolution',
+        value: '${data.slaIncidentResolution}%',
+        progress: data.slaIncidentResolution / 100,
+        compact: !metrics.isWide,
+      ),
+    ];
+
+    if (metrics.isWide) {
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (int i = 0; i < cards.length; i++) ...[
+              Expanded(child: cards[i]),
+              if (i != cards.length - 1) SizedBox(width: 16.w),
+            ],
+          ],
+        ),
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: _SlaCard(
-              label: 'Availability',
-              value: '${data.slaAvailability}%',
-              progress: data.slaAvailability / 100,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: cards[0]),
+              SizedBox(width: 16.w),
+              Expanded(child: cards[1]),
+            ],
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _SlaCard(
-              label: 'Response Time SLA',
-              value: '${data.slaResponseTime}%',
-              progress: data.slaResponseTime / 100,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _SlaCard(
-              label: 'Incident Resolution',
-              value: '${data.slaIncidentResolution}%',
-              progress: data.slaIncidentResolution / 100,
-            ),
-          ),
+          SizedBox(height: metrics.fieldGap),
+          cards[2],
         ],
-      ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (int i = 0; i < cards.length; i++) ...[
+          cards[i],
+          if (i != cards.length - 1) SizedBox(height: metrics.fieldGap),
+        ],
+      ],
     );
   }
 }
@@ -1165,16 +1448,18 @@ class _SlaCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.progress,
+    this.compact = false,
   });
 
   final String label;
   final String value;
   final double progress;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(compact ? 12.w : 16.w),
       decoration: BoxDecoration(
         color: _kSlaCardBg,
         borderRadius: BorderRadius.circular(10.r),
@@ -1196,7 +1481,7 @@ class _SlaCard extends StatelessWidget {
             value,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 24.sp,
+              fontSize: compact ? 20.sp : 24.sp,
               fontWeight: FontWeight.w700,
               height: 32 / 24,
               letterSpacing: 0.072,
@@ -1219,13 +1504,34 @@ class _SlaCard extends StatelessWidget {
 }
 
 class _Footer extends StatelessWidget {
-  const _Footer({required this.onEdit, required this.onClose});
+  const _Footer({
+    required this.onEdit,
+    required this.onClose,
+    required this.metrics,
+  });
 
   final VoidCallback? onEdit;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final editButton = AppButton(
+      label: 'Edit Vendor',
+      iconAsset: 'assets/figma/tprm/svg/action_edit.svg',
+      iconSize: metrics.isPhone ? 20.r : 24.r,
+      variant: AppButtonVariant.primary,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onEdit,
+    );
+
+    final closeButton = AppButton(
+      label: 'Close',
+      variant: AppButtonVariant.outlined,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onClose,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1233,24 +1539,32 @@ class _Footer extends StatelessWidget {
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: AppColors.border)),
           ),
-          padding: EdgeInsets.only(top: 25.h),
-          child: Row(
-            children: [
-              AppButton(
-                label: 'Edit Vendor',
-                iconAsset: 'assets/figma/tprm/svg/action_edit.svg',
-                iconSize: 24.r,
-                variant: AppButtonVariant.primary,
-                onPressed: onEdit,
-              ),
-              const Spacer(),
-              AppButton(
-                label: 'Close',
-                variant: AppButtonVariant.outlined,
-                onPressed: onClose,
-              ),
-            ],
-          ),
+          padding: EdgeInsets.only(top: metrics.isPhone ? 20.h : 25.h),
+          child: metrics.useStackedFooter
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    editButton,
+                    SizedBox(height: 10.h),
+                    closeButton,
+                  ],
+                )
+              : metrics.isCompact
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        editButton,
+                        SizedBox(height: 10.h),
+                        closeButton,
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        editButton,
+                        const Spacer(),
+                        closeButton,
+                      ],
+                    ),
         ),
       ],
     );

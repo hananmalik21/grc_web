@@ -5,7 +5,10 @@ import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/features/assessments/presentation/widgets/assessment_page_layout.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
 
@@ -252,20 +255,20 @@ class OrmFrameworkPage extends StatelessWidget {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: AssessmentPageLayout.pagePadding(context),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: AssessmentPageLayout.contentConstraints(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _TitleBar(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: AssessmentPageLayout.sectionGap(context)),
             const _StatsRow(),
-            SizedBox(height: 24.h),
+            SizedBox(height: AssessmentPageLayout.sectionGap(context)),
             const _RiskCategoriesGrid(categories: _categories),
-            SizedBox(height: 24.h),
+            SizedBox(height: AssessmentPageLayout.sectionGap(context)),
             const _KrisCard(kris: _kris),
-            SizedBox(height: 24.h),
+            SizedBox(height: AssessmentPageLayout.sectionGap(context)),
             const _PriorityActionsCard(actions: _actions),
           ],
         ),
@@ -285,99 +288,48 @@ class _TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessments),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
+    final layout = context.screenLayout;
+
+    return AssessmentPageLayout.detailTitleBar(
+      context: context,
+      backButton: AppButton.back(
+        iconAsset: '$_kAssetsDir/back_arrow.svg',
+        borderColor: _kBorderInput,
+        onPressed: () => context.deferGo(AppRoutes.assessments),
+      ),
+      titleSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Operational Risk Management (ORM)',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: AssessmentPageLayout.titleFontSize(context),
+              fontWeight: FontWeight.w600,
+              height: 32 / 24,
+              letterSpacing: 0.072,
             ),
           ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Operational Risk Management (ORM)',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 32 / 24,
-                  letterSpacing: 0.072,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'People, Process, Systems, and External Events',
-                style: TextStyle(
-                  color: AppColors.textBody,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    '$_kAssetsDir/export.svg',
-                    width: 16.r,
-                    height: 16.r,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Export Report',
-                    style: TextStyle(
-                      color: _kExportText,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 24 / 16,
-                      letterSpacing: -0.32,
-                    ),
-                  ),
-                ],
-              ),
+          SizedBox(height: 4.h),
+          Text(
+            'People, Process, Systems, and External Events',
+            style: TextStyle(
+              color: AppColors.textBody,
+              fontSize: AssessmentPageLayout.subtitleFontSize(context),
+              fontWeight: FontWeight.w400,
+              height: 20 / 14,
+              letterSpacing: -0.154,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+      trailing: AppButton.export(
+        label: l10n.exportReport,
+        iconAsset: '$_kAssetsDir/export.svg',
+        foregroundColor: _kExportText,
+        fullWidth: layout.isCompact,
+        onPressed: () {},
+      ),
     );
   }
 }
@@ -391,46 +343,30 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(
-            child: _StatCard(
-              value: '73%',
-              label: 'Avg Risk Mitigation',
-              progressPercent: 73,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '16',
-              label: 'Identified Risks',
-              sublabel: 'Across 4 categories',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '5',
-              valueColor: _kGreen,
-              label: 'Strong Mitigations',
-              sublabel: 'Effective controls',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '2',
-              valueColor: _kAmber,
-              label: 'Developing Controls',
-              sublabel: 'Needs attention',
-            ),
-          ),
-        ],
+    return AssessmentPageLayout.statsRow(context, const [
+      _StatCard(
+        value: '73%',
+        label: 'Avg Risk Mitigation',
+        progressPercent: 73,
       ),
-    );
+      _StatCard(
+        value: '16',
+        label: 'Identified Risks',
+        sublabel: 'Across 4 categories',
+      ),
+      _StatCard(
+        value: '5',
+        valueColor: _kGreen,
+        label: 'Strong Mitigations',
+        sublabel: 'Effective controls',
+      ),
+      _StatCard(
+        value: '2',
+        valueColor: _kAmber,
+        label: 'Developing Controls',
+        sublabel: 'Needs attention',
+      ),
+    ]);
   }
 }
 
@@ -452,7 +388,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -515,29 +451,12 @@ class _RiskCategoriesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return AssessmentPageLayout.twoColumnGrid(
+      context,
+      columnGap: 24,
+      rowGap: 24,
       children: [
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _RiskCard(data: categories[0])),
-              SizedBox(width: 24.w),
-              Expanded(child: _RiskCard(data: categories[1])),
-            ],
-          ),
-        ),
-        SizedBox(height: 24.h),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _RiskCard(data: categories[2])),
-              SizedBox(width: 24.w),
-              Expanded(child: _RiskCard(data: categories[3])),
-            ],
-          ),
-        ),
+        for (final category in categories) _RiskCard(data: category),
       ],
     );
   }
@@ -558,8 +477,9 @@ class _RiskCardState extends State<_RiskCard> {
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
+    final cardPadding = AssessmentPageLayout.cardPadding(context);
     return Container(
-      padding: EdgeInsets.fromLTRB(25.w, 25.h, 25.w, 26.h),
+      padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -798,7 +718,7 @@ class _KrisCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -818,16 +738,11 @@ class _KrisCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < kris.length; i++) ...[
-                  Expanded(child: _KriCard(data: kris[i])),
-                  if (i != kris.length - 1) SizedBox(width: 16.w),
-                ],
-              ],
-            ),
+          AssessmentPageLayout.twoColumnGrid(
+            context,
+            children: [
+              for (final kri in kris) _KriCard(data: kri),
+            ],
           ),
         ],
       ),
@@ -901,7 +816,7 @@ class _PriorityActionsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),

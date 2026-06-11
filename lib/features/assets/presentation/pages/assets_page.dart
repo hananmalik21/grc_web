@@ -358,10 +358,9 @@ class _AssetsFilterBarState extends State<_AssetsFilterBar> {
       onPressed: () {},
     );
 
-    final exportButton = AppButton(
+    final exportButton = AppButton.export(
       label: l10n.export,
       iconAsset: 'assets/figma/assets/svg/export.svg',
-      variant: AppButtonVariant.outlined,
       iconSize: isMobile ? 20.r : 28.r,
       size: isMobile ? AppButtonSize.md : AppButtonSize.lg,
       fullWidth: isMobile,
@@ -649,14 +648,16 @@ class _AssetsTable extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/assets/svg/edit_asset.svg',
             onPressed: () => showAssetDetailDialog(context: context, asset: asset),
+            bordered: false,
           ),
           SizedBox(width: 8.w),
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/assets/svg/delete_asset.svg',
             onPressed: () {},
+            bordered: false,
           ),
         ],
       ),
@@ -817,15 +818,17 @@ class _AssetMobileCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              _TableIconButton(
+              AppButton.icon(
                 iconAsset: 'assets/figma/assets/svg/edit_asset.svg',
                 onPressed: () =>
                     showAssetDetailDialog(context: context, asset: asset),
+                bordered: false,
               ),
               SizedBox(width: 8.w),
-              _TableIconButton(
+              AppButton.icon(
                 iconAsset: 'assets/figma/assets/svg/delete_asset.svg',
                 onPressed: () {},
+                bordered: false,
               ),
             ],
           ),
@@ -939,31 +942,3 @@ class _RiskBadge extends StatelessWidget {
   }
 }
 
-class _TableIconButton extends StatelessWidget {
-  const _TableIconButton({
-    required this.iconAsset,
-    this.onPressed,
-  });
-
-  final String iconAsset;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4.r),
-        child: Padding(
-          padding: EdgeInsets.all(6.r),
-          child: SvgPicture.asset(
-            iconAsset,
-            width: 25.r,
-            height: 25.r,
-          ),
-        ),
-      ),
-    );
-  }
-}

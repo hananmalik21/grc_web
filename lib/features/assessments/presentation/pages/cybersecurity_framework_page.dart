@@ -5,7 +5,10 @@ import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/features/assessments/presentation/widgets/assessment_page_layout.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
 
@@ -183,30 +186,32 @@ class _CybersecurityFrameworkPageState
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
+    final sectionGap = AssessmentPageLayout.sectionGap(context);
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: AssessmentPageLayout.pagePadding(context),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: AssessmentPageLayout.contentConstraints(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _TitleBar(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _TabSwitcher(
               selected: _tab,
               onChanged: (i) => setState(() => _tab = i),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             if (_tab == 0) ...[
               const _StatsRow(),
-              SizedBox(height: 24.h),
+              SizedBox(height: sectionGap),
               for (var i = 0; i < _sections.length; i++) ...[
                 _SectionCard(section: _sections[i]),
                 if (i != _sections.length - 1) SizedBox(height: 16.h),
               ],
             ] else ...[
               const _IsoStatsRow(),
-              SizedBox(height: 24.h),
+              SizedBox(height: sectionGap),
               const _IsoControlsCard(controls: _isoControls),
             ],
           ],
@@ -227,99 +232,46 @@ class _TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessments),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
+    return AssessmentPageLayout.detailTitleBar(
+      context: context,
+      backButton: AppButton.back(
+        iconAsset: '$_kAssetsDir/back_arrow.svg',
+        borderColor: _kBorderInput,
+        onPressed: () => context.deferGo(AppRoutes.assessments),
+      ),
+      titleSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Cybersecurity Framework',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: AssessmentPageLayout.titleFontSize(context),
+              fontWeight: FontWeight.w600,
+              height: 32 / 24,
+              letterSpacing: 0.072,
             ),
           ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Cybersecurity Framework',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 32 / 24,
-                  letterSpacing: 0.072,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'NIST CSF & ISO 27001 Assessment',
-                style: TextStyle(
-                  color: AppColors.textBody,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    '$_kAssetsDir/export.svg',
-                    width: 16.r,
-                    height: 16.r,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    l10n.exportReport,
-                    style: TextStyle(
-                      color: _kExportText,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 24 / 16,
-                      letterSpacing: -0.32,
-                    ),
-                  ),
-                ],
-              ),
+          SizedBox(height: 4.h),
+          Text(
+            'NIST CSF & ISO 27001 Assessment',
+            style: TextStyle(
+              color: AppColors.textBody,
+              fontSize: AssessmentPageLayout.subtitleFontSize(context),
+              fontWeight: FontWeight.w400,
+              height: 20 / 14,
+              letterSpacing: -0.154,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+      trailing: AppButton.export(
+        label: l10n.exportReport,
+        iconAsset: '$_kAssetsDir/export.svg',
+        foregroundColor: _kExportText,
+        fullWidth: context.screenLayout.isCompact,
+        onPressed: () {},
+      ),
     );
   }
 }
@@ -343,22 +295,18 @@ class _TabSwitcher extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _TabButton(
-              label: 'NIST Cybersecurity Framework',
-              active: selected == 0,
-              onTap: () => onChanged(0),
-            ),
+      child: AssessmentPageLayout.tabSwitcher(
+        context: context,
+        tabs: [
+          _TabButton(
+            label: 'NIST Cybersecurity Framework',
+            active: selected == 0,
+            onTap: () => onChanged(0),
           ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: _TabButton(
-              label: 'ISO 27001:2013',
-              active: selected == 1,
-              onTap: () => onChanged(1),
-            ),
+          _TabButton(
+            label: 'ISO 27001:2013',
+            active: selected == 1,
+            onTap: () => onChanged(1),
           ),
         ],
       ),
@@ -392,7 +340,7 @@ class _TabButton extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: active ? Colors.white : _kTabInactive,
-              fontSize: 16.sp,
+              fontSize: context.screenLayout.isMobile ? 13.sp : 16.sp,
               fontWeight: FontWeight.w500,
               height: 24 / 16,
               letterSpacing: -0.32,
@@ -413,41 +361,28 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(
-            child: _MaturityCard(value: '85%', label: 'Overall Maturity', percent: 85),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '5',
-              label: 'Functions',
-              sublabel: 'Assessed',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '155',
-              valueColor: _kGreen,
-              label: 'Implemented Controls',
-              sublabel: 'Out of 180',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: 'Tier 3',
-              valueColor: _kPrimary,
-              label: 'Maturity Level',
-              sublabel: 'Repeatable',
-            ),
-          ),
-        ],
-      ),
+    return AssessmentPageLayout.statsRow(
+      context,
+      const [
+        _MaturityCard(value: '85%', label: 'Overall Maturity', percent: 85),
+        _StatCard(
+          value: '5',
+          label: 'Functions',
+          sublabel: 'Assessed',
+        ),
+        _StatCard(
+          value: '155',
+          valueColor: _kGreen,
+          label: 'Implemented Controls',
+          sublabel: 'Out of 180',
+        ),
+        _StatCard(
+          value: 'Tier 3',
+          valueColor: _kPrimary,
+          label: 'Maturity Level',
+          sublabel: 'Repeatable',
+        ),
+      ],
     );
   }
 }
@@ -465,8 +400,10 @@ class _MaturityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardPadding = AssessmentPageLayout.cardPadding(context);
+
     return Container(
-      padding: EdgeInsets.fromLTRB(25.w, 25.h, 25.w, 29.h),
+      padding: EdgeInsets.fromLTRB(cardPadding, cardPadding, cardPadding, 29.h),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -521,7 +458,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -600,7 +537,7 @@ class _SectionCardState extends State<_SectionCard> {
             child: InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
               child: Padding(
-                padding: EdgeInsets.all(25.w),
+                padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
                 child: _header(section),
               ),
             ),
@@ -833,45 +770,32 @@ class _IsoStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(
-            child: _MaturityCard(
-              value: '89%',
-              label: 'Overall Maturity',
-              percent: 89,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '10',
-              label: 'Domains',
-              sublabel: 'Assessed',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '77',
-              valueColor: _kGreen,
-              label: 'Implemented Controls',
-              sublabel: 'Out of 90',
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: 'Certified',
-              valueColor: _kPrimary,
-              label: 'Maturity Level',
-              sublabel: '2024-2027',
-            ),
-          ),
-        ],
-      ),
+    return AssessmentPageLayout.statsRow(
+      context,
+      const [
+        _MaturityCard(
+          value: '89%',
+          label: 'Overall Maturity',
+          percent: 89,
+        ),
+        _StatCard(
+          value: '10',
+          label: 'Domains',
+          sublabel: 'Assessed',
+        ),
+        _StatCard(
+          value: '77',
+          valueColor: _kGreen,
+          label: 'Implemented Controls',
+          sublabel: 'Out of 90',
+        ),
+        _StatCard(
+          value: 'Certified',
+          valueColor: _kPrimary,
+          label: 'Maturity Level',
+          sublabel: '2024-2027',
+        ),
+      ],
     );
   }
 }

@@ -2,8 +2,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_horizontal_scroll_row.dart';
 import 'package:grc_web/core/widgets/app_select_field.dart';
 import 'package:grc_web/core/widgets/app_text_field.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
@@ -19,30 +21,78 @@ const _kChartRed = Color(0xFFDC2626);
 const _kLinkRiskBg = Color(0xFFF3E8FF);
 const _kLinkRiskFg = Color(0xFF6E11B0);
 
+Widget _compactFourCardGrid({
+  required BuildContext context,
+  required List<Widget> cards,
+}) {
+  assert(cards.length == 4);
+  final gap = context.screenLayout.isMobile ? 12.w : 14.w;
+
+  return Column(
+    children: [
+      IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: cards[0]),
+            SizedBox(width: gap),
+            Expanded(child: cards[1]),
+          ],
+        ),
+      ),
+      SizedBox(height: gap),
+      IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: cards[2]),
+            SizedBox(width: gap),
+            Expanded(child: cards[3]),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
 class TprmPage extends StatelessWidget {
   const TprmPage({super.key});
 
+  static const _textHeight = AppTextMetrics.textHeight;
+
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+    final sectionGap = compact
+        ? ResponsiveHelper.getTabSectionSpacing(context)
+        : 24.h;
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: layout.isMobile
+          ? EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h)
+          : compact
+              ? ResponsiveHelper.getDetailScreenPadding(context)
+              : EdgeInsets.all(24.w),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: BoxConstraints(
+          maxWidth: compact ? context.responsiveMaxContentWidth : 1512.w,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _TitleBar(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _StatsRow(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _ChartsRow(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _RiskSummaryRow(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _FilterBar(),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _VendorsTable(vendors: _vendors),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             const _TprmIntegrationSummary(),
           ],
         ),
@@ -57,37 +107,58 @@ class _TitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final layout = context.screenLayout;
+
+    final titleSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Third-Party Risk Management (TPRM)',
+          style: textTheme.displaySmall?.copyWith(
+            fontSize: layout.isMobile ? 20.sp : null,
+          ),
+          strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+          textHeightBehavior: TprmPage._textHeight,
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          'Monitor and assess vendor security risks across the enterprise',
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppColors.textBody,
+            fontSize: layout.isCompact ? 13.sp : null,
+          ),
+          strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+          textHeightBehavior: TprmPage._textHeight,
+        ),
+      ],
+    );
+
+    final addButton = AppButton(
+      label: 'Add Vendor',
+      iconAsset: 'assets/figma/tprm/svg/add_vendor.svg',
+      variant: AppButtonVariant.primary,
+      iconSize: layout.isCompact ? 20.r : 16.r,
+      size: layout.isCompact ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: layout.isCompact,
+      onPressed: () => showAddVendorDialog(context: context),
+    );
+
+    if (layout.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          titleSection,
+          SizedBox(height: 16.h),
+          addButton,
+        ],
+      );
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                Text(
-                  'Third-Party Risk Management (TPRM)',
-                  style: textTheme.displaySmall,
-                  strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-                  textHeightBehavior: AppTextMetrics.textHeight,
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  'Monitor and assess vendor security risks across the enterprise',
-                  style: textTheme.bodyMedium?.copyWith(color: AppColors.textBody),
-                  strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-                  textHeightBehavior: AppTextMetrics.textHeight,
-                ),
-              ],
-            ),
-          ),
-        AppButton(
-          label: 'Add Vendor',
-          iconAsset: 'assets/figma/tprm/svg/add_vendor.svg',
-          variant: AppButtonVariant.primary,
-          iconSize: 16.r,
-          onPressed: () => showAddVendorDialog(context: context),
-        ),
+        Expanded(child: titleSection),
+        addButton,
       ],
     );
   }
@@ -98,45 +169,67 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+
+    const cards = [
+      _StatCard(
+        value: '8',
+        label: 'Total Vendors',
+        iconAsset: 'assets/figma/tprm/svg/stat_vendors.svg',
+        iconBg: AppColors.primaryTint,
+      ),
+      _StatCard(
+        value: '4',
+        label: 'Critical Vendors',
+        iconAsset: 'assets/figma/tprm/svg/stat_critical.svg',
+        iconBg: AppColors.statusCriticalBg,
+      ),
+      _StatCard(
+        value: r'$8.5M',
+        label: 'Total Contract Value',
+        iconAsset: 'assets/figma/tprm/svg/stat_contract.svg',
+        iconBg: _kContractIconBg,
+      ),
+      _StatCard(
+        value: '4',
+        label: 'Open Issues',
+        iconAsset: 'assets/figma/tprm/svg/stat_issues.svg',
+        iconBg: AppColors.statusHighBg,
+      ),
+    ];
+
+    if (compact) {
+      final cardWidth = layout.isMobile
+          ? MediaQuery.sizeOf(context).width * 0.86
+          : ResponsiveHelper.getResponsiveWidth(
+              context,
+              mobile: 220,
+              tablet: 240,
+              web: 260,
+            );
+      final spacing = context.responsive(
+        mobile: 12.0,
+        tablet: 14.0,
+        desktop: 16.0,
+      );
+
+      return AppHorizontalScrollRow(
+        spacing: spacing,
+        children: [
+          for (final card in cards) SizedBox(width: cardWidth, child: card),
+        ],
+      );
+    }
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Expanded(
-            child: _StatCard(
-              value: '8',
-              label: 'Total Vendors',
-              iconAsset: 'assets/figma/tprm/svg/stat_vendors.svg',
-              iconBg: AppColors.primaryTint,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '4',
-              label: 'Critical Vendors',
-              iconAsset: 'assets/figma/tprm/svg/stat_critical.svg',
-              iconBg: AppColors.statusCriticalBg,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: r'$8.5M',
-              label: 'Total Contract Value',
-              iconAsset: 'assets/figma/tprm/svg/stat_contract.svg',
-              iconBg: _kContractIconBg,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '4',
-              label: 'Open Issues',
-              iconAsset: 'assets/figma/tprm/svg/stat_issues.svg',
-              iconBg: AppColors.statusHighBg,
-            ),
-          ),
+          for (int i = 0; i < cards.length; i++) ...[
+            Expanded(child: cards[i]),
+            if (i != cards.length - 1) SizedBox(width: 16.w),
+          ],
         ],
       ),
     );
@@ -159,51 +252,79 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final compact = context.screenLayout.isCompact;
+    final padding = compact ? EdgeInsets.all(12.w) : EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h);
+    final iconBoxSize = compact ? 36.r : 40.r;
+
+    final icon = Container(
+      width: iconBoxSize,
+      height: iconBoxSize,
+      decoration: BoxDecoration(
+        color: iconBg,
+        borderRadius: BorderRadius.circular(compact ? 8.r : 10.r),
+      ),
+      child: Center(
+        child: SvgPicture.asset(iconAsset, width: 20.r, height: 20.r),
+      ),
+    );
+
+    final valueText = Text(
+      value,
+      style: textTheme.headlineSmall?.copyWith(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.072,
+        fontSize: compact ? 20.sp : null,
+      ),
+      strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+      textHeightBehavior: TprmPage._textHeight,
+    );
+
+    final labelText = Text(
+      label,
+      style: textTheme.bodyMedium?.copyWith(
+        color: AppColors.textBody,
+        fontWeight: FontWeight.w400,
+        fontSize: compact ? 12.sp : null,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+      textHeightBehavior: TprmPage._textHeight,
+    );
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40.r,
-            height: 40.r,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(10.r),
+      child: compact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    icon,
+                    SizedBox(width: 8.w),
+                    Expanded(child: valueText),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                labelText,
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                icon,
+                SizedBox(height: 8.h),
+                valueText,
+                labelText,
+              ],
             ),
-            child: Center(
-              child: SvgPicture.asset(iconAsset, width: 20.r, height: 20.r),
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            value,
-            style: textTheme.headlineSmall?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.072,
-            ),
-            strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-            textHeightBehavior: AppTextMetrics.textHeight,
-          ),
-          Text(
-            label,
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textBody,
-              fontWeight: FontWeight.w400,
-            ),
-            strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-            textHeightBehavior: AppTextMetrics.textHeight,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -213,12 +334,35 @@ class _ChartsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final gap = layout.isCompact ? 16.h : 24.w;
+
+    final riskTrend = _ChartCard(
+      title: 'Vendor Risk Trend',
+      child: _VendorRiskTrendChart(),
+    );
+    final riskDistribution = _ChartCard(
+      title: 'Risk Distribution by Tier',
+      child: _RiskDistributionChart(),
+    );
+
+    if (layout.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          riskTrend,
+          SizedBox(height: gap),
+          riskDistribution,
+        ],
+      );
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _ChartCard(title: 'Vendor Risk Trend', child: _VendorRiskTrendChart())),
-        SizedBox(width: 24.w),
-        Expanded(child: _ChartCard(title: 'Risk Distribution by Tier', child: _RiskDistributionChart())),
+        Expanded(child: riskTrend),
+        SizedBox(width: gap),
+        Expanded(child: riskDistribution),
       ],
     );
   }
@@ -233,9 +377,14 @@ class _ChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final layout = context.screenLayout;
+    final padding = layout.isCompact
+        ? ResponsiveHelper.libraryCardPadding(context)
+        : EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h);
+    final chartHeight = layout.isMobile ? 200.h : (layout.isCompact ? 220.h : 250.h);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -252,10 +401,11 @@ class _ChartCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
               letterSpacing: -0.45,
               height: 28 / 18,
+              fontSize: layout.isMobile ? 16.sp : null,
             ),
           ),
           SizedBox(height: 16.h),
-          SizedBox(height: 250.h, child: child),
+          SizedBox(height: chartHeight, child: child),
         ],
       ),
     );
@@ -359,15 +509,16 @@ class _VendorRiskTrendChart extends StatelessWidget {
           left: 0,
           right: 0,
           bottom: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10.w,
+            runSpacing: 4.h,
+            children: const [
               _ChartLegendItem(
                 iconAsset: 'assets/figma/tprm/svg/chart_legend_avg.svg',
                 label: 'Avg Risk Rating',
                 color: _kChartBlue,
               ),
-              SizedBox(width: 10.w),
               _ChartLegendItem(
                 iconAsset: 'assets/figma/tprm/svg/chart_legend_critical.svg',
                 label: 'Critical Vendors',
@@ -467,6 +618,8 @@ class _ChartLegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = context.screenLayout.isCompact;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -480,7 +633,7 @@ class _ChartLegendItem extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: compact ? 12.sp : 16.sp,
             color: color,
             fontWeight: FontWeight.w400,
             height: 24 / 16,
@@ -503,12 +656,26 @@ class _RiskSummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final gap = layout.isMobile ? 12.h : 16.w;
+
+    if (layout.isCompact) {
+      return Column(
+        children: [
+          for (var i = 0; i < _items.length; i++) ...[
+            _RiskSummaryCard(item: _items[i]),
+            if (i != _items.length - 1) SizedBox(height: gap),
+          ],
+        ],
+      );
+    }
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (var i = 0; i < _items.length; i++) ...[
-            if (i > 0) SizedBox(width: 16.w),
+            if (i > 0) SizedBox(width: gap),
             Expanded(child: _RiskSummaryCard(item: _items[i])),
           ],
         ],
@@ -540,8 +707,12 @@ class _RiskSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = context.screenLayout.isCompact
+        ? ResponsiveHelper.libraryCardPadding(context)
+        : EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h);
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -554,17 +725,18 @@ class _RiskSummaryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                item.label,
-                style: TextStyle(
-                  color: AppColors.textLabel,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
+              Expanded(
+                child: Text(
+                  item.label,
+                  style: TextStyle(
+                    color: AppColors.textLabel,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    height: 20 / 14,
+                    letterSpacing: -0.154,
+                  ),
                 ),
               ),
-              const Spacer(),
               Text(
                 '${item.count}',
                 style: TextStyle(
@@ -611,55 +783,222 @@ class _FilterBarState extends State<_FilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+    final isTabletSmall = layout.isTabletSmall;
+    final compact = layout.isCompact;
+    final padding = ResponsiveHelper.libraryCardPadding(context);
+
+    final searchField = AppTextField.search(
+      controller: _searchController,
+      hint: 'Search vendors...',
+    );
+
+    final tierField = AppSelectField<String>(
+      value: 'all',
+      items: const ['all'],
+      itemLabel: (_) => 'All Tiers',
+      onChanged: (_) {},
+      contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
+    );
+
+    final riskField = AppSelectField<String>(
+      value: 'all',
+      items: const ['all'],
+      itemLabel: (_) => 'All Risk Levels',
+      onChanged: (_) {},
+      contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
+    );
+
+    final exportButton = AppButton.export(
+      label: 'Export',
+      iconAsset: 'assets/figma/assets/svg/export.svg',
+      iconSize: compact ? 20.r : 16.r,
+      size: compact ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: compact,
+      onPressed: () {},
+    );
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 17.h),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: AppTextField.search(
-              controller: _searchController,
-              hint: 'Search vendors...',
+      child: isMobile || isTabletSmall
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                searchField,
+                SizedBox(height: 12.h),
+                tierField,
+                SizedBox(height: 12.h),
+                riskField,
+                SizedBox(height: 12.h),
+                exportButton,
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: searchField),
+                SizedBox(width: 16.w),
+                SizedBox(width: 126.w, child: tierField),
+                SizedBox(width: 8.w),
+                SizedBox(width: 157.w, child: riskField),
+                SizedBox(width: 8.w),
+                exportButton,
+              ],
             ),
-          ),
-          SizedBox(width: 16.w),
-          SizedBox(
-            width: 126.w,
-            child: AppSelectField<String>(
-              value: 'all',
-              items: const ['all'],
-              itemLabel: (_) => 'All Tiers',
-              onChanged: (_) {},
-              contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          SizedBox(
-            width: 157.w,
-            child: AppSelectField<String>(
-              value: 'all',
-              items: const ['all'],
-              itemLabel: (_) => 'All Risk Levels',
-              onChanged: (_) {},
-              contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          AppButton(
-            label: 'Export',
-            iconAsset: 'assets/figma/assets/svg/export.svg',
-            variant: AppButtonVariant.outlined,
-            iconSize: 16.r,
-            onPressed: () {},
-          ),
-        ],
-      ),
     );
   }
+}
+
+(Color bg, Color fg) _tierColors(_VendorTier tier) {
+  return switch (tier) {
+    _VendorTier.critical => (AppColors.statusCriticalBg, AppColors.statusCriticalFg),
+    _VendorTier.important => (AppColors.statusHighBg, AppColors.statusHighFg),
+    _VendorTier.standard => (AppColors.chipNeutralBg, AppColors.textBody),
+  };
+}
+
+(Color bg, Color fg) _riskLevelColors(_RiskLevel level) {
+  return switch (level) {
+    _RiskLevel.low => (AppColors.statusLowBg, AppColors.statusLowFg),
+    _RiskLevel.medium => (AppColors.statusMediumBg, AppColors.statusMediumFg),
+    _RiskLevel.high => (AppColors.statusCriticalBg, AppColors.statusCriticalFg),
+  };
+}
+
+VendorDetailData _vendorDetailDataFor(_VendorItem vendor) {
+  if (vendor.id == 'VND-001') {
+    return VendorDetailData.sample();
+  }
+
+  return VendorDetailData(
+    id: vendor.id,
+    name: vendor.name,
+    category: vendor.category,
+    tierLabel: vendor.tier.label,
+    riskRating: vendor.riskRating,
+    riskLevelLabel: '${vendor.riskLevel.label} Risk',
+    contractValue: '—',
+    controlEffectiveness: vendor.riskRating,
+    openIssuesCount: vendor.issues,
+    businessOwner: '—',
+    vendorManager: '—',
+    geography: '—',
+    dataAccess: '—',
+    servicesProvided: vendor.category,
+    lastAssessment: vendor.lastAssessment,
+    nextAssessment: '—',
+    inherentRisk: vendor.riskRating,
+    residualRisk: (vendor.riskRating * 0.3).round(),
+    riskReduction: (vendor.riskRating * 0.7).round(),
+    assessmentScores: const [
+      VendorAssessmentScore(label: 'Info Security', value: 70),
+      VendorAssessmentScore(label: 'Data Privacy', value: 65),
+      VendorAssessmentScore(label: 'Cloud Security', value: 72),
+      VendorAssessmentScore(label: 'Ops Resilience', value: 68),
+      VendorAssessmentScore(label: 'Financial', value: 75),
+    ],
+    certifications: const [],
+    linkedAssets: [
+      for (var i = 0; i < vendor.links.assets; i++)
+        'AST-${(i + 1).toString().padLeft(3, '0')}',
+    ],
+    linkedRisks: [
+      for (var i = 0; i < vendor.links.risks; i++)
+        'R-${(i + 1).toString().padLeft(3, '0')}',
+    ],
+    linkedControls: const [],
+    linkedPrograms: const [],
+    openIssues: vendor.issues > 0
+        ? [
+            VendorOpenIssue(
+              id: 'ISS-${vendor.id.split('-').last}',
+              severity: vendor.riskLevel.label,
+              title: 'Pending vendor review item',
+              dueDate: vendor.lastAssessment,
+              status: 'Open',
+            ),
+          ]
+        : const [],
+    slaAvailability: 99.0,
+    slaResponseTime: 95,
+    slaIncidentResolution: 93,
+  );
+}
+
+String _categoryKeyFor(String category) {
+  return switch (category) {
+    'Cloud Provider' => 'cloudProvider',
+    'Financial Services' => 'financialServices',
+    'SaaS' => 'saas',
+    'Security' => 'security',
+    'Infrastructure' => 'infrastructure',
+    _ => '',
+  };
+}
+
+String _tierKeyFor(_VendorTier tier) {
+  return switch (tier) {
+    _VendorTier.critical => 'critical',
+    _VendorTier.important => 'important',
+    _VendorTier.standard => 'standard',
+  };
+}
+
+String _riskLevelKeyFor(_RiskLevel level) {
+  return switch (level) {
+    _RiskLevel.medium => 'medium',
+    _RiskLevel.high => 'high',
+    _RiskLevel.low => 'low',
+  };
+}
+
+VendorFormData _vendorFormDataFor(_VendorItem vendor) {
+  if (vendor.id == 'VND-001') {
+    return VendorFormData.fromDetail(VendorDetailData.sample());
+  }
+
+  return VendorFormData(
+    id: vendor.id,
+    name: vendor.name,
+    category: _categoryKeyFor(vendor.category),
+    tier: _tierKeyFor(vendor.tier),
+    dataAccessLevel: 'internal',
+    status: 'active',
+    geography: '',
+    businessOwner: '',
+    servicesProvided: vendor.category,
+    riskRating: vendor.riskRating,
+    riskLevel: _riskLevelKeyFor(vendor.riskLevel),
+    inherentRisk: vendor.riskRating,
+    residualRisk: (vendor.riskRating * 0.3).round(),
+    controlEffectiveness: vendor.riskRating,
+    contractValue: 0,
+    annualSpend: 0,
+    vendorManager: '',
+    lastAssessment: DateTime.tryParse(vendor.lastAssessment),
+    nextAssessment: null,
+    linkedAssets: [
+      for (var i = 0; i < vendor.links.assets; i++)
+        'AST-${(i + 1).toString().padLeft(3, '0')}',
+    ].join(', '),
+    linkedRisks: [
+      for (var i = 0; i < vendor.links.risks; i++)
+        'R-${(i + 1).toString().padLeft(3, '0')}',
+    ].join(', '),
+    linkedControls: '',
+    linkedPrograms: '',
+    certifications: const {},
+    infoSecurityScore: 0,
+    dataPrivacyScore: 0,
+    cloudSecurityScore: 0,
+    operationalResilienceScore: 0,
+    financialStabilityScore: 0,
+  );
 }
 
 class _VendorsTable extends StatelessWidget {
@@ -682,6 +1021,8 @@ class _VendorsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final useMobileCards = context.screenLayout.isCompact;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -689,31 +1030,51 @@ class _VendorsTable extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final tableMinWidth = _colWidths.fold<double>(0, (s, w) => s + w.w);
-
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: constraints.maxWidth.clamp(tableMinWidth, double.infinity),
-              ),
-              child: Table(
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                columnWidths: {
-                  for (var i = 0; i < _colWidths.length; i++)
-                    i: FixedColumnWidth(_colWidths[i].w),
-                },
-                children: [
-                  _headerRow(context),
-                  for (final vendor in vendors) _dataRow(context, vendor),
+      child: useMobileCards
+          ? Column(
+              children: [
+                for (int i = 0; i < vendors.length; i++) ...[
+                  _VendorMobileCard(vendor: vendors[i]),
+                  if (i != vendors.length - 1)
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.rowDivider.withValues(alpha: 0.8),
+                    ),
                 ],
-              ),
+              ],
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final tableMinWidth =
+                    _colWidths.fold<double>(0, (s, w) => s + w.w);
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth.clamp(
+                        tableMinWidth,
+                        double.infinity,
+                      ),
+                    ),
+                    child: Table(
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      columnWidths: {
+                        for (var i = 0; i < _colWidths.length; i++)
+                          i: FixedColumnWidth(_colWidths[i].w),
+                      },
+                      children: [
+                        _headerRow(context),
+                        for (final vendor in vendors)
+                          _dataRow(context, vendor),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 
@@ -828,11 +1189,7 @@ class _VendorsTable extends StatelessWidget {
   }
 
   Widget _tierCell(_VendorTier tier) {
-    final (bg, fg) = switch (tier) {
-      _VendorTier.critical => (AppColors.statusCriticalBg, AppColors.statusCriticalFg),
-      _VendorTier.important => (AppColors.statusHighBg, AppColors.statusHighFg),
-      _VendorTier.standard => (AppColors.chipNeutralBg, AppColors.textBody),
-    };
+    final (bg, fg) = _tierColors(tier);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 13.h),
@@ -894,11 +1251,7 @@ class _VendorsTable extends StatelessWidget {
   }
 
   Widget _riskLevelCell(_RiskLevel level) {
-    final (bg, fg) = switch (level) {
-      _RiskLevel.low => (AppColors.statusLowBg, AppColors.statusLowFg),
-      _RiskLevel.medium => (AppColors.statusMediumBg, AppColors.statusMediumFg),
-      _RiskLevel.high => (AppColors.statusCriticalBg, AppColors.statusCriticalFg),
-    };
+    final (bg, fg) = _riskLevelColors(level);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 13.h),
@@ -982,157 +1335,261 @@ class _VendorsTable extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/tprm/svg/action_view.svg',
-            onTap: () => showVendorDetailDialog(
+            onPressed: () => showVendorDetailDialog(
               context: context,
               data: _vendorDetailDataFor(vendor),
             ),
+            bordered: false,
           ),
           SizedBox(width: 4.w),
-          _TableIconButton(
+          AppButton.icon(
             iconAsset: 'assets/figma/tprm/svg/action_edit.svg',
-            onTap: () => showEditVendorDialog(
+            onPressed: () => showEditVendorDialog(
               context: context,
               data: _vendorFormDataFor(vendor),
             ),
+            bordered: false,
           ),
           SizedBox(width: 4.w),
-          _TableIconButton(iconAsset: 'assets/figma/tprm/svg/action_link.svg'),
+          AppButton.icon(
+            iconAsset: 'assets/figma/tprm/svg/action_link.svg',
+            bordered: false,
+          ),
         ],
       ),
     );
   }
+}
 
-  VendorDetailData _vendorDetailDataFor(_VendorItem vendor) {
-    if (vendor.id == 'VND-001') {
-      return VendorDetailData.sample();
-    }
+class _VendorMobileCard extends StatelessWidget {
+  const _VendorMobileCard({required this.vendor});
 
-    return VendorDetailData(
-      id: vendor.id,
-      name: vendor.name,
-      category: vendor.category,
-      tierLabel: vendor.tier.label,
-      riskRating: vendor.riskRating,
-      riskLevelLabel: '${vendor.riskLevel.label} Risk',
-      contractValue: '—',
-      controlEffectiveness: vendor.riskRating,
-      openIssuesCount: vendor.issues,
-      businessOwner: '—',
-      vendorManager: '—',
-      geography: '—',
-      dataAccess: '—',
-      servicesProvided: vendor.category,
-      lastAssessment: vendor.lastAssessment,
-      nextAssessment: '—',
-      inherentRisk: vendor.riskRating,
-      residualRisk: (vendor.riskRating * 0.3).round(),
-      riskReduction: (vendor.riskRating * 0.7).round(),
-      assessmentScores: const [
-        VendorAssessmentScore(label: 'Info Security', value: 70),
-        VendorAssessmentScore(label: 'Data Privacy', value: 65),
-        VendorAssessmentScore(label: 'Cloud Security', value: 72),
-        VendorAssessmentScore(label: 'Ops Resilience', value: 68),
-        VendorAssessmentScore(label: 'Financial', value: 75),
-      ],
-      certifications: const [],
-      linkedAssets: [
-        for (var i = 0; i < vendor.links.assets; i++)
-          'AST-${(i + 1).toString().padLeft(3, '0')}',
-      ],
-      linkedRisks: [
-        for (var i = 0; i < vendor.links.risks; i++)
-          'R-${(i + 1).toString().padLeft(3, '0')}',
-      ],
-      linkedControls: const [],
-      linkedPrograms: const [],
-      openIssues: vendor.issues > 0
-          ? [
-              VendorOpenIssue(
-                id: 'ISS-${vendor.id.split('-').last}',
-                severity: vendor.riskLevel.label,
-                title: 'Pending vendor review item',
-                dueDate: vendor.lastAssessment,
-                status: 'Open',
+  final _VendorItem vendor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final (tierBg, tierFg) = _tierColors(vendor.tier);
+    final (riskBg, riskFg) = _riskLevelColors(vendor.riskLevel);
+
+    final linkBadges = <Widget>[
+      if (vendor.links.risks > 0)
+        _LinkBadge(
+          count: vendor.links.risks,
+          bg: _kLinkRiskBg,
+          fg: _kLinkRiskFg,
+          iconAsset: 'assets/figma/tprm/svg/link_risk.svg',
+        ),
+      if (vendor.links.assets > 0)
+        _LinkBadge(
+          count: vendor.links.assets,
+          bg: AppColors.statusCriticalBg,
+          fg: AppColors.statusCriticalFg,
+          iconAsset: 'assets/figma/tprm/svg/link_asset.svg',
+        ),
+      if (vendor.links.assessments > 0)
+        _LinkBadge(
+          count: vendor.links.assessments,
+          bg: AppColors.primaryTint,
+          fg: AppColors.weightBadgeFg,
+          iconAsset: 'assets/figma/tprm/svg/link_assessment.svg',
+        ),
+    ];
+
+    return Padding(
+      padding: EdgeInsets.all(16.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => showVendorDetailDialog(
+                    context: context,
+                    data: _vendorDetailDataFor(vendor),
+                  ),
+                  borderRadius: BorderRadius.circular(4.r),
+                  child: Text(
+                    vendor.id,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ),
-            ]
-          : const [],
-      slaAvailability: 99.0,
-      slaResponseTime: 95,
-      slaIncidentResolution: 93,
+              _VendorBadge(label: vendor.tier.label, bg: tierBg, fg: tierFg),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            vendor.name,
+            style: textTheme.titleSmall?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _VendorMobileField(
+                  label: 'Category',
+                  value: vendor.category,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _VendorMobileField(
+                  label: 'Risk Level',
+                  value: vendor.riskLevel.label,
+                  valueWidget: _VendorBadge(
+                    label: vendor.riskLevel.label,
+                    bg: riskBg,
+                    fg: riskFg,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            children: [
+              Expanded(
+                child: _VendorMobileField(
+                  label: 'Risk Rating',
+                  value: '${vendor.riskRating}',
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _VendorMobileField(
+                  label: 'Last Assessment',
+                  value: vendor.lastAssessment,
+                ),
+              ),
+            ],
+          ),
+          if (vendor.issues > 0) ...[
+            SizedBox(height: 8.h),
+            _VendorMobileField(
+              label: 'Issues',
+              valueWidget: _LinkBadge(
+                count: vendor.issues,
+                bg: AppColors.statusCriticalBg,
+                fg: AppColors.statusCriticalFg,
+                iconAsset: 'assets/figma/tprm/svg/link_issue.svg',
+              ),
+            ),
+          ],
+          if (linkBadges.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            Wrap(spacing: 4.w, runSpacing: 4.h, children: linkBadges),
+          ],
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              AppButton.icon(
+                iconAsset: 'assets/figma/tprm/svg/action_view.svg',
+                onPressed: () => showVendorDetailDialog(
+                  context: context,
+                  data: _vendorDetailDataFor(vendor),
+                ),
+                bordered: false,
+              ),
+              SizedBox(width: 4.w),
+              AppButton.icon(
+                iconAsset: 'assets/figma/tprm/svg/action_edit.svg',
+                onPressed: () => showEditVendorDialog(
+                  context: context,
+                  data: _vendorFormDataFor(vendor),
+                ),
+                bordered: false,
+              ),
+              SizedBox(width: 4.w),
+              AppButton.icon(
+                iconAsset: 'assets/figma/tprm/svg/action_link.svg',
+                bordered: false,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
+}
 
-  VendorFormData _vendorFormDataFor(_VendorItem vendor) {
-    if (vendor.id == 'VND-001') {
-      return VendorFormData.fromDetail(VendorDetailData.sample());
-    }
+class _VendorMobileField extends StatelessWidget {
+  const _VendorMobileField({
+    required this.label,
+    this.value,
+    this.valueWidget,
+  });
 
-    return VendorFormData(
-      id: vendor.id,
-      name: vendor.name,
-      category: _categoryKeyFor(vendor.category),
-      tier: _tierKeyFor(vendor.tier),
-      dataAccessLevel: 'internal',
-      status: 'active',
-      geography: '',
-      businessOwner: '',
-      servicesProvided: vendor.category,
-      riskRating: vendor.riskRating,
-      riskLevel: _riskLevelKeyFor(vendor.riskLevel),
-      inherentRisk: vendor.riskRating,
-      residualRisk: (vendor.riskRating * 0.3).round(),
-      controlEffectiveness: vendor.riskRating,
-      contractValue: 0,
-      annualSpend: 0,
-      vendorManager: '',
-      lastAssessment: DateTime.tryParse(vendor.lastAssessment),
-      nextAssessment: null,
-      linkedAssets: [
-        for (var i = 0; i < vendor.links.assets; i++)
-          'AST-${(i + 1).toString().padLeft(3, '0')}',
-      ].join(', '),
-      linkedRisks: [
-        for (var i = 0; i < vendor.links.risks; i++)
-          'R-${(i + 1).toString().padLeft(3, '0')}',
-      ].join(', '),
-      linkedControls: '',
-      linkedPrograms: '',
-      certifications: const {},
-      infoSecurityScore: 0,
-      dataPrivacyScore: 0,
-      cloudSecurityScore: 0,
-      operationalResilienceScore: 0,
-      financialStabilityScore: 0,
+  final String label;
+  final String? value;
+  final Widget? valueWidget;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ),
+        SizedBox(height: 2.h),
+        if (valueWidget != null)
+          valueWidget!
+        else
+          Text(
+            value ?? '',
+            style: textTheme.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+      ],
     );
   }
+}
 
-  String _categoryKeyFor(String category) {
-    return switch (category) {
-      'Cloud Provider' => 'cloudProvider',
-      'Financial Services' => 'financialServices',
-      'SaaS' => 'saas',
-      'Security' => 'security',
-      'Infrastructure' => 'infrastructure',
-      _ => '',
-    };
-  }
+class _VendorBadge extends StatelessWidget {
+  const _VendorBadge({
+    required this.label,
+    required this.bg,
+    required this.fg,
+  });
 
-  String _tierKeyFor(_VendorTier tier) {
-    return switch (tier) {
-      _VendorTier.critical => 'critical',
-      _VendorTier.important => 'important',
-      _VendorTier.standard => 'standard',
-    };
-  }
+  final String label;
+  final Color bg;
+  final Color fg;
 
-  String _riskLevelKeyFor(_RiskLevel level) {
-    return switch (level) {
-      _RiskLevel.medium => 'medium',
-      _RiskLevel.high => 'high',
-      _RiskLevel.low => 'low',
-    };
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999.r),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: fg,
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+          height: 16 / 12,
+        ),
+      ),
+    );
   }
 }
 
@@ -1169,9 +1626,17 @@ class _TprmIntegrationSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final layout = context.screenLayout;
+    final padding = layout.isCompact
+        ? ResponsiveHelper.libraryCardPadding(context)
+        : EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h);
+
+    final statCards = [
+      for (final card in _cards) _IntegrationStatCardWidget(data: card),
+    ];
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h),
+      padding: padding,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [AppColors.primaryLightBg, Color(0xFFFAF5FF)],
@@ -1191,20 +1656,24 @@ class _TprmIntegrationSummary extends StatelessWidget {
               fontWeight: FontWeight.w600,
               letterSpacing: -0.45,
               height: 28 / 18,
+              fontSize: layout.isMobile ? 16.sp : null,
             ),
           ),
           SizedBox(height: 16.h),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < _cards.length; i++) ...[
-                  if (i > 0) SizedBox(width: 16.w),
-                  Expanded(child: _IntegrationStatCardWidget(data: _cards[i])),
+          if (layout.isCompact)
+            _compactFourCardGrid(context: context, cards: statCards)
+          else
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < statCards.length; i++) ...[
+                    if (i > 0) SizedBox(width: 16.w),
+                    Expanded(child: statCards[i]),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1233,9 +1702,12 @@ class _IntegrationStatCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final compact = context.screenLayout.isCompact;
+    final iconBoxSize = compact ? 36.r : 40.r;
+    final padding = compact ? EdgeInsets.all(12.w) : EdgeInsets.all(16.w);
 
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -1255,39 +1727,45 @@ class _IntegrationStatCardWidget extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 40.r,
-            height: 40.r,
+            width: iconBoxSize,
+            height: iconBoxSize,
             decoration: BoxDecoration(
               color: data.iconBg,
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(compact ? 8.r : 10.r),
             ),
             child: Center(
               child: SvgPicture.asset(data.iconAsset, width: 20.r, height: 20.r),
             ),
           ),
-          SizedBox(width: 12.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                data.value,
-                style: textTheme.headlineSmall?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.072,
-                  height: 32 / 24,
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  data.value,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.072,
+                    height: 32 / 24,
+                    fontSize: compact ? 18.sp : null,
+                  ),
                 ),
-              ),
-              Text(
-                data.label,
-                style: textTheme.labelSmall?.copyWith(
-                  color: AppColors.textBody,
-                  fontWeight: FontWeight.w400,
-                  height: 16 / 12,
+                Text(
+                  data.label,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: AppColors.textBody,
+                    fontWeight: FontWeight.w400,
+                    height: 16 / 12,
+                    fontSize: compact ? 11.sp : null,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -1336,27 +1814,6 @@ class _LinkBadge extends StatelessWidget {
   }
 }
 
-class _TableIconButton extends StatelessWidget {
-  const _TableIconButton({required this.iconAsset, this.onTap});
-
-  final String iconAsset;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4.r),
-        child: Padding(
-          padding: EdgeInsets.all(3.w),
-          child: SvgPicture.asset(iconAsset, width: 22.r, height: 22.r),
-        ),
-      ),
-    );
-  }
-}
 
 enum _VendorTier {
   critical('Critical'),

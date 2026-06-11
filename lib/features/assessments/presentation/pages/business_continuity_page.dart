@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:grc_web/core/localization/app_localizations_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/router/app_routes.dart';
+import 'package:grc_web/features/assessments/presentation/widgets/assessment_page_layout.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
 
@@ -261,21 +265,23 @@ class BusinessContinuityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gap = AssessmentPageLayout.sectionGap(context);
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: AssessmentPageLayout.pagePadding(context),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: AssessmentPageLayout.contentConstraints(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _TitleBar(),
-            SizedBox(height: 24.h),
+            SizedBox(height: gap),
             const _StatsRow(),
-            SizedBox(height: 24.h),
+            SizedBox(height: gap),
             const _CriticalProcessesCard(processes: _processes),
-            SizedBox(height: 24.h),
+            SizedBox(height: gap),
             const _ComplianceCard(requirements: _requirements),
-            SizedBox(height: 24.h),
+            SizedBox(height: gap),
             const _UpcomingCard(items: _upcoming),
           ],
         ),
@@ -293,98 +299,48 @@ class _TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessments),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
+    final l10n = context.l10n;
+
+    return AssessmentPageLayout.detailTitleBar(
+      context: context,
+      backButton: AppButton.back(
+        iconAsset: '$_kAssetsDir/back_arrow.svg',
+        borderColor: _kBorderInput,
+        onPressed: () => context.deferGo(AppRoutes.assessments),
+      ),
+      titleSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Business Continuity & Resilience',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: AssessmentPageLayout.titleFontSize(context),
+              fontWeight: FontWeight.w600,
+              height: 32 / 24,
+              letterSpacing: 0.072,
             ),
           ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Business Continuity & Resilience',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 32 / 24,
-                  letterSpacing: 0.072,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'ISO 22301 - Business Continuity Management System',
-                style: TextStyle(
-                  color: AppColors.textBody,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    '$_kAssetsDir/export.svg',
-                    width: 16.r,
-                    height: 16.r,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Export Report',
-                    style: TextStyle(
-                      color: _kExportText,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 24 / 16,
-                      letterSpacing: -0.32,
-                    ),
-                  ),
-                ],
-              ),
+          SizedBox(height: 4.h),
+          Text(
+            'ISO 22301 - Business Continuity Management System',
+            style: TextStyle(
+              color: AppColors.textBody,
+              fontSize: AssessmentPageLayout.subtitleFontSize(context),
+              fontWeight: FontWeight.w400,
+              height: 20 / 14,
+              letterSpacing: -0.154,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+      trailing: AppButton.export(
+        label: l10n.exportReport,
+        iconAsset: '$_kAssetsDir/export.svg',
+        foregroundColor: _kExportText,
+        fullWidth: context.screenLayout.isCompact,
+        onPressed: () {},
+      ),
     );
   }
 }
@@ -398,55 +354,42 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(
-            child: _StatCard(
-              value: '87%',
-              delta: '+3%',
-              deltaColor: _kGreen,
-              label: 'Overall Resilience Score',
-              percent: 87,
-              barColor: _kGreen,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '92%',
-              delta: '+5%',
-              deltaColor: _kGreen,
-              label: 'Avg RTO Achievement',
-              percent: 92,
-              barColor: _kGreen,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '78%',
-              delta: '-2%',
-              deltaColor: _kAmber,
-              label: 'Test Success Rate',
-              percent: 78,
-              barColor: _kAmber,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          const Expanded(
-            child: _StatCard(
-              value: '85%',
-              delta: '+4%',
-              deltaColor: _kPrimary,
-              label: 'Recovery Readiness',
-              percent: 85,
-              barColor: _kPrimary,
-            ),
-          ),
-        ],
-      ),
+    return AssessmentPageLayout.statsRow(
+      context,
+      const [
+        _StatCard(
+          value: '87%',
+          delta: '+3%',
+          deltaColor: _kGreen,
+          label: 'Overall Resilience Score',
+          percent: 87,
+          barColor: _kGreen,
+        ),
+        _StatCard(
+          value: '92%',
+          delta: '+5%',
+          deltaColor: _kGreen,
+          label: 'Avg RTO Achievement',
+          percent: 92,
+          barColor: _kGreen,
+        ),
+        _StatCard(
+          value: '78%',
+          delta: '-2%',
+          deltaColor: _kAmber,
+          label: 'Test Success Rate',
+          percent: 78,
+          barColor: _kAmber,
+        ),
+        _StatCard(
+          value: '85%',
+          delta: '+4%',
+          deltaColor: _kPrimary,
+          label: 'Recovery Readiness',
+          percent: 85,
+          barColor: _kPrimary,
+        ),
+      ],
     );
   }
 }
@@ -471,7 +414,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -536,8 +479,10 @@ class _CriticalProcessesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = AssessmentPageLayout.cardPadding(context);
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -557,10 +502,53 @@ class _CriticalProcessesCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
+          _buildProcessContent(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProcessContent(BuildContext context) {
+    final layout = context.screenLayout;
+
+    if (layout.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < processes.length; i++) ...[
+            _ProcessMobileCard(process: processes[i]),
+            if (i != processes.length - 1) SizedBox(height: 12.h),
+          ],
+        ],
+      );
+    }
+
+    Widget buildTable() {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           _headerRow(),
           for (final p in processes) _bodyRow(p),
         ],
-      ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tableWidth = 1100.w;
+        if (constraints.maxWidth >= tableWidth) {
+          return buildTable();
+        }
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: tableWidth,
+            child: buildTable(),
+          ),
+        );
+      },
     );
   }
 
@@ -749,6 +737,183 @@ class _CriticalProcessesCard extends StatelessWidget {
   }
 }
 
+class _ProcessMobileCard extends StatelessWidget {
+  const _ProcessMobileCard({required this.process});
+
+  final _Process process;
+
+  @override
+  Widget build(BuildContext context) {
+    final (statusBg, statusFg, statusLabel) = switch (process.status) {
+      _ProcessStatus.tested => (_kTestedBg, _kTestedText, 'Tested'),
+      _ProcessStatus.testDue => (_kTestDueBg, _kTestDueText, 'Test Due'),
+    };
+
+    Widget metricRow(String label, Widget value) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: 8.h),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 100.w,
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: _kSubLabel,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  height: 16 / 12,
+                ),
+              ),
+            ),
+            Expanded(child: value),
+          ],
+        ),
+      );
+    }
+
+    Widget iconMetric(String icon, String value) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            '$_kAssetsDir/$icon',
+            width: 12.w,
+            height: 12.h,
+            fit: BoxFit.contain,
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            '$value hrs',
+            style: TextStyle(
+              color: _kCellMuted,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              height: 20 / 14,
+              letterSpacing: -0.154,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: _kHeaderBg,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: _kRowBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  process.name,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    height: 24 / 16,
+                    letterSpacing: -0.32,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: statusBg,
+                  borderRadius: BorderRadius.circular(100.r),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    color: statusFg,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    height: 16 / 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          metricRow('RTO', iconMetric('bcm_clock_sm.svg', process.rto)),
+          metricRow('RPO', iconMetric('bcm_clock_sm.svg', process.rpo)),
+          metricRow('MTD', iconMetric('bcm_warn_sm.svg', process.mtd)),
+          metricRow(
+            'Dependencies',
+            Text(
+              process.dependencies,
+              style: TextStyle(
+                color: _kCellMuted,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                height: 20 / 14,
+              ),
+            ),
+          ),
+          metricRow(
+            'Last Test',
+            Text(
+              process.lastTest,
+              style: TextStyle(
+                color: _kCellMuted,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                height: 20 / 14,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: 100.w,
+                child: Text(
+                  'Readiness',
+                  style: TextStyle(
+                    color: _kSubLabel,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    height: 16 / 12,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _ProgressBar(
+                        percent: process.readiness,
+                        color: process.readinessColor,
+                        height: 6,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '${process.readiness}%',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        height: 16 / 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // ISO 22301 Compliance Assessment
 // ---------------------------------------------------------------------------
@@ -760,8 +925,64 @@ class _ComplianceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+
+    final titleBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'ISO 22301 Compliance Assessment',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: isMobile ? 16.sp : 18.sp,
+            fontWeight: FontWeight.w600,
+            height: 28 / 18,
+            letterSpacing: -0.45,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          'Business Continuity Management requirements',
+          style: TextStyle(
+            color: AppColors.textBody,
+            fontSize: isMobile ? 13.sp : 14.sp,
+            fontWeight: FontWeight.w400,
+            height: 20 / 14,
+            letterSpacing: -0.154,
+          ),
+        ),
+      ],
+    );
+
+    final scoreBlock = Column(
+      crossAxisAlignment:
+          layout.isCompact ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+      children: [
+        Text(
+          '69%',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: isMobile ? 24.sp : 30.sp,
+            fontWeight: FontWeight.w600,
+            height: 36 / 30,
+            letterSpacing: 0.42,
+          ),
+        ),
+        Text(
+          'Compliance Score',
+          style: TextStyle(
+            color: _kSubLabel,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            height: 16 / 12,
+          ),
+        ),
+      ],
+    );
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -770,111 +991,105 @@ class _ComplianceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ISO 22301 Compliance Assessment',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w600,
-                        height: 28 / 18,
-                        letterSpacing: -0.45,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'Business Continuity Management requirements',
-                      style: TextStyle(
-                        color: AppColors.textBody,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        height: 20 / 14,
-                        letterSpacing: -0.154,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '69%',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.w600,
-                      height: 36 / 30,
-                      letterSpacing: 0.42,
-                    ),
-                  ),
-                  Text(
-                    'Compliance Score',
-                    style: TextStyle(
-                      color: _kSubLabel,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      height: 16 / 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          if (layout.isCompact)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                titleBlock,
+                SizedBox(height: 12.h),
+                scoreBlock,
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: titleBlock),
+                SizedBox(width: 16.w),
+                scoreBlock,
+              ],
+            ),
+          SizedBox(height: 16.h),
+          _summaryBoxes(context),
+          SizedBox(height: 16.h),
+          for (var i = 0; i < requirements.length; i++) ...[
+            _RequirementSection(data: requirements[i]),
+            if (i != requirements.length - 1) SizedBox(height: 16.h),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryBoxes(BuildContext context) {
+    const boxes = [
+      _SummaryBox(
+        label: 'Compliant',
+        value: '11',
+        bg: _kBoxGreenBg,
+        valueColor: _kBoxGreenVal,
+      ),
+      _SummaryBox(
+        label: 'Partial',
+        value: '4',
+        bg: _kBoxAmberBg,
+        valueColor: _kBoxAmberVal,
+      ),
+      _SummaryBox(
+        label: 'Non-Compliant',
+        value: '1',
+        bg: _kBoxRedBg,
+        valueColor: _kBoxRedVal,
+      ),
+      _SummaryBox(
+        label: 'Total',
+        value: '16',
+        bg: _kBoxBlueBg,
+        valueColor: _kBoxBlueVal,
+      ),
+    ];
+
+    final layout = context.screenLayout;
+
+    if (layout.isMobile) {
+      return AssessmentPageLayout.statsRow(context, boxes);
+    }
+
+    if (layout.isTabletSmall) {
+      return Column(
+        children: [
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: boxes[0]),
+                SizedBox(width: 16.w),
+                Expanded(child: boxes[1]),
+              ],
+            ),
           ),
           SizedBox(height: 16.h),
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Expanded(
-                  child: _SummaryBox(
-                    label: 'Compliant',
-                    value: '11',
-                    bg: _kBoxGreenBg,
-                    valueColor: _kBoxGreenVal,
-                  ),
-                ),
+                Expanded(child: boxes[2]),
                 SizedBox(width: 16.w),
-                const Expanded(
-                  child: _SummaryBox(
-                    label: 'Partial',
-                    value: '4',
-                    bg: _kBoxAmberBg,
-                    valueColor: _kBoxAmberVal,
-                  ),
-                ),
-                SizedBox(width: 16.w),
-                const Expanded(
-                  child: _SummaryBox(
-                    label: 'Non-Compliant',
-                    value: '1',
-                    bg: _kBoxRedBg,
-                    valueColor: _kBoxRedVal,
-                  ),
-                ),
-                SizedBox(width: 16.w),
-                const Expanded(
-                  child: _SummaryBox(
-                    label: 'Total',
-                    value: '16',
-                    bg: _kBoxBlueBg,
-                    valueColor: _kBoxBlueVal,
-                  ),
-                ),
+                Expanded(child: boxes[3]),
               ],
             ),
           ),
-          SizedBox(height: 16.h),
-          for (var i = 0; i < requirements.length; i++) ...[
-            _RequirementSection(data: requirements[i]),
-            if (i != requirements.length - 1) SizedBox(height: 16.h),
+        ],
+      );
+    }
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < boxes.length; i++) ...[
+            Expanded(child: boxes[i]),
+            if (i != boxes.length - 1) SizedBox(width: 16.w),
           ],
         ],
       ),
@@ -947,6 +1162,31 @@ class _RequirementSectionState extends State<_RequirementSection> {
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
+    final isMobile = context.screenLayout.isMobile;
+
+    final progressRow = Row(
+      children: [
+        Text(
+          '${data.percent}%',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            height: 20 / 14,
+            letterSpacing: -0.154,
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _ProgressBar(
+            percent: data.percent,
+            color: data.color,
+            height: 8,
+          ),
+        ),
+      ],
+    );
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
@@ -962,42 +1202,60 @@ class _RequirementSectionState extends State<_RequirementSection> {
               onTap: () => setState(() => _expanded = !_expanded),
               child: Padding(
                 padding: EdgeInsets.all(16.w),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        data.name,
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          height: 24 / 16,
-                          letterSpacing: -0.32,
-                        ),
+                child: isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            data.name,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              height: 24 / 16,
+                              letterSpacing: -0.32,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          progressRow,
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              data.name,
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                height: 24 / 16,
+                                letterSpacing: -0.32,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          SizedBox(
+                            width: 96.w,
+                            child: _ProgressBar(
+                              percent: data.percent,
+                              color: data.color,
+                              height: 8,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Text(
+                            '${data.percent}%',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              height: 20 / 14,
+                              letterSpacing: -0.154,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Text(
-                      '${data.percent}%',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        height: 20 / 14,
-                        letterSpacing: -0.154,
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    SizedBox(
-                      width: 96.w,
-                      child: _ProgressBar(
-                        percent: data.percent,
-                        color: data.color,
-                        height: 8,
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),
@@ -1183,7 +1441,7 @@ class _UpcomingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),

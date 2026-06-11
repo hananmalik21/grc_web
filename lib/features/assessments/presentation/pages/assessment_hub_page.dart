@@ -5,7 +5,10 @@ import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_horizontal_scroll_row.dart';
 import 'package:grc_web/features/assessments/presentation/widgets/create_assessment_dialog.dart';
 
 const _kAssetsDir = 'assets/figma/assessments/svg';
@@ -23,22 +26,33 @@ class AssessmentHubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final layout = context.screenLayout;
+    final compact = layout.isCompact;
+    final sectionGap = compact
+        ? ResponsiveHelper.getTabSectionSpacing(context)
+        : 24.h;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: layout.isMobile
+          ? EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h)
+          : compact
+              ? ResponsiveHelper.getDetailScreenPadding(context)
+              : EdgeInsets.all(24.w),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: BoxConstraints(
+          maxWidth: compact ? context.responsiveMaxContentWidth : 1512.w,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _TitleBar(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _StatsRow(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _CriteriaCard(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _FrameworksSection(l10n: l10n),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _FeaturesCard(l10n: l10n),
           ],
         ),
@@ -58,32 +72,16 @@ class _TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+    final isCompact = layout.isCompact;
+
+    final titleSection = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessments),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: AppColors.borderInput),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                  colorFilter:
-                      const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
-                ),
-              ),
-            ),
-          ),
+        AppButton.back(
+          iconAsset: '$_kAssetsDir/back_arrow.svg',
+          onPressed: () => context.deferGo(AppRoutes.assessments),
         ),
         SizedBox(width: 16.w),
         Expanded(
@@ -94,7 +92,7 @@ class _TitleBar extends StatelessWidget {
                 l10n.assessmentHubTitle,
                 style: TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 24.sp,
+                  fontSize: isMobile ? 20.sp : (isCompact ? 22.sp : 24.sp),
                   fontWeight: FontWeight.w600,
                   height: 32 / 24,
                   letterSpacing: 0.072,
@@ -105,7 +103,7 @@ class _TitleBar extends StatelessWidget {
                 l10n.hubPageSubtitle,
                 style: TextStyle(
                   color: AppColors.textBody,
-                  fontSize: 14.sp,
+                  fontSize: isMobile ? 13.sp : (isCompact ? 13.sp : 14.sp),
                   fontWeight: FontWeight.w400,
                   height: 20 / 14,
                   letterSpacing: -0.154,
@@ -114,41 +112,36 @@ class _TitleBar extends StatelessWidget {
             ],
           ),
         ),
+      ],
+    );
+
+    final addButton = AppButton(
+      label: l10n.addAssessment,
+      iconAsset: '$_kAssetsDir/plus.svg',
+      variant: AppButtonVariant.primary,
+      iconSize: 16.r,
+      size: isMobile ? AppButtonSize.md : AppButtonSize.lg,
+      fullWidth: layout.isCompact,
+      onPressed: () => showCreateAssessmentDialog(context: context),
+    );
+
+    if (layout.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          titleSection,
+          SizedBox(height: 16.h),
+          addButton,
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(child: titleSection),
         SizedBox(width: 16.w),
-        Material(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () => showCreateAssessmentDialog(context: context),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    '$_kAssetsDir/plus.svg',
-                    width: 16.r,
-                    height: 16.r,
-                    colorFilter:
-                        const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    l10n.addAssessment,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 24 / 16,
-                      letterSpacing: -0.32,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        addButton,
       ],
     );
   }
@@ -172,22 +165,37 @@ class _StatsRow extends StatelessWidget {
       ('0', l10n.hubCustomAssessments, 'hub_clipboard.svg'),
     ];
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final cards = [
+      for (final stat in stats)
+        _StatCard(value: stat.$1, label: stat.$2, icon: stat.$3),
+    ];
+
+    final layout = context.screenLayout;
+    if (layout.isCompact) {
+      final cardWidth = layout.isMobile
+          ? MediaQuery.sizeOf(context).width * 0.86
+          : ResponsiveHelper.getResponsiveWidth(
+              context,
+              mobile: 220,
+              tablet: 240,
+              web: 260,
+            );
+
+      return AppHorizontalScrollRow(
+        spacing: context.responsive(mobile: 12.0, tablet: 14.0, desktop: 16.0),
         children: [
-          for (var i = 0; i < stats.length; i++) ...[
-            Expanded(
-              child: _StatCard(
-                value: stats[i].$1,
-                label: stats[i].$2,
-                icon: stats[i].$3,
-              ),
-            ),
-            if (i != stats.length - 1) SizedBox(width: 16.w),
-          ],
+          for (final card in cards) SizedBox(width: cardWidth, child: card),
         ],
-      ),
+      );
+    }
+
+    return Row(
+      children: [
+        for (int i = 0; i < cards.length; i++) ...[
+          Expanded(child: cards[i]),
+          if (i != cards.length - 1) SizedBox(width: 16.w),
+        ],
+      ],
     );
   }
 }
@@ -201,8 +209,11 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.getCardPadding(context);
+    final isMobile = context.screenLayout.isMobile;
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -212,8 +223,8 @@ class _StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40.r,
-            height: 40.r,
+            width: isMobile ? 36.r : 40.r,
+            height: isMobile ? 36.r : 40.r,
             decoration: BoxDecoration(
               color: AppColors.primaryTint,
               borderRadius: BorderRadius.circular(10.r),
@@ -221,8 +232,8 @@ class _StatCard extends StatelessWidget {
             child: Center(
               child: SvgPicture.asset(
                 '$_kAssetsDir/$icon',
-                width: 20.r,
-                height: 20.r,
+                width: isMobile ? 18.r : 20.r,
+                height: isMobile ? 18.r : 20.r,
                 colorFilter:
                     const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
               ),
@@ -233,7 +244,7 @@ class _StatCard extends StatelessWidget {
             value,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 24.sp,
+              fontSize: isMobile ? 20.sp : 24.sp,
               fontWeight: FontWeight.w600,
               height: 32 / 24,
               letterSpacing: 0.072,
@@ -243,7 +254,7 @@ class _StatCard extends StatelessWidget {
             label,
             style: TextStyle(
               color: AppColors.textBody,
-              fontSize: 14.sp,
+              fontSize: isMobile ? 13.sp : 14.sp,
               fontWeight: FontWeight.w400,
               height: 20 / 14,
               letterSpacing: -0.154,
@@ -274,8 +285,22 @@ class _CriteriaCard extends StatelessWidget {
       (l10n.criteriaContinuousImprovement, l10n.criteriaContinuousImprovementDesc, 10),
     ];
 
+    final layout = context.screenLayout;
+    final padding = ResponsiveHelper.getCardPadding(context);
+    final isMobile = layout.isMobile;
+
+    final criteriaItems = [
+      for (final item in criteria)
+        _CriteriaItem(
+          title: item.$1,
+          description: item.$2,
+          weight: item.$3,
+          l10n: l10n,
+        ),
+    ];
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
@@ -288,7 +313,7 @@ class _CriteriaCard extends StatelessWidget {
             l10n.hubStandardEvaluationCriteria,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 18.sp,
+              fontSize: isMobile ? 16.sp : 18.sp,
               fontWeight: FontWeight.w600,
               height: 28 / 18,
               letterSpacing: -0.45,
@@ -297,33 +322,47 @@ class _CriteriaCard extends StatelessWidget {
           SizedBox(height: 16.h),
           Text(
             l10n.hubCriteriaIntro,
+            maxLines: isMobile ? 3 : null,
+            overflow: isMobile ? TextOverflow.ellipsis : null,
             style: TextStyle(
               color: AppColors.textBody,
-              fontSize: 14.sp,
+              fontSize: isMobile ? 13.sp : 14.sp,
               fontWeight: FontWeight.w400,
               height: 20 / 14,
               letterSpacing: -0.154,
             ),
           ),
           SizedBox(height: 16.h),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          if (layout.isCompact)
+            AppHorizontalScrollRow(
+              spacing: context.responsive(mobile: 12.0, tablet: 14.0, desktop: 16.0),
               children: [
-                for (var i = 0; i < criteria.length; i++) ...[
-                  Expanded(
-                    child: _CriteriaItem(
-                      title: criteria[i].$1,
-                      description: criteria[i].$2,
-                      weight: criteria[i].$3,
-                      l10n: l10n,
-                    ),
+                for (final item in criteriaItems)
+                  SizedBox(
+                    width: layout.isMobile
+                        ? MediaQuery.sizeOf(context).width * 0.72
+                        : ResponsiveHelper.getResponsiveWidth(
+                            context,
+                            mobile: 220,
+                            tablet: 240,
+                            web: 260,
+                          ),
+                    child: item,
                   ),
-                  if (i != criteria.length - 1) SizedBox(width: 16.w),
-                ],
               ],
+            )
+          else
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < criteriaItems.length; i++) ...[
+                    Expanded(child: criteriaItems[i]),
+                    if (i != criteriaItems.length - 1) SizedBox(width: 16.w),
+                  ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -431,6 +470,8 @@ class _FrameworksSection extends StatelessWidget {
       ),
     ];
 
+    final isMobile = context.screenLayout.isMobile;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -438,24 +479,36 @@ class _FrameworksSection extends StatelessWidget {
           l10n.hubStandardFrameworkAssessments,
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 18.sp,
+            fontSize: isMobile ? 16.sp : 18.sp,
             fontWeight: FontWeight.w600,
             height: 28 / 18,
             letterSpacing: -0.45,
           ),
         ),
         SizedBox(height: 16.h),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        if (context.screenLayout.isCompact)
+          Column(
             children: [
-              for (var i = 0; i < frameworks.length; i++) ...[
-                Expanded(child: _FrameworkCard(data: frameworks[i], l10n: l10n)),
-                if (i != frameworks.length - 1) SizedBox(width: 24.w),
+              for (int i = 0; i < frameworks.length; i++) ...[
+                _FrameworkCard(data: frameworks[i], l10n: l10n),
+                if (i != frameworks.length - 1) SizedBox(height: 16.h),
               ],
             ],
+          )
+        else
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < frameworks.length; i++) ...[
+                  Expanded(
+                    child: _FrameworkCard(data: frameworks[i], l10n: l10n),
+                  ),
+                  if (i != frameworks.length - 1) SizedBox(width: 24.w),
+                ],
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -489,19 +542,79 @@ class _FrameworkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.getCardPadding(context);
+    final layout = context.screenLayout;
+    final isMobile = layout.isMobile;
+
+    final startButton = Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(10.r),
+      child: InkWell(
+        onTap: () => context.deferGo(AppRoutes.assessmentQuestionnaire),
+        borderRadius: BorderRadius.circular(10.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 12.w : 16.w,
+            vertical: isMobile ? 10.h : 8.h,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                '$_kAssetsDir/play.svg',
+                width: 16.r,
+                height: 16.r,
+                colorFilter:
+                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              ),
+              SizedBox(width: 8.w),
+              Flexible(
+                child: Text(
+                  l10n.startAssessment,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: isMobile ? 14.sp : 16.sp,
+                    fontWeight: FontWeight.w500,
+                    height: 24 / 16,
+                    letterSpacing: -0.32,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final viewButton = AppButton.eye(
+      iconAsset: '$_kAssetsDir/eye.svg',
+      compact: isMobile,
+      onPressed: () => switch (data.detailName) {
+        'Cybersecurity' => context.deferGo(AppRoutes.assessmentCyber),
+        'COSO ERM' => context.deferGo(AppRoutes.assessmentCosoErm),
+        _ => context.deferGo(
+            AppRoutes.assessmentDetail,
+            extra: data.detailName,
+          ),
+      },
+    );
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            width: 48.r,
-            height: 48.r,
+            width: isMobile ? 40.r : 48.r,
+            height: isMobile ? 40.r : 48.r,
             decoration: BoxDecoration(
               color: AppColors.primaryTint,
               borderRadius: BorderRadius.circular(10.r),
@@ -509,8 +622,8 @@ class _FrameworkCard extends StatelessWidget {
             child: Center(
               child: SvgPicture.asset(
                 '$_kAssetsDir/${data.icon}',
-                width: 24.r,
-                height: 24.r,
+                width: isMobile ? 20.r : 24.r,
+                height: isMobile ? 20.r : 24.r,
                 colorFilter:
                     const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
               ),
@@ -521,7 +634,7 @@ class _FrameworkCard extends StatelessWidget {
             data.name,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 18.sp,
+              fontSize: isMobile ? 16.sp : 18.sp,
               fontWeight: FontWeight.w600,
               height: 28 / 18,
               letterSpacing: -0.45,
@@ -530,9 +643,11 @@ class _FrameworkCard extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             data.description,
+            maxLines: isMobile ? 3 : null,
+            overflow: isMobile ? TextOverflow.ellipsis : null,
             style: TextStyle(
               color: AppColors.textBody,
-              fontSize: 14.sp,
+              fontSize: isMobile ? 13.sp : 14.sp,
               fontWeight: FontWeight.w400,
               height: 20 / 14,
               letterSpacing: -0.154,
@@ -545,80 +660,23 @@ class _FrameworkCard extends StatelessWidget {
           SizedBox(height: 8.h),
           _metaRow(l10n.hubEstTimeLabel, data.estTime),
           SizedBox(height: 16.h),
-          Row(
-            children: [
-              Expanded(
-                child: Material(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: InkWell(
-                    onTap: () =>
-                        context.deferGo(AppRoutes.assessmentQuestionnaire),
-                    borderRadius: BorderRadius.circular(10.r),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            '$_kAssetsDir/play.svg',
-                            width: 16.r,
-                            height: 16.r,
-                            colorFilter: const ColorFilter.mode(
-                                Colors.white, BlendMode.srcIn),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            l10n.startAssessment,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              height: 24 / 16,
-                              letterSpacing: -0.32,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Material(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(10.r),
-                child: InkWell(
-                  onTap: () => switch (data.detailName) {
-                    'Cybersecurity' =>
-                      context.deferGo(AppRoutes.assessmentCyber),
-                    'COSO ERM' =>
-                      context.deferGo(AppRoutes.assessmentCosoErm),
-                    _ => context.deferGo(
-                        AppRoutes.assessmentDetail,
-                        extra: data.detailName,
-                      ),
-                  },
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 12.h),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: AppColors.borderInput),
-                    ),
-                    child: SvgPicture.asset(
-                      '$_kAssetsDir/eye.svg',
-                      width: 16.r,
-                      height: 16.r,
-                      colorFilter: const ColorFilter.mode(
-                          AppColors.textPrimary, BlendMode.srcIn),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          if (isMobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                startButton,
+                SizedBox(height: 8.h),
+                viewButton,
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(child: startButton),
+                SizedBox(width: 8.w),
+                viewButton,
+              ],
+            ),
         ],
       ),
     );
@@ -669,8 +727,21 @@ class _FeaturesCard extends StatelessWidget {
       (l10n.featureProgressTracking, l10n.featureProgressTrackingDesc, 'hub_clipboard.svg'),
     ];
 
+    final layout = context.screenLayout;
+    final padding = ResponsiveHelper.getCardPadding(context);
+    final isMobile = layout.isMobile;
+
+    final featureItems = [
+      for (final feature in features)
+        _FeatureItem(
+          title: feature.$1,
+          description: feature.$2,
+          icon: feature.$3,
+        ),
+    ];
+
     return Container(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: _kCriteriaBg,
         borderRadius: BorderRadius.circular(10.r),
@@ -683,30 +754,56 @@ class _FeaturesCard extends StatelessWidget {
             l10n.hubAssessmentFeatures,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 18.sp,
+              fontSize: isMobile ? 16.sp : 18.sp,
               fontWeight: FontWeight.w600,
               height: 28 / 18,
               letterSpacing: -0.45,
             ),
           ),
           SizedBox(height: 16.h),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          if (layout.isMobile)
+            Column(
               children: [
-                for (var i = 0; i < features.length; i++) ...[
-                  Expanded(
-                    child: _FeatureItem(
-                      title: features[i].$1,
-                      description: features[i].$2,
-                      icon: features[i].$3,
-                    ),
-                  ),
-                  if (i != features.length - 1) SizedBox(width: 16.w),
+                for (int i = 0; i < featureItems.length; i++) ...[
+                  featureItems[i],
+                  if (i != featureItems.length - 1) SizedBox(height: 12.h),
                 ],
               ],
+            )
+          else if (layout.isTabletSmall)
+            Column(
+              children: [
+                for (int i = 0; i < featureItems.length; i += 2) ...[
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: featureItems[i]),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: i + 1 < featureItems.length
+                              ? featureItems[i + 1]
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (i + 2 < featureItems.length) SizedBox(height: 12.h),
+                ],
+              ],
+            )
+          else
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < featureItems.length; i++) ...[
+                    Expanded(child: featureItems[i]),
+                    if (i != featureItems.length - 1) SizedBox(width: 16.w),
+                  ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

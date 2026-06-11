@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
@@ -348,27 +347,10 @@ class _DetailHeader extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: SizedBox(
-                width: 32.r,
-                height: 32.r,
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/figma/library/svg/close_white.svg',
-                    width: 20.r,
-                    height: 20.r,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          AppButton.close(
+            onPressed: onClose,
+            iconSize: 20.r,
+            padding: EdgeInsets.all(6.r),
           ),
         ],
       ),

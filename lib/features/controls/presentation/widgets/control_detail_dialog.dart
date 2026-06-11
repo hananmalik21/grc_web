@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
 import 'package:grc_web/features/controls/presentation/widgets/add_control_dialog.dart';
 
 const _kEffectivenessGreen = Color(0xFF22C55E);
@@ -228,87 +229,127 @@ class ControlDetailDialog extends StatelessWidget {
   final ControlDetailData data;
   final VoidCallback onEdit;
 
-  static const _dialogWidth = 1152.0;
+  static const maxDialogWidth = 1152.0;
 
   @override
   Widget build(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-    final dialogWidth = math.min(_dialogWidth.w, screen.width - 48.w);
-    final dialogHeight = math.min(1462.h, screen.height * 0.92);
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-      child: SizedBox(
-        width: dialogWidth,
-        height: dialogHeight,
-        child: Material(
-          color: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10.r),
-              boxShadow: const [
-                BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20)),
-                BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 8)),
-              ],
-            ),
-            child: Column(
-              children: [
-                _Header(
-                  name: data.name,
-                  subtitle: 'Control ID: ${data.id} | ${data.typeLabel}',
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-                Expanded(
-                  child: ColoredBox(
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: dialogWidth,
+              height: metrics.maxHeight,
+              child: Material(
+                color: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                borderRadius: BorderRadius.circular(10.r),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.all(24.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _OverviewSection(data: data),
-                          SizedBox(height: 24.h),
-                          _EffectivenessSection(percent: data.effectiveness),
-                          SizedBox(height: 24.h),
-                          _TestHistorySection(results: data.testResults),
-                          if (data.linkedRisks.isNotEmpty) ...[
-                            SizedBox(height: 24.h),
-                            _LinkedRisksSection(risks: data.linkedRisks),
-                          ],
-                          if (data.linkedAssets.isNotEmpty) ...[
-                            SizedBox(height: 24.h),
-                            _LinkedAssetsSection(assets: data.linkedAssets),
-                          ],
-                          if (data.linkedAssessments.isNotEmpty) ...[
-                            SizedBox(height: 24.h),
-                            _LinkedAssessmentsSection(assessments: data.linkedAssessments),
-                          ],
-                          if (data.evidence.isNotEmpty) ...[
-                            SizedBox(height: 24.h),
-                            _EvidenceSection(items: data.evidence),
-                          ],
-                        ],
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 25,
+                        offset: Offset(0, 20),
                       ),
-                    ),
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _Header(
+                        name: data.name,
+                        subtitle: 'Control ID: ${data.id} | ${data.typeLabel}',
+                        onClose: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                      Expanded(
+                        child: ColoredBox(
+                          color: Colors.white,
+                          child: SingleChildScrollView(
+                            padding: metrics.contentPadding,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _OverviewSection(data: data, metrics: metrics),
+                                _EffectivenessSection(
+                                  percent: data.effectiveness,
+                                  metrics: metrics,
+                                ),
+                                _TestHistorySection(
+                                  results: data.testResults,
+                                  metrics: metrics,
+                                ),
+                                if (data.linkedRisks.isNotEmpty)
+                                  _LinkedRisksSection(
+                                    risks: data.linkedRisks,
+                                    metrics: metrics,
+                                  ),
+                                if (data.linkedAssets.isNotEmpty)
+                                  _LinkedAssetsSection(
+                                    assets: data.linkedAssets,
+                                    metrics: metrics,
+                                  ),
+                                if (data.linkedAssessments.isNotEmpty)
+                                  _LinkedAssessmentsSection(
+                                    assessments: data.linkedAssessments,
+                                    metrics: metrics,
+                                  ),
+                                if (data.evidence.isNotEmpty)
+                                  _EvidenceSection(
+                                    items: data.evidence,
+                                    metrics: metrics,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.fromLTRB(
+                          metrics.contentPadding.left,
+                          0,
+                          metrics.contentPadding.right,
+                          metrics.contentPadding.bottom,
+                        ),
+                        child: _Footer(
+                          onEdit: onEdit,
+                          onClose: () => Navigator.of(context).pop(),
+                          metrics: metrics,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
-                  child: _Footer(
-                    onEdit: onEdit,
-                    onClose: () => Navigator.of(context).pop(),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -319,16 +360,18 @@ class _Header extends StatelessWidget {
     required this.name,
     required this.subtitle,
     required this.onClose,
+    required this.metrics,
   });
 
   final String name;
   final String subtitle;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 17.h),
+      padding: metrics.headerPadding,
       decoration: const BoxDecoration(
         color: AppColors.primary,
         border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -344,7 +387,7 @@ class _Header extends StatelessWidget {
                   name,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20.sp,
+                    fontSize: metrics.isPhone ? 18.sp : 20.sp,
                     fontWeight: FontWeight.w600,
                     height: 28 / 20,
                     letterSpacing: -0.46,
@@ -355,7 +398,7 @@ class _Header extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14.sp,
+                    fontSize: metrics.isPhone ? 13.sp : 14.sp,
                     fontWeight: FontWeight.w400,
                     height: 20 / 14,
                     letterSpacing: -0.154,
@@ -364,22 +407,7 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: SvgPicture.asset(
-                  'assets/figma/library/svg/close_white.svg',
-                  width: 28.r,
-                  height: 28.r,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-              ),
-            ),
-          ),
+          AppButton.close(onPressed: onClose),
         ],
       ),
     );
@@ -387,126 +415,172 @@ class _Header extends StatelessWidget {
 }
 
 class _OverviewSection extends StatelessWidget {
-  const _OverviewSection({required this.data});
+  const _OverviewSection({required this.data, required this.metrics});
 
   final ControlDetailData data;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final descriptionColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _fieldLabel('Description'),
-              SizedBox(height: 12.h),
-              Text(
-                data.description,
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-              SizedBox(height: 12.h),
-              _fieldLabel('Framework Mappings'),
-              SizedBox(height: 12.h),
-              Wrap(
-                spacing: 8.w,
-                runSpacing: 8.h,
-                children: [
-                  for (final fw in data.frameworks)
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLightBg,
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(color: _kLinkedCardBorder),
-                      ),
-                      child: Text(
-                        fw,
-                        style: TextStyle(
-                          color: AppColors.weightBadgeFg,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          height: 20 / 14,
-                          letterSpacing: -0.154,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
+        _fieldLabel('Description'),
+        SizedBox(height: 12.h),
+        Text(
+          data.description,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            height: 20 / 14,
+            letterSpacing: -0.154,
           ),
         ),
-        SizedBox(width: 24.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _metaField(
-                label: 'Status',
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: data.statusBg,
-                    borderRadius: BorderRadius.circular(999.r),
-                  ),
-                  child: Text(
-                    data.statusLabel,
-                    style: TextStyle(
-                      color: data.statusFg,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 16 / 12,
-                    ),
+        SizedBox(height: 12.h),
+        _fieldLabel('Framework Mappings'),
+        SizedBox(height: 12.h),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 8.h,
+          children: [
+            for (final fw in data.frameworks)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLightBg,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: _kLinkedCardBorder),
+                ),
+                child: Text(
+                  fw,
+                  style: TextStyle(
+                    color: AppColors.weightBadgeFg,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    height: 20 / 14,
+                    letterSpacing: -0.154,
                   ),
                 ),
               ),
-              SizedBox(height: 16.h),
-              _metaField(
-                label: 'Owner',
-                value: data.owner,
-              ),
-              SizedBox(height: 16.h),
-              _metaField(
-                label: 'Test Frequency',
-                value: data.testFrequency,
-              ),
-              SizedBox(height: 16.h),
-              _metaField(
-                label: 'Last Assessed',
-                value: data.lastAssessed,
-              ),
-            ],
+          ],
+        ),
+      ],
+    );
+
+    final statusField = _metaField(
+      label: 'Status',
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+        decoration: BoxDecoration(
+          color: data.statusBg,
+          borderRadius: BorderRadius.circular(999.r),
+        ),
+        child: Text(
+          data.statusLabel,
+          style: TextStyle(
+            color: data.statusFg,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+            height: 16 / 12,
           ),
         ),
+      ),
+    );
+
+    final ownerField = _metaField(label: 'Owner', value: data.owner);
+    final frequencyField =
+        _metaField(label: 'Test Frequency', value: data.testFrequency);
+    final assessedField =
+        _metaField(label: 'Last Assessed', value: data.lastAssessed);
+
+    if (metrics.isWide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 2, child: descriptionColumn),
+          SizedBox(width: 24.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                statusField,
+                SizedBox(height: metrics.fieldGap),
+                ownerField,
+                SizedBox(height: metrics.fieldGap),
+                frequencyField,
+                SizedBox(height: metrics.fieldGap),
+                assessedField,
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          descriptionColumn,
+          SizedBox(height: metrics.sectionGap),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: statusField),
+              SizedBox(width: 16.w),
+              Expanded(child: ownerField),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: frequencyField),
+              SizedBox(width: 16.w),
+              Expanded(child: assessedField),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        descriptionColumn,
+        SizedBox(height: metrics.sectionGap),
+        statusField,
+        SizedBox(height: metrics.fieldGap),
+        ownerField,
+        SizedBox(height: metrics.fieldGap),
+        frequencyField,
+        SizedBox(height: metrics.fieldGap),
+        assessedField,
       ],
     );
   }
 }
 
 class _EffectivenessSection extends StatelessWidget {
-  const _EffectivenessSection({required this.percent});
+  const _EffectivenessSection({
+    required this.percent,
+    required this.metrics,
+  });
 
   final int percent;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         _fieldLabel('Control Effectiveness'),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         Container(
-          padding: EdgeInsets.all(24.w),
+          padding: EdgeInsets.all(metrics.isPhone ? 16.w : 24.w),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(10.r),
@@ -558,25 +632,28 @@ class _EffectivenessSection extends StatelessWidget {
 }
 
 class _TestHistorySection extends StatelessWidget {
-  const _TestHistorySection({required this.results});
+  const _TestHistorySection({
+    required this.results,
+    required this.metrics,
+  });
 
   final List<ControlTestResult> results;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         _SectionTitle(
           iconAsset: 'assets/figma/controls/svg/detail_test_history.svg',
           title: 'Test Results History',
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         for (var i = 0; i < results.length; i++) ...[
-          _TestResultRow(result: results[i]),
-          if (i != results.length - 1) SizedBox(height: 8.h),
+          _TestResultRow(result: results[i], metrics: metrics),
+          if (i != results.length - 1) SizedBox(height: metrics.cardGap),
         ],
       ],
     );
@@ -584,12 +661,44 @@ class _TestHistorySection extends StatelessWidget {
 }
 
 class _TestResultRow extends StatelessWidget {
-  const _TestResultRow({required this.result});
+  const _TestResultRow({
+    required this.result,
+    required this.metrics,
+  });
 
   final ControlTestResult result;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final statusBadge = Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: AppColors.statusLowBg,
+        borderRadius: BorderRadius.circular(999.r),
+      ),
+      child: Text(
+        result.result,
+        style: TextStyle(
+          color: AppColors.statusLowFg,
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+          height: 16 / 12,
+        ),
+      ),
+    );
+
+    final scoreText = Text(
+      '${result.score}%',
+      style: TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w500,
+        height: 20 / 14,
+        letterSpacing: -0.154,
+      ),
+    );
+
     return Container(
       padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
       decoration: BoxDecoration(
@@ -597,31 +706,36 @@ class _TestResultRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 8.r,
-            height: 8.r,
-            decoration: const BoxDecoration(
-              color: _kTestDotGreen,
-              shape: BoxShape.circle,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
+      child: metrics.isPhone
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  result.date,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 20 / 14,
-                    letterSpacing: -0.154,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      width: 8.r,
+                      height: 8.r,
+                      decoration: const BoxDecoration(
+                        color: _kTestDotGreen,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Text(
+                        result.date,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          height: 20 / 14,
+                          letterSpacing: -0.154,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                SizedBox(height: 4.h),
                 Text(
                   'Tested by: ${result.testedBy}',
                   style: TextStyle(
@@ -631,67 +745,86 @@ class _TestResultRow extends StatelessWidget {
                     height: 16 / 12,
                   ),
                 ),
+                SizedBox(height: 10.h),
+                Row(
+                  children: [
+                    statusBadge,
+                    const Spacer(),
+                    scoreText,
+                  ],
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Container(
+                  width: 8.r,
+                  height: 8.r,
+                  decoration: const BoxDecoration(
+                    color: _kTestDotGreen,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        result.date,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          height: 20 / 14,
+                          letterSpacing: -0.154,
+                        ),
+                      ),
+                      Text(
+                        'Tested by: ${result.testedBy}',
+                        style: TextStyle(
+                          color: AppColors.textBody,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          height: 16 / 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                statusBadge,
+                SizedBox(width: 12.w),
+                scoreText,
               ],
             ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: AppColors.statusLowBg,
-              borderRadius: BorderRadius.circular(999.r),
-            ),
-            child: Text(
-              result.result,
-              style: TextStyle(
-                color: AppColors.statusLowFg,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                height: 16 / 12,
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            '${result.score}%',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-              height: 20 / 14,
-              letterSpacing: -0.154,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
 
 class _LinkedRisksSection extends StatelessWidget {
-  const _LinkedRisksSection({required this.risks});
+  const _LinkedRisksSection({
+    required this.risks,
+    required this.metrics,
+  });
 
   final List<ControlLinkedRisk> risks;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         _SectionTitle(
           iconAsset: 'assets/figma/controls/svg/link_risk.svg',
           title: 'Linked Risks (${risks.length})',
           titleColor: _kRiskSectionTitle,
         ),
-        SizedBox(height: 16.h),
-        Row(
-          children: [
-            for (var i = 0; i < risks.length; i++) ...[
-              if (i > 0) SizedBox(width: 12.w),
-              Expanded(child: _RiskCard(risk: risks[i])),
-            ],
-          ],
+        SizedBox(height: metrics.fieldGap),
+        _ResponsiveCardRow(
+          metrics: metrics,
+          children: [for (final risk in risks) _RiskCard(risk: risk)],
         ),
       ],
     );
@@ -768,29 +901,28 @@ class _RiskCard extends StatelessWidget {
 }
 
 class _LinkedAssetsSection extends StatelessWidget {
-  const _LinkedAssetsSection({required this.assets});
+  const _LinkedAssetsSection({
+    required this.assets,
+    required this.metrics,
+  });
 
   final List<String> assets;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         _SectionTitle(
           iconAsset: 'assets/figma/controls/svg/detail_linked_assets_header.svg',
           title: 'Linked Assets (${assets.length})',
         ),
-        SizedBox(height: 16.h),
-        Row(
-          children: [
-            for (var i = 0; i < assets.length; i++) ...[
-              if (i > 0) SizedBox(width: 12.w),
-              Expanded(child: _AssetCard(id: assets[i])),
-            ],
-          ],
+        SizedBox(height: metrics.fieldGap),
+        _ResponsiveCardRow(
+          metrics: metrics,
+          children: [for (final id in assets) _AssetCard(id: id)],
         ),
       ],
     );
@@ -843,28 +975,30 @@ class _AssetCard extends StatelessWidget {
 }
 
 class _LinkedAssessmentsSection extends StatelessWidget {
-  const _LinkedAssessmentsSection({required this.assessments});
+  const _LinkedAssessmentsSection({
+    required this.assessments,
+    required this.metrics,
+  });
 
   final List<ControlLinkedAssessment> assessments;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         _SectionTitle(
           iconAsset: 'assets/figma/controls/svg/detail_linked_assessments_header.svg',
           title: 'Linked Assessments (${assessments.length})',
         ),
-        SizedBox(height: 16.h),
-        Row(
+        SizedBox(height: metrics.fieldGap),
+        _ResponsiveCardRow(
+          metrics: metrics,
           children: [
-            for (var i = 0; i < assessments.length; i++) ...[
-              if (i > 0) SizedBox(width: 12.w),
-              Expanded(child: _AssessmentCard(assessment: assessments[i])),
-            ],
+            for (final assessment in assessments)
+              _AssessmentCard(assessment: assessment),
           ],
         ),
       ],
@@ -927,25 +1061,28 @@ class _AssessmentCard extends StatelessWidget {
 }
 
 class _EvidenceSection extends StatelessWidget {
-  const _EvidenceSection({required this.items});
+  const _EvidenceSection({
+    required this.items,
+    required this.metrics,
+  });
 
   final List<ControlEvidence> items;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
+        _SectionDivider(metrics: metrics),
         _SectionTitle(
           iconAsset: 'assets/figma/controls/svg/detail_evidence_header.svg',
           title: 'Evidence & Documentation (${items.length})',
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         for (var i = 0; i < items.length; i++) ...[
-          _EvidenceRow(item: items[i]),
-          if (i != items.length - 1) SizedBox(height: 8.h),
+          _EvidenceRow(item: items[i], metrics: metrics),
+          if (i != items.length - 1) SizedBox(height: metrics.cardGap),
         ],
       ],
     );
@@ -953,12 +1090,48 @@ class _EvidenceSection extends StatelessWidget {
 }
 
 class _EvidenceRow extends StatelessWidget {
-  const _EvidenceRow({required this.item});
+  const _EvidenceRow({
+    required this.item,
+    required this.metrics,
+  });
 
   final ControlEvidence item;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final viewButton = AppButton.text(
+      label: 'View',
+      fontSize: 14.sp,
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+      onPressed: () {},
+    );
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          item.title,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            height: 20 / 14,
+            letterSpacing: -0.154,
+          ),
+        ),
+        Text(
+          item.meta,
+          style: TextStyle(
+            color: AppColors.textBody,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            height: 16 / 12,
+          ),
+        ),
+      ],
+    );
+
     return Container(
       padding: EdgeInsets.all(13.w),
       decoration: BoxDecoration(
@@ -966,60 +1139,38 @@ class _EvidenceRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: _kLinkedCardBorder),
       ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            'assets/figma/controls/svg/integration_evidence.svg',
-            width: 24.r,
-            height: 24.r,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
+      child: metrics.isPhone
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.title,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 20 / 14,
-                    letterSpacing: -0.154,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/figma/controls/svg/integration_evidence.svg',
+                      width: 24.r,
+                      height: 24.r,
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(child: content),
+                  ],
                 ),
-                Text(
-                  item.meta,
-                  style: TextStyle(
-                    color: AppColors.textBody,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    height: 16 / 12,
-                  ),
+                SizedBox(height: 10.h),
+                viewButton,
+              ],
+            )
+          : Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/figma/controls/svg/integration_evidence.svg',
+                  width: 24.r,
+                  height: 24.r,
                 ),
+                SizedBox(width: 12.w),
+                Expanded(child: content),
+                viewButton,
               ],
             ),
-          ),
-          TextButton(
-            onPressed: () {},
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              'View',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                height: 20 / 14,
-                letterSpacing: -0.154,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -1028,51 +1179,169 @@ class _Footer extends StatelessWidget {
   const _Footer({
     required this.onEdit,
     required this.onClose,
+    required this.metrics,
   });
 
   final VoidCallback onEdit;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = metrics.isPhone ? 20.r : 24.r;
+
+    final editButton = AppButton(
+      label: 'Edit Control',
+      iconAsset: 'assets/figma/controls/svg/detail_edit.svg',
+      iconSize: iconSize,
+      variant: AppButtonVariant.primary,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onEdit,
+    );
+
+    final deleteButton = AppButton(
+      label: 'Delete',
+      iconAsset: 'assets/figma/controls/svg/detail_delete.svg',
+      iconSize: iconSize,
+      iconColor: AppColors.deletePrimary,
+      borderColor: AppColors.deleteBorderRed,
+      variant: AppButtonVariant.outlined,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: () {},
+    );
+
+    final scheduleButton = AppButton(
+      label: 'Schedule Test',
+      variant: AppButtonVariant.outlined,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: () {},
+    );
+
+    final closeButton = AppButton(
+      label: 'Close',
+      variant: AppButtonVariant.outlined,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onClose,
+    );
+
+    Widget actions;
+    if (metrics.isWide) {
+      actions = Row(
+        children: [
+          editButton,
+          SizedBox(width: 12.w),
+          deleteButton,
+          const Spacer(),
+          scheduleButton,
+          SizedBox(width: 12.w),
+          closeButton,
+        ],
+      );
+    } else if (metrics.isCompact) {
+      actions = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: editButton),
+              SizedBox(width: 12.w),
+              Expanded(child: deleteButton),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(child: scheduleButton),
+              SizedBox(width: 12.w),
+              Expanded(child: closeButton),
+            ],
+          ),
+        ],
+      );
+    } else {
+      actions = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          editButton,
+          SizedBox(height: 10.h),
+          deleteButton,
+          SizedBox(height: 10.h),
+          scheduleButton,
+          SizedBox(height: 10.h),
+          closeButton,
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionDivider(),
-        SizedBox(height: 25.h),
-        Row(
-          children: [
-            AppButton(
-              label: 'Edit Control',
-              iconAsset: 'assets/figma/controls/svg/detail_edit.svg',
-              iconSize: 24.r,
-              variant: AppButtonVariant.primary,
-              onPressed: onEdit,
-            ),
-            SizedBox(width: 12.w),
-            AppButton(
-              label: 'Delete',
-              iconAsset: 'assets/figma/controls/svg/detail_delete.svg',
-              iconSize: 24.r,
-              iconColor: AppColors.deletePrimary,
-              borderColor: AppColors.deleteBorderRed,
-              variant: AppButtonVariant.outlined,
-              onPressed: () {},
-            ),
-            const Spacer(),
-            AppButton(
-              label: 'Schedule Test',
-              variant: AppButtonVariant.outlined,
-              onPressed: () {},
-            ),
-            SizedBox(width: 12.w),
-            AppButton(
-              label: 'Close',
-              variant: AppButtonVariant.outlined,
-              onPressed: onClose,
-            ),
-          ],
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          padding: EdgeInsets.only(top: metrics.isPhone ? 20.h : 25.h),
+          child: actions,
         ),
+      ],
+    );
+  }
+}
+
+class _ResponsiveCardRow extends StatelessWidget {
+  const _ResponsiveCardRow({
+    required this.metrics,
+    required this.children,
+  });
+
+  final AppResponsiveDialogMetrics metrics;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    if (metrics.isWide) {
+      return Row(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) SizedBox(width: 12.w),
+            Expanded(child: children[i]),
+          ],
+        ],
+      );
+    }
+
+    if (metrics.isCompact && children.length >= 2) {
+      final rows = <Widget>[];
+      for (var i = 0; i < children.length; i += 2) {
+        if (i > 0) rows.add(SizedBox(height: metrics.cardGap));
+        if (i + 1 < children.length) {
+          rows.add(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: children[i]),
+                SizedBox(width: 12.w),
+                Expanded(child: children[i + 1]),
+              ],
+            ),
+          );
+        } else {
+          rows.add(children[i]);
+        }
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: rows,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          children[i],
+          if (i != children.length - 1) SizedBox(height: metrics.cardGap),
+        ],
       ],
     );
   }
@@ -1146,11 +1415,20 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _SectionDivider extends StatelessWidget {
-  const _SectionDivider();
+  const _SectionDivider({required this.metrics});
+
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(color: AppColors.border, height: 1, thickness: 1);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: metrics.majorSectionGap),
+        const Divider(color: AppColors.border, height: 1, thickness: 1),
+        SizedBox(height: metrics.isPhone ? 20.h : 25.h),
+      ],
+    );
   }
 }
 

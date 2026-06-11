@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
 import 'package:grc_web/core/widgets/app_button.dart';
+import 'package:grc_web/core/widgets/app_responsive_dialog_metrics.dart';
 import 'package:grc_web/core/widgets/app_select_field.dart';
 import 'package:grc_web/core/widgets/app_text_field.dart';
 import 'package:grc_web/features/tprm/presentation/widgets/vendor_detail_dialog.dart';
@@ -193,7 +194,7 @@ class AddVendorDialog extends StatefulWidget {
 
   final VendorFormData? initialData;
 
-  static const _dialogWidth = 896.0;
+  static const maxDialogWidth = 896.0;
 
   @override
   State<AddVendorDialog> createState() => _AddVendorDialogState();
@@ -347,69 +348,116 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-    final dialogWidth = math.min(AddVendorDialog._dialogWidth.w, screen.width - 48.w);
-    final dialogHeight = math.min(1556.h, screen.height * 0.92);
+    final viewport = MediaQuery.sizeOf(context);
+    final insetPadding =
+        AppResponsiveDialogMetrics.insetPaddingForViewport(viewport.width);
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-      child: SizedBox(
-        width: dialogWidth,
-        height: dialogHeight,
-        child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10.r),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(10.r),
-              boxShadow: const [
-                BoxShadow(color: Color(0x1A000000), blurRadius: 25, offset: Offset(0, 20)),
-                BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 8)),
-              ],
-            ),
-            child: Column(
-              children: [
-                _DialogHeader(
-                  title: _isEditing ? 'Edit Vendor' : 'Add New Vendor',
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(24.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildBasicInformationSection(),
-                        _SectionDivider(title: 'Risk & Financial Information'),
-                        _buildRiskFinancialSection(),
-                        _SectionDivider(title: 'GRC Integration'),
-                        _buildGrcIntegrationSection(),
-                        _SectionDivider(title: 'Security Certifications'),
-                        _buildCertificationsSection(),
-                        _SectionDivider(title: 'Assessment Scores (0-100)'),
-                        _buildAssessmentScoresSection(),
-                        SizedBox(height: 24.h),
-                        _DialogFooter(
+      insetPadding: insetPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialogWidth = math.min(
+            constraints.maxWidth,
+            AddVendorDialog.maxDialogWidth,
+          );
+          final metrics = AppResponsiveDialogMetrics.fromContext(
+            context,
+            dialogWidth: dialogWidth,
+            dialogHeight: constraints.maxHeight,
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: dialogWidth,
+              height: metrics.maxHeight,
+              child: Material(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10.r),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 25,
+                        offset: Offset(0, 20),
+                      ),
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _DialogHeader(
+                        title: _isEditing ? 'Edit Vendor' : 'Add New Vendor',
+                        onClose: () => Navigator.of(context).pop(),
+                        metrics: metrics,
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: metrics.contentPadding,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildBasicInformationSection(metrics),
+                              _SectionDivider(
+                                title: 'Risk & Financial Information',
+                                metrics: metrics,
+                              ),
+                              _buildRiskFinancialSection(metrics),
+                              _SectionDivider(
+                                title: 'GRC Integration',
+                                metrics: metrics,
+                              ),
+                              _buildGrcIntegrationSection(metrics),
+                              _SectionDivider(
+                                title: 'Security Certifications',
+                                metrics: metrics,
+                              ),
+                              _buildCertificationsSection(metrics),
+                              _SectionDivider(
+                                title: 'Assessment Scores (0-100)',
+                                metrics: metrics,
+                              ),
+                              _buildAssessmentScoresSection(metrics),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        color: AppColors.surface,
+                        padding: EdgeInsets.fromLTRB(
+                          metrics.contentPadding.left,
+                          0,
+                          metrics.contentPadding.right,
+                          metrics.contentPadding.bottom,
+                        ),
+                        child: _DialogFooter(
                           isEditing: _isEditing,
                           onCancel: () => Navigator.of(context).pop(),
                           onSubmit: () => Navigator.of(context).pop(),
+                          metrics: metrics,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildBasicInformationSection() {
+  Widget _buildBasicInformationSection(AppResponsiveDialogMetrics metrics) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -422,8 +470,9 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
           controller: _nameController,
           hint: 'e.g., Cloud Infrastructure Services Inc.',
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _TwoColumnRow(
+          metrics: metrics,
           left: AppSelectField<String>(
             label: 'Category',
             isRequired: true,
@@ -447,8 +496,9 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
             contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _TwoColumnRow(
+          metrics: metrics,
           left: AppSelectField<String>(
             label: 'Data Access Level',
             isRequired: true,
@@ -474,8 +524,9 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
             contentPadding: EdgeInsets.fromLTRB(21.w, 9.h, 12.w, 9.h),
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _TwoColumnRow(
+          metrics: metrics,
           left: AppTextField(
             label: 'Geography',
             labelSpacing: 8,
@@ -489,7 +540,7 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
             hint: 'e.g., CTO',
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         AppTextField(
           label: 'Services Provided',
           labelSpacing: 8,
@@ -502,11 +553,12 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
     );
   }
 
-  Widget _buildRiskFinancialSection() {
+  Widget _buildRiskFinancialSection(AppResponsiveDialogMetrics metrics) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _ThreeColumnRow(
+          metrics: metrics,
           children: [
             _numericField('Risk Rating (0-100)', _riskRatingController),
             AppSelectField<String>(
@@ -523,16 +575,18 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
             _numericField('Inherent Risk (%)', _inherentRiskController),
           ],
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _ThreeColumnRow(
+          metrics: metrics,
           children: [
             _numericField('Residual Risk (%)', _residualRiskController),
             _numericField('Control Effectiveness (%)', _controlEffectivenessController),
             _numericField('Contract Value (\$)', _contractValueController),
           ],
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _ThreeColumnRow(
+          metrics: metrics,
           children: [
             _numericField('Annual Spend (\$)', _annualSpendController),
             AppTextField(
@@ -544,32 +598,22 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
             _dateField('Last Assessment', _lastAssessmentController, () => _pickDate(isLast: true)),
           ],
         ),
-        SizedBox(height: 16.h),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _dateField(
-                'Next Assessment',
-                _nextAssessmentController,
-                () => _pickDate(isLast: false),
-              ),
-            ),
-            SizedBox(width: 16.w),
-            const Expanded(child: SizedBox()),
-            SizedBox(width: 16.w),
-            const Expanded(child: SizedBox()),
-          ],
+        SizedBox(height: metrics.fieldGap),
+        _dateField(
+          'Next Assessment',
+          _nextAssessmentController,
+          () => _pickDate(isLast: false),
         ),
       ],
     );
   }
 
-  Widget _buildGrcIntegrationSection() {
+  Widget _buildGrcIntegrationSection(AppResponsiveDialogMetrics metrics) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _TwoColumnRow(
+          metrics: metrics,
           left: AppTextField(
             label: 'Linked Assets (comma-separated IDs)',
             labelSpacing: 8,
@@ -583,8 +627,9 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
             hint: 'R-001, R-002',
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: metrics.fieldGap),
         _TwoColumnRow(
+          metrics: metrics,
           left: AppTextField(
             label: 'Linked Controls (comma-separated IDs)',
             labelSpacing: 8,
@@ -602,44 +647,118 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
     );
   }
 
-  Widget _buildCertificationsSection() {
-    return Row(
-      children: [
-        for (var i = 0; i < _certificationOptions.length; i++) ...[
-          if (i > 0) SizedBox(width: 16.w),
-          Expanded(
-            child: _CertificationCheckbox(
-              label: _certificationOptions[i].$2,
-              value: _certifications.contains(_certificationOptions[i].$1),
-              onChanged: (checked) {
-                setState(() {
-                  if (checked) {
-                    _certifications.add(_certificationOptions[i].$1);
-                  } else {
-                    _certifications.remove(_certificationOptions[i].$1);
-                  }
-                });
-              },
-            ),
-          ),
+  Widget _buildCertificationsSection(AppResponsiveDialogMetrics metrics) {
+    final checkboxes = [
+      for (var i = 0; i < _certificationOptions.length; i++)
+        _CertificationCheckbox(
+          label: _certificationOptions[i].$2,
+          value: _certifications.contains(_certificationOptions[i].$1),
+          onChanged: (checked) {
+            setState(() {
+              if (checked) {
+                _certifications.add(_certificationOptions[i].$1);
+              } else {
+                _certifications.remove(_certificationOptions[i].$1);
+              }
+            });
+          },
+        ),
+    ];
+
+    if (metrics.isWide) {
+      return Row(
+        children: [
+          for (var i = 0; i < checkboxes.length; i++) ...[
+            if (i > 0) SizedBox(width: 16.w),
+            Expanded(child: checkboxes[i]),
+          ],
         ],
+      );
+    }
+
+    final gap = metrics.isPhone ? 12.w : 14.w;
+    return Column(
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: checkboxes[0]),
+              SizedBox(width: gap),
+              Expanded(child: checkboxes[1]),
+            ],
+          ),
+        ),
+        SizedBox(height: gap),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: checkboxes[2]),
+              SizedBox(width: gap),
+              Expanded(child: checkboxes[3]),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildAssessmentScoresSection() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildAssessmentScoresSection(AppResponsiveDialogMetrics metrics) {
+    final fields = [
+      _scoreField('Information Security', _infoSecurityController),
+      _scoreField('Data Privacy', _dataPrivacyController),
+      _scoreField('Cloud Security', _cloudSecurityController),
+      _scoreField('Operational Resilience', _operationalResilienceController),
+      _scoreField('Financial Stability', _financialStabilityController),
+    ];
+
+    if (metrics.isWide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < fields.length; i++) ...[
+            Expanded(child: fields[i]),
+            if (i != fields.length - 1) SizedBox(width: 16.w),
+          ],
+        ],
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: fields[0]),
+              SizedBox(width: 16.w),
+              Expanded(child: fields[1]),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: fields[2]),
+              SizedBox(width: 16.w),
+              Expanded(child: fields[3]),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          fields[4],
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(child: _scoreField('Information Security', _infoSecurityController)),
-        SizedBox(width: 16.w),
-        Expanded(child: _scoreField('Data Privacy', _dataPrivacyController)),
-        SizedBox(width: 16.w),
-        Expanded(child: _scoreField('Cloud Security', _cloudSecurityController)),
-        SizedBox(width: 16.w),
-        Expanded(child: _scoreField('Operational Resilience', _operationalResilienceController)),
-        SizedBox(width: 16.w),
-        Expanded(child: _scoreField('Financial Stability', _financialStabilityController)),
+        for (int i = 0; i < fields.length; i++) ...[
+          fields[i],
+          if (i != fields.length - 1) SizedBox(height: metrics.fieldGap),
+        ],
       ],
     );
   }
@@ -740,15 +859,20 @@ class _AddVendorDialogState extends State<AddVendorDialog> {
 }
 
 class _DialogHeader extends StatelessWidget {
-  const _DialogHeader({required this.title, required this.onClose});
+  const _DialogHeader({
+    required this.title,
+    required this.onClose,
+    required this.metrics,
+  });
 
   final String title;
   final VoidCallback onClose;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 16.w, 17.h),
+      padding: metrics.headerPadding,
       decoration: const BoxDecoration(
         color: AppColors.primary,
         border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -760,29 +884,14 @@ class _DialogHeader extends StatelessWidget {
               title,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20.sp,
+                fontSize: metrics.isPhone ? 18.sp : 20.sp,
                 fontWeight: FontWeight.w600,
                 height: 28 / 20,
                 letterSpacing: -0.46,
               ),
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onClose,
-              borderRadius: BorderRadius.circular(10.r),
-              child: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: SvgPicture.asset(
-                  'assets/figma/library/svg/close_white.svg',
-                  width: 28.r,
-                  height: 28.r,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-              ),
-            ),
-          ),
+          AppButton.close(onPressed: onClose),
         ],
       ),
     );
@@ -810,18 +919,19 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _SectionDivider extends StatelessWidget {
-  const _SectionDivider({required this.title});
+  const _SectionDivider({required this.title, required this.metrics});
 
   final String title;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(height: 24.h),
+        SizedBox(height: metrics.majorSectionGap),
         Container(
-          padding: EdgeInsets.only(top: 25.h),
+          padding: EdgeInsets.only(top: metrics.isPhone ? 20.h : 25.h),
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: AppColors.border)),
           ),
@@ -834,31 +944,78 @@ class _SectionDivider extends StatelessWidget {
 }
 
 class _TwoColumnRow extends StatelessWidget {
-  const _TwoColumnRow({required this.left, required this.right});
+  const _TwoColumnRow({
+    required this.metrics,
+    required this.left,
+    required this.right,
+  });
 
+  final AppResponsiveDialogMetrics metrics;
   final Widget left;
   final Widget right;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    if (metrics.isWide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: left),
+          SizedBox(width: 16.w),
+          Expanded(child: right),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(child: left),
-        SizedBox(width: 16.w),
-        Expanded(child: right),
+        left,
+        SizedBox(height: metrics.fieldGap),
+        right,
       ],
     );
   }
 }
 
 class _ThreeColumnRow extends StatelessWidget {
-  const _ThreeColumnRow({required this.children});
+  const _ThreeColumnRow({required this.metrics, required this.children});
 
+  final AppResponsiveDialogMetrics metrics;
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
+    if (metrics.isPhone) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1) SizedBox(height: metrics.fieldGap),
+          ],
+        ],
+      );
+    }
+
+    if (metrics.isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: children[0]),
+              SizedBox(width: 16.w),
+              Expanded(child: children[1]),
+            ],
+          ),
+          SizedBox(height: metrics.fieldGap),
+          children[2],
+        ],
+      );
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -924,34 +1081,64 @@ class _DialogFooter extends StatelessWidget {
     required this.isEditing,
     required this.onCancel,
     required this.onSubmit,
+    required this.metrics,
   });
 
   final bool isEditing;
   final VoidCallback onCancel;
   final VoidCallback onSubmit;
+  final AppResponsiveDialogMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
+    final submitButton = AppButton(
+      label: isEditing ? 'Update Vendor' : 'Create Vendor',
+      variant: AppButtonVariant.primary,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onSubmit,
+    );
+
+    final cancelButton = AppButton(
+      label: 'Cancel',
+      variant: AppButtonVariant.outlined,
+      fullWidth: metrics.useStackedFooter,
+      onPressed: onCancel,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Divider(color: AppColors.border, height: 1, thickness: 1),
-        SizedBox(height: 17.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            AppButton(
-              label: 'Cancel',
-              variant: AppButtonVariant.outlined,
-              onPressed: onCancel,
-            ),
-            SizedBox(width: 12.w),
-            AppButton(
-              label: isEditing ? 'Update Vendor' : 'Create Vendor',
-              variant: AppButtonVariant.primary,
-              onPressed: onSubmit,
-            ),
-          ],
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          padding: EdgeInsets.only(top: metrics.isPhone ? 20.h : 25.h),
+          child: metrics.useStackedFooter
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    submitButton,
+                    SizedBox(height: 10.h),
+                    cancelButton,
+                  ],
+                )
+              : metrics.isCompact
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        submitButton,
+                        SizedBox(height: 10.h),
+                        cancelButton,
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        cancelButton,
+                        SizedBox(width: 12.w),
+                        submitButton,
+                      ],
+                    ),
         ),
       ],
     );

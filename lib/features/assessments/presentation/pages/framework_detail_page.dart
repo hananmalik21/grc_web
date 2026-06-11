@@ -7,13 +7,16 @@ import 'package:grc_web/core/localization/app_localizations_ext.dart';
 import 'package:grc_web/core/localization/l10n/app_localizations.dart';
 import 'package:grc_web/core/router/app_routes.dart';
 import 'package:grc_web/core/router/nav_ext.dart';
+import 'package:grc_web/core/services/responsive_service.dart';
 import 'package:grc_web/core/theme/app_colors.dart';
+import 'package:grc_web/core/widgets/app_button.dart';
 import 'package:grc_web/core/widgets/app_error_view.dart';
 import 'package:grc_web/core/widgets/app_loading_indicator.dart';
 import 'package:grc_web/core/widgets/app_text_metrics.dart';
 import 'package:grc_web/features/assessments/application/providers/assessments_providers.dart';
 import 'package:grc_web/features/assessments/domain/entities/assessment_entities.dart';
 import 'package:grc_web/features/assessments/presentation/widgets/add_action_dialog.dart';
+import 'package:grc_web/features/assessments/presentation/widgets/assessment_page_layout.dart';
 
 // ─── Colors not in AppColors ─────────────────────────────────────────────────
 const _kGreen = Color(0xFF00A63E);
@@ -91,19 +94,21 @@ class _DetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sectionGap = AssessmentPageLayout.sectionGap(context);
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24.w),
+      padding: AssessmentPageLayout.pagePadding(context),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1512.w),
+        constraints: AssessmentPageLayout.contentConstraints(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _TitleBar(detail: detail),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _StatsRow(detail: detail),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _SectionsList(sections: detail.sections),
-            SizedBox(height: 24.h),
+            SizedBox(height: sectionGap),
             _RemediationCard(detail: detail),
           ],
         ),
@@ -126,95 +131,46 @@ class _TitleBar extends StatelessWidget {
     final l10n = context.l10n;
     final textTheme = Theme.of(context).textTheme;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () => context.deferGo(AppRoutes.assessments),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  '$_kAssetsDir/back_arrow.svg',
-                  width: 20.r,
-                  height: 20.r,
-                ),
-              ),
+    return AssessmentPageLayout.detailTitleBar(
+      context: context,
+      backButton: AppButton.back(
+        iconAsset: '$_kAssetsDir/back_arrow.svg',
+        borderColor: _kBorderInput,
+        onPressed: () => context.deferGo(AppRoutes.assessments),
+      ),
+      titleSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            detail.title,
+            style: textTheme.headlineSmall?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.072,
+              fontSize: AssessmentPageLayout.titleFontSize(context),
             ),
+            strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
+            textHeightBehavior: AppTextMetrics.textHeight,
           ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                detail.title,
-                style: textTheme.headlineSmall?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.072,
-                ),
-                strutStyle: AppTextMetrics.strut(fontSize: 24, lineHeight: 32),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                detail.subtitle,
-                style: textTheme.bodyMedium?.copyWith(color: AppColors.textBody),
-                strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
-                textHeightBehavior: AppTextMetrics.textHeight,
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10.r),
-          child: InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 9.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: _kBorderInput),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    '$_kAssetsDir/export.svg',
-                    width: 16.r,
-                    height: 16.r,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    l10n.exportReport,
-                    style: TextStyle(
-                      color: _kExportText,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 24 / 16,
-                      letterSpacing: -0.32,
-                    ),
-                  ),
-                ],
-              ),
+          SizedBox(height: 4.h),
+          Text(
+            detail.subtitle,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textBody,
+              fontSize: AssessmentPageLayout.subtitleFontSize(context),
             ),
+            strutStyle: AppTextMetrics.strut(fontSize: 14, lineHeight: 20),
+            textHeightBehavior: AppTextMetrics.textHeight,
           ),
-        ),
-      ],
+        ],
+      ),
+      trailing: AppButton.export(
+        label: l10n.exportReport,
+        iconAsset: '$_kAssetsDir/export.svg',
+        foregroundColor: _kExportText,
+        fullWidth: context.screenLayout.isCompact,
+        onPressed: () {},
+      ),
     );
   }
 }
@@ -232,45 +188,32 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: _ScoreCard(
-              score: detail.complianceScore,
-              label: l10n.complianceScore,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _StatCard(
-              value: '${detail.compliantControls}',
-              valueColor: _kGreen,
-              label: l10n.compliantControls,
-              sublabel: l10n.outOfTotal(detail.totalControls),
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _StatCard(
-              value: '${detail.partialCompliance}',
-              valueColor: _kAmber,
-              label: l10n.partialComplianceLabel,
-              sublabel: l10n.needsImprovement,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: _StatCard(
-              value: '${detail.nonCompliant}',
-              valueColor: _kRed,
-              label: l10n.nonCompliantLabel,
-              sublabel: l10n.immediateActionRequired,
-            ),
-          ),
-        ],
-      ),
+    return AssessmentPageLayout.statsRow(
+      context,
+      [
+        _ScoreCard(
+          score: detail.complianceScore,
+          label: l10n.complianceScore,
+        ),
+        _StatCard(
+          value: '${detail.compliantControls}',
+          valueColor: _kGreen,
+          label: l10n.compliantControls,
+          sublabel: l10n.outOfTotal(detail.totalControls),
+        ),
+        _StatCard(
+          value: '${detail.partialCompliance}',
+          valueColor: _kAmber,
+          label: l10n.partialComplianceLabel,
+          sublabel: l10n.needsImprovement,
+        ),
+        _StatCard(
+          value: '${detail.nonCompliant}',
+          valueColor: _kRed,
+          label: l10n.nonCompliantLabel,
+          sublabel: l10n.immediateActionRequired,
+        ),
+      ],
     );
   }
 }
@@ -283,8 +226,10 @@ class _ScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardPadding = AssessmentPageLayout.cardPadding(context);
+
     return _cardBox(
-      padding: EdgeInsets.fromLTRB(25.w, 25.h, 25.w, 29.h),
+      padding: EdgeInsets.fromLTRB(cardPadding, cardPadding, cardPadding, 29.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -351,7 +296,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _cardBox(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -446,7 +391,7 @@ class _SectionCardState extends State<_SectionCard> {
             child: InkWell(
               onTap: canExpand ? () => setState(() => _expanded = !_expanded) : null,
               child: Padding(
-                padding: EdgeInsets.all(25.w),
+                padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
                 child: _header(context, section),
               ),
             ),
@@ -757,7 +702,7 @@ class _RemediationCard extends StatelessWidget {
     final l10n = context.l10n;
 
     return _cardBox(
-      padding: EdgeInsets.all(25.w),
+      padding: EdgeInsets.all(AssessmentPageLayout.cardPadding(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -796,9 +741,12 @@ class _RemediationCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 16.w),
-              _AddActionButton(
+              AppButton.primary(
                 label: l10n.addAction,
-                onTap: () => showAddActionDialog(
+                iconAsset: '$_kAssetsDir/plus.svg',
+                iconSize: 16.r,
+                size: AppButtonSize.sm,
+                onPressed: () => showAddActionDialog(
                   context: context,
                   sections: detail.sections.map((s) => s.title).toList(),
                 ),
@@ -811,45 +759,6 @@ class _RemediationCard extends StatelessWidget {
             if (i != detail.remediationItems.length - 1) SizedBox(height: 12.h),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _AddActionButton extends StatelessWidget {
-  const _AddActionButton({required this.label, this.onTap});
-
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.primary,
-      borderRadius: BorderRadius.circular(10.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset('$_kAssetsDir/plus.svg', width: 16.r, height: 16.r),
-              SizedBox(width: 8.w),
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  height: 20 / 14,
-                  letterSpacing: -0.154,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

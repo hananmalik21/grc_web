@@ -68,12 +68,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                 const NoTransitionPage(child: TprmPage()),
           ),
           GoRoute(
-            path: AppRoutes.assessments,
-            name: 'assessments',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: AssessmentsPage()),
-          ),
-          GoRoute(
             path: AppRoutes.assessmentHub,
             name: 'assessmentHub',
             pageBuilder: (context, state) =>
@@ -123,6 +117,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'assessmentBcm',
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: BusinessContinuityPage()),
+          ),
+          GoRoute(
+            path: AppRoutes.assessments,
+            name: 'assessments',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: AssessmentsPage()),
           ),
         ],
       ),
