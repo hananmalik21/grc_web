@@ -45,15 +45,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       final camelId = _kebabToCamel(btn.id);
       try {
         match = sidebarItems.firstWhere((item) => item.id == camelId);
-      } catch (_) {
-        if (btn.id == NavItemIds.settings) {
-          try {
-            match = sidebarItems.firstWhere(
-              (item) => item.id == NavItemIds.settingsConfig,
-            );
-          } catch (_) {}
-        }
-      }
+      } catch (_) {}
     }
 
     if (match != null && (match.children?.isNotEmpty ?? false)) {

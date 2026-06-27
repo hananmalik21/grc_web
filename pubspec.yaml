@@ -19,6 +19,16 @@ dependencies:
       url: https://github.com/hananmalik21/grc_suite.git
       ref: main
 
+  digify_enterprise_structure:
+    git:
+      url: https://github.com/hananmalik21/digify_enterprise_structure.git
+      ref: main
+
+  digify_security_console:
+    git:
+      url: https://github.com/hananmalik21/digify_security_console.git
+      ref: main
+
   flutter_riverpod: ^2.6.1
   go_router: ^17.2.3
   dio: ^5.4.0

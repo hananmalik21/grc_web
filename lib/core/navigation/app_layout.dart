@@ -15,6 +15,7 @@ class AppLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(enterpriseBootstrapProvider);
     ref.read(appInitializationAfterAuthProvider);
     ref.watch(permissionsBootstrapProvider);
     final isDesktop = ref.screenLayout.isDesktop;

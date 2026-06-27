@@ -1,1 +1,0 @@
-enum LeaveType { annualLeave, sickLeave }

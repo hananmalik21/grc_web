@@ -266,6 +266,15 @@ packages:
       url: "https://github.com/hananmalik21/digify_core.git"
     source: git
     version: "0.1.0"
+  digify_enterprise_structure:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: da54f4c0eb464aeacd0f53e5306dff98a057b353
+      url: "https://github.com/hananmalik21/digify_enterprise_structure.git"
+    source: git
+    version: "0.1.0"
   digify_grc_suite:
     dependency: "direct main"
     description:
@@ -273,6 +282,15 @@ packages:
       ref: main
       resolved-ref: "27c25fbffb6f3323177bbb4aa11b61c3b116504e"
       url: "https://github.com/hananmalik21/grc_suite.git"
+    source: git
+    version: "0.1.0"
+  digify_security_console:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: "92ee0e00afd6856d6122debf70d4d71ec55cf112"
+      url: "https://github.com/hananmalik21/digify_security_console.git"
     source: git
     version: "0.1.0"
   dio:

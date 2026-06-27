@@ -2,7 +2,7 @@ import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/services/responsive_service.dart';
 import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/core/widgets/assets/digify_asset.dart';
-import 'package:grc/features/time_management/domain/models/pagination_info.dart';
+import 'package:grc/core/models/pagination_info.dart';
 import 'package:grc/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -78,7 +78,11 @@ class PaginationControls extends StatelessWidget {
     final isDark = context.isDark;
     final hasAnyItems = totalItems > 0;
     final startItem = hasAnyItems ? ((currentPage - 1) * pageSize) + 1 : 0;
-    final endItem = hasAnyItems ? (currentPage * pageSize > totalItems ? totalItems : currentPage * pageSize) : 0;
+    final endItem = hasAnyItems
+        ? (currentPage * pageSize > totalItems
+              ? totalItems
+              : currentPage * pageSize)
+        : 0;
 
     final controls = style == PaginationStyle.simple
         ? _buildSimpleControls(context, isDark)
@@ -86,7 +90,10 @@ class PaginationControls extends StatelessWidget {
 
     final infoText = Text(
       'Showing $startItem - $endItem of $totalItems items',
-      style: TextStyle(fontSize: 13.sp, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+      style: TextStyle(
+        fontSize: 13.sp,
+        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+      ),
     );
 
     return Container(
@@ -94,7 +101,12 @@ class PaginationControls extends StatelessWidget {
       decoration: showBorder
           ? BoxDecoration(
               border: Border(
-                top: BorderSide(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorder, width: 1),
+                top: BorderSide(
+                  color: isDark
+                      ? AppColors.cardBorderDark
+                      : AppColors.cardBorder,
+                  width: 1,
+                ),
               ),
             )
           : null,
@@ -108,7 +120,10 @@ class PaginationControls extends StatelessWidget {
               onPrevious: onPrevious,
               onNext: onNext,
             )
-          : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [infoText, controls]),
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [infoText, controls],
+            ),
     );
   }
 
@@ -126,7 +141,10 @@ class PaginationControls extends StatelessWidget {
         Gap(8.w),
         Text(
           'Page $currentPage of $totalPages',
-          style: TextStyle(fontSize: 13.sp, color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary),
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+          ),
         ),
         Gap(8.w),
         _buildNavButton(
@@ -147,14 +165,24 @@ class PaginationControls extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (totalPages > 7 && currentPage > 4)
-          _buildPageButton(context: context, isDark: isDark, page: 1, onTap: () => onPageTap?.call(1)),
+          _buildPageButton(
+            context: context,
+            isDark: isDark,
+            page: 1,
+            onTap: () => onPageTap?.call(1),
+          ),
         if (totalPages > 7 && currentPage > 4) Gap(4.w),
         if (_shouldShowFirstEllipsis())
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.w),
             child: Text(
               '...',
-              style: TextStyle(fontSize: 14.sp, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
+              ),
             ),
           ),
         if (_shouldShowFirstEllipsis()) Gap(4.w),
@@ -192,7 +220,12 @@ class PaginationControls extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 4.w),
             child: Text(
               '...',
-              style: TextStyle(fontSize: 14.sp, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
+              ),
             ),
           ),
         if (_shouldShowLastEllipsis()) Gap(4.w),
@@ -226,7 +259,10 @@ class PaginationControls extends StatelessWidget {
           decoration: BoxDecoration(
             color: isDark ? AppColors.cardBackgroundGreyDark : AppColors.grayBg,
             borderRadius: BorderRadius.circular(6.r),
-            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorder, width: 1),
+            border: Border.all(
+              color: isDark ? AppColors.cardBorderDark : AppColors.cardBorder,
+              width: 1,
+            ),
           ),
           alignment: Alignment.center,
           child: isLoading
@@ -236,7 +272,9 @@ class PaginationControls extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                      isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimary,
                     ),
                   ),
                 )
@@ -244,8 +282,12 @@ class PaginationControls extends StatelessWidget {
                   icon,
                   size: 18.sp,
                   color: enabled
-                      ? (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary)
-                      : (isDark ? AppColors.textPlaceholderDark : AppColors.textPlaceholder),
+                      ? (isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary)
+                      : (isDark
+                            ? AppColors.textPlaceholderDark
+                            : AppColors.textPlaceholder),
                 ),
         ),
       ),
@@ -268,11 +310,20 @@ class PaginationControls extends StatelessWidget {
           width: 36.w,
           height: 36.h,
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : (isDark ? AppColors.cardBackgroundGreyDark : AppColors.grayBg),
+            color: isActive
+                ? AppColors.primary
+                : (isDark
+                      ? AppColors.cardBackgroundGreyDark
+                      : AppColors.grayBg),
             borderRadius: BorderRadius.circular(6.r),
             border: isActive
                 ? null
-                : Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorder, width: 1),
+                : Border.all(
+                    color: isDark
+                        ? AppColors.cardBorderDark
+                        : AppColors.cardBorder,
+                    width: 1,
+                  ),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -280,7 +331,11 @@ class PaginationControls extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-              color: isActive ? Colors.white : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary),
+              color: isActive
+                  ? Colors.white
+                  : (isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary),
             ),
           ),
         ),
@@ -295,9 +350,21 @@ class PaginationControls extends StatelessWidget {
       if (currentPage <= 3) {
         return [1, 2, 3, 4, 5];
       } else if (currentPage >= totalPages - 2) {
-        return [totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+        return [
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages,
+        ];
       } else {
-        return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
+        return [
+          currentPage - 2,
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          currentPage + 2,
+        ];
       }
     }
   }
@@ -363,7 +430,12 @@ class MobilePaginationControls extends StatelessWidget {
 }
 
 class _MobileNavButton extends StatelessWidget {
-  const _MobileNavButton({required this.isDark, required this.assetPath, required this.enabled, this.onTap});
+  const _MobileNavButton({
+    required this.isDark,
+    required this.assetPath,
+    required this.enabled,
+    this.onTap,
+  });
 
   final bool isDark;
   final String assetPath;
@@ -387,7 +459,9 @@ class _MobileNavButton extends StatelessWidget {
               height: 20.w,
               color: enabled
                   ? (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary)
-                  : (isDark ? AppColors.textPlaceholderDark : AppColors.textPlaceholder),
+                  : (isDark
+                        ? AppColors.textPlaceholderDark
+                        : AppColors.textPlaceholder),
             ),
           ),
         ),

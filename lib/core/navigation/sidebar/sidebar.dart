@@ -1,3 +1,11 @@
+import 'package:digify_enterprise_structure/digify_enterprise_structure.dart';
+import 'package:digify_grc_suite/digify_grc_suite.dart';
+import 'package:digify_grc_suite/grc/presentation/providers/grc_tab_state_provider.dart';
+import 'package:digify_security_console/digify_security_console.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/localization/l10n/app_localizations.dart';
 import 'package:grc/core/navigation/sidebar/config/sidebar_config.dart';
@@ -11,24 +19,6 @@ import 'package:grc/core/navigation/sidebar/widgets/sidebar_menu_item.dart';
 import 'package:grc/core/navigation/sidebar/widgets/sidebar_search_section.dart';
 import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/services/responsive_service.dart';
-import 'package:grc/features/employee_self_service/presentation/providers/employee_self_service_tab_provider.dart';
-import 'package:grc/features/employee_management/presentation/providers/employee_management_tab_provider.dart';
-import 'package:grc/features/enterprise_structure/presentation/providers/enterprise_structure_tab_provider.dart';
-import 'package:grc/features/leave_management/presentation/providers/leave_management_tab_provider.dart';
-import 'package:grc/features/time_management/presentation/providers/time_management_tab_provider.dart';
-import 'package:grc/features/workforce_structure/presentation/providers/workforce_tab_provider.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
-
-import 'package:grc/features/payroll/application/payroll/providers/payroll_tab_state_provider.dart';
-import '../../../features/compensation/presentation/providers/compensation_tab_state_provider.dart';
-import '../../../features/developer_tools/presentation/providers/developer_tools_tab_state_provider.dart';
-import '../../../features/hiring/presentation/providers/hiring_tab_state_provider.dart';
-import '../../../features/security_manager/presentation/providers/security_manager_tab_state_provider.dart';
-import '../../../features/time_tracking_and_attendance/presentation/providers/time_tracking_and_attendance_tab_state_provider.dart';
-import 'package:digify_grc_suite/grc/presentation/providers/grc_tab_state_provider.dart';
 
 class Sidebar extends ConsumerStatefulWidget {
   const Sidebar({super.key});
@@ -50,71 +40,12 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
 
   void _handleNavigation(SidebarItem item) {
     if (item.route != null && mounted) {
-      if (item.route == AppRoutes.employees) {
-        final tabIndex = getEmployeeManagementTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(employeeManagementTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.employeeSelfService) {
-        final tabIndex = getEmployeeSelfServiceTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(employeeSelfServiceTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.enterpriseStructure) {
-        final tabIndex = getEnterpriseStructureTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(enterpriseStructureTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.timeManagement) {
-        final tabIndex = getTimeManagementTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(timeManagementTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.workforceStructure) {
-        final tabIndex = getWorkforceStructureTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(workforceTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.leaveManagement) {
-        final tabIndex = getLeaveManagementTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(leaveManagementTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.timeTrackingAndAttendance) {
-        final tabIndex = getTimeTrackingAndAttendanceTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(timeTrackingAndAttendanceTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.compensation) {
-        final tabIndex = getCompensationTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(compensationTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
+      if (item.route == AppRoutes.enterpriseStructure) {
+        EnterpriseStructureModule.applySidebarTab(ref, item.route!, item.id);
       } else if (item.route == AppRoutes.securityManager) {
-        final tabIndex = getSecurityManagerTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(securityManagerTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.hiring) {
-        final tabIndex = getHiringTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(hiringTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.developerTools) {
-        final tabIndex = getDeveloperToolsTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(developerToolsTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
-      } else if (item.route == AppRoutes.payroll) {
-        final tabIndex = getPayrollTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(payrollTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
+        SecurityConsoleModule.applySidebarTab(ref, item.route!, item.id);
       } else if (item.route == AppRoutes.grc) {
-        final tabIndex = getGrcTabIndex(item.id);
-        if (tabIndex != null) {
-          ref.read(grcTabStateProvider.notifier).setTabIndex(tabIndex);
-        }
+        GrcSuiteModule.applySidebarTab(ref, item.route!, item.id);
       }
       context.go(item.route!);
       if (!ResponsiveHelper.isWeb(context)) {
@@ -125,44 +56,9 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
   }
 
   bool _isTabIndexActive(String itemId, String route) {
-    if (route == AppRoutes.employees) {
-      final state = ref.watch(employeeManagementTabStateProvider);
-      final itemTabIndex = getEmployeeManagementTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.employeeSelfService) {
-      final state = ref.watch(employeeSelfServiceTabStateProvider);
-      final itemTabIndex = getEmployeeSelfServiceTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.enterpriseStructure) {
+    if (route == AppRoutes.enterpriseStructure) {
       final state = ref.watch(enterpriseStructureTabStateProvider);
       final itemTabIndex = getEnterpriseStructureTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.timeManagement) {
-      final state = ref.watch(timeManagementTabStateProvider);
-      final itemTabIndex = getTimeManagementTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.workforceStructure) {
-      final state = ref.watch(workforceTabStateProvider);
-      final itemTabIndex = getWorkforceStructureTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.leaveManagement) {
-      final state = ref.watch(leaveManagementTabStateProvider);
-      final itemTabIndex = getLeaveManagementTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.timeTrackingAndAttendance) {
-      final state = ref.watch(timeTrackingAndAttendanceTabStateProvider);
-      final itemTabIndex = getTimeTrackingAndAttendanceTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.compensation) {
-      final state = ref.watch(compensationTabStateProvider);
-      final itemTabIndex = getCompensationTabIndex(itemId);
       if (itemTabIndex == null) return false;
       return itemTabIndex == state.currentTabIndex;
     } else if (route == AppRoutes.grc) {
@@ -175,21 +71,6 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
       final itemTabIndex = getSecurityManagerTabIndex(itemId);
       if (itemTabIndex == null) return false;
       return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.hiring) {
-      final state = ref.watch(hiringTabStateProvider);
-      final itemTabIndex = getHiringTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.developerTools) {
-      final state = ref.watch(developerToolsTabStateProvider);
-      final itemTabIndex = getDeveloperToolsTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
-    } else if (route == AppRoutes.payroll) {
-      final state = ref.watch(payrollTabStateProvider);
-      final itemTabIndex = getPayrollTabIndex(itemId);
-      if (itemTabIndex == null) return false;
-      return itemTabIndex == state.currentTabIndex;
     }
     return true;
   }
@@ -199,7 +80,9 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
       final isCurrentlyExpanded = _expandedItems[id] ?? false;
       if (!isCurrentlyExpanded) {
         for (final item in allItems) {
-          if (item.id != id && item.children != null && item.children!.isNotEmpty) {
+          if (item.id != id &&
+              item.children != null &&
+              item.children!.isNotEmpty) {
             _expandedItems[item.id] = false;
           }
         }
@@ -221,7 +104,9 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
         String? itemToExpand;
         for (final item in menuItems) {
           if (item.children != null) {
-            final hasActiveChild = item.children!.any((child) => child.route == currentRoute);
+            final hasActiveChild = item.children!.any(
+              (child) => child.route == currentRoute,
+            );
             if (hasActiveChild) {
               itemToExpand = item.id;
               break;
@@ -251,7 +136,11 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
             color: Colors.white,
             border: Border(right: BorderSide(color: AppColors.cardBorder)),
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(2, 0)),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(2, 0),
+              ),
             ],
           ),
           child: Column(
@@ -266,7 +155,11 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
                     duration: const Duration(milliseconds: 400),
                     curve: Curves.fastOutSlowIn,
                     opacity: isExpanded ? 1.0 : 0.0,
-                    child: ClipRect(child: isExpanded ? const SidebarSearchSection() : const SizedBox.shrink()),
+                    child: ClipRect(
+                      child: isExpanded
+                          ? const SidebarSearchSection()
+                          : const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),
@@ -275,8 +168,14 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
                   items: menuItems,
                   isExpanded: isExpanded,
                   scrollController: _menuScrollController,
-                  itemBuilder: (context, item, index) =>
-                      _buildMenuItem(context, item, menuItems, isExpanded, currentRoute, localizations),
+                  itemBuilder: (context, item, index) => _buildMenuItem(
+                    context,
+                    item,
+                    menuItems,
+                    isExpanded,
+                    currentRoute,
+                    localizations,
+                  ),
                 ),
               ),
               AnimatedSize(
@@ -288,7 +187,11 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
                     duration: const Duration(milliseconds: 400),
                     curve: Curves.fastOutSlowIn,
                     opacity: isExpanded ? 1.0 : 0.0,
-                    child: ClipRect(child: isExpanded ? const SidebarFooter() : const SizedBox.shrink()),
+                    child: ClipRect(
+                      child: isExpanded
+                          ? const SidebarFooter()
+                          : const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),
@@ -309,12 +212,16 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
   ) {
     final hasChildren = item.children != null && item.children!.isNotEmpty;
     final isSectionExpanded = _expandedItems[item.id] ?? false;
-    final isDashboardRoute = item.route == AppRoutes.dashboard && currentRoute.startsWith('${AppRoutes.dashboard}/');
+    final isDashboardRoute =
+        item.route == AppRoutes.dashboard &&
+        currentRoute.startsWith('${AppRoutes.dashboard}/');
     final isRouteMatch =
         item.route == currentRoute ||
         isDashboardRoute ||
-        (hasChildren && item.children!.any((child) => child.route == currentRoute));
-    final isActive = isRouteMatch && _isTabIndexActive(item.id, item.route ?? '');
+        (hasChildren &&
+            item.children!.any((child) => child.route == currentRoute));
+    final isActive =
+        isRouteMatch && _isTabIndexActive(item.id, item.route ?? '');
 
     VoidCallback onRowTap;
     if (!isExpanded) {
@@ -342,7 +249,9 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
       onRowTap: onRowTap,
       onToggleSection: () => _toggleExpanded(item.id, allItems),
       onChildTap: _handleNavigation,
-      isChildActive: (child) => child.route == currentRoute && _isTabIndexActive(child.id, child.route ?? ''),
+      isChildActive: (child) =>
+          child.route == currentRoute &&
+          _isTabIndexActive(child.id, child.route ?? ''),
       localizations: localizations,
     );
   }

@@ -1,7 +1,7 @@
 class AppConfig {
   AppConfig._();
 
-  static const String appName = 'Digify HR';
+  static const String appName = 'GRC';
 
   // Debug Credentials
   // static const String debugUsername = 'hanan.khalid@digify.com';

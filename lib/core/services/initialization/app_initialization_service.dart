@@ -1,5 +1,4 @@
-import 'package:grc/features/enterprise_structure/domain/models/enterprise.dart';
-import 'package:grc/features/enterprise_structure/domain/usecases/get_enterprises_usecase.dart';
+import 'package:digify_enterprise_structure/digify_enterprise_structure.dart';
 
 class AppInitializationService {
   final GetEnterprisesUseCase getEnterprisesUseCase;
@@ -15,10 +14,15 @@ class AppInitializationService {
     this.initializeLocation,
   });
 
-  Future<void> initializeAfterAuth({int? preferredEnterpriseId, void Function()? onEnterprisesLoaded}) async {
+  Future<void> initializeAfterAuth({
+    int? preferredEnterpriseId,
+    void Function()? onEnterprisesLoaded,
+  }) async {
     initializeLocation?.call();
     await _loadEnterprises();
-    _setEnterpriseIdFromEnterprises(preferredEnterpriseId: preferredEnterpriseId);
+    _setEnterpriseIdFromEnterprises(
+      preferredEnterpriseId: preferredEnterpriseId,
+    );
     onEnterprisesLoaded?.call();
   }
 

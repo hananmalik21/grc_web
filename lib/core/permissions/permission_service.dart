@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:grc/core/config/app_config.dart';
 import 'package:grc/core/providers/current_user_provider.dart';
-import 'package:grc/features/security_manager/domain/models/user_detail_data.dart';
+import 'package:digify_security_console/digify_security_console.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,14 +17,18 @@ class PermissionService {
 
   factory PermissionService() => _instance;
 
-  bool get isBypassAllPermissions => kDebugMode && AppConfig.debugBypassAllPermissions;
+  bool get isBypassAllPermissions =>
+      kDebugMode && AppConfig.debugBypassAllPermissions;
 
   bool get hasFullAccess => _guard.hasGlobalWildcard;
 
   PermissionGuard _guard = PermissionGuard(const <String>[]);
 
   void init(List<String> permissions) {
-    assert(permissions.isNotEmpty, 'Call clear() instead of init() with an empty list.');
+    assert(
+      permissions.isNotEmpty,
+      'Call clear() instead of init() with an empty list.',
+    );
     _guard = PermissionGuard(permissions);
   }
 
@@ -67,8 +71,14 @@ final permissionsBootstrapProvider = Provider<void>((ref) {
           return;
         }
 
-        final keys = user.permissionKeys.map((k) => k.toLowerCase().trim()).where((k) => k.isNotEmpty).toList();
-        developer.log('Permission keys from API: $keys', name: 'auth.permissions');
+        final keys = user.permissionKeys
+            .map((k) => k.toLowerCase().trim())
+            .where((k) => k.isNotEmpty)
+            .toList();
+        developer.log(
+          'Permission keys from API: $keys',
+          name: 'auth.permissions',
+        );
 
         if (keys.isEmpty) {
           // Backend returned no permissions — treat as unauthorized.

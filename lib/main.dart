@@ -1,7 +1,11 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:digify_enterprise_structure/digify_enterprise_structure.dart';
 import 'package:digify_grc_suite/digify_grc_suite.dart';
+import 'package:digify_security_console/digify_security_console.dart';
 import 'package:grc/core/config/app_config.dart';
+import 'package:grc/core/integration/enterprise_structure_integration.dart';
 import 'package:grc/core/integration/grc_suite_integration.dart';
+import 'package:grc/core/integration/security_console_integration.dart';
 import 'package:grc/core/localization/l10n/app_localizations.dart';
 import 'package:grc/core/localization/locale_provider.dart';
 import 'package:grc/core/router/app_router.dart';
@@ -19,14 +23,18 @@ Future<void> main() async {
   await HiveService.init();
   runApp(
     ProviderScope(
-      overrides: buildGrcSuiteHostOverrides(),
-      child: const DigifyHrSystemApp(),
+      overrides: [
+        ...buildGrcSuiteHostOverrides(),
+        ...buildEnterpriseStructureHostOverrides(),
+        ...buildSecurityConsoleHostOverrides(),
+      ],
+      child: const GrcApp(),
     ),
   );
 }
 
-class DigifyHrSystemApp extends ConsumerWidget {
-  const DigifyHrSystemApp({super.key});
+class GrcApp extends ConsumerWidget {
+  const GrcApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,7 +44,9 @@ class DigifyHrSystemApp extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final designSize = ResponsiveService.getScreenUtilDesignSizeFromContext(context);
+        final designSize = ResponsiveService.getScreenUtilDesignSizeFromContext(
+          context,
+        );
 
         return ScreenUtilInit(
           designSize: designSize,
@@ -48,20 +58,29 @@ class DigifyHrSystemApp extends ConsumerWidget {
               title: AppConfig.appName,
               debugShowCheckedModeBanner: false,
               locale: locale,
-              theme: ResponsiveHelper.isMobile(context) ? AppMobileTheme.lightTheme : AppTheme.lightTheme,
-              darkTheme: ResponsiveHelper.isMobile(context) ? AppMobileTheme.darkTheme : AppTheme.darkTheme,
+              theme: ResponsiveHelper.isMobile(context)
+                  ? AppMobileTheme.lightTheme
+                  : AppTheme.lightTheme,
+              darkTheme: ResponsiveHelper.isMobile(context)
+                  ? AppMobileTheme.darkTheme
+                  : AppTheme.darkTheme,
               themeMode: themeMode,
               localizationsDelegates: [
                 ...AppLocalizations.localizationsDelegates,
                 GrcSuiteLocalizations.delegate,
+                EnterpriseStructureLocalizations.delegate,
+                SecurityConsoleLocalizations.delegate,
                 CountryLocalizations.delegate,
               ],
               supportedLocales: AppLocalizations.supportedLocales,
               routerConfig: router,
-
               builder: (context, child) {
                 if (child == null) return const SizedBox.shrink();
-                return GrcSuiteAssetScope(child: child);
+                return EnterpriseStructureAssetScope(
+                  child: GrcSuiteAssetScope(
+                    child: SecurityConsoleAssetScope(child: child),
+                  ),
+                );
               },
             );
           },
