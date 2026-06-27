@@ -444,6 +444,13 @@ class AppColors {
   static const Color authDesktopPrimary = Color(0xFF155DFC);
   static const Color authDesktopMuted = Color(0xFF6A7282);
   static const Color authDesktopCheckboxBorder = Color(0xFF767676);
+  static const Color authDesktopBackground = Color(0xFFFFFFFF);
+  static const Color authDesktopSignInTitle = Color(0xFF101828);
+  static const Color authDesktopSignInSubtitle = Color(0xFF969696);
+  static const Color authDesktopSignInDivider = Color(0xFFE6E8E7);
+  static const Color authDesktopSignInDividerLabel = Color(0xFF6E6E6E);
+  static const Color authDesktopSignInFieldBorder = Color(0xFFD9D9D9);
+  static const Color authDesktopSignInFieldFocused = Color(0xFF367AFF);
   static const Color transparent = Colors.transparent;
 
   // Candidate Notes Tags Specific Colors

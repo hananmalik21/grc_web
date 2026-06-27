@@ -119,11 +119,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'منصة موارد بشرية حديثة لإدارة الموظفين وأتمتة المهام الإدارية وتحسين رضا الموظفين. ادخل إلى مساحة عملك وابدأ بإدارة فريقك بكفاءة.';
 
   @override
-  String get loginDesktopSignInTitle => 'تسجيل الدخول إلى مساحة عملك';
+  String get loginDesktopSignInTitle => 'تسجيل الدخول';
 
   @override
   String get loginDesktopSignInSubtitle =>
-      'أدخل بيانات الاعتماد للوصول إلى حسابك';
+      'يرجى تسجيل الدخول للمتابعة إلى حسابك.';
 
   @override
   String get loginDesktopEmailHint => 'أدخل بريد العمل الإلكتروني';
@@ -141,7 +141,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginDesktopEnterpriseCodeInvalid => 'أدخل رمز مؤسسة صالحًا';
 
   @override
-  String get loginDesktopRememberMe => 'تذكرني';
+  String get loginDesktopRememberMe => 'إبقني مسجلاً للدخول';
 
   @override
   String get loginDesktopForgotPassword => 'نسيت كلمة المرور؟';
@@ -150,7 +150,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginDesktopSignInButton => 'تسجيل الدخول';
 
   @override
-  String get loginDesktopOrSignInWithSso => 'أو سجّل الدخول عبر SSO';
+  String get loginDesktopOrSignInWithSso => 'أو';
 
   @override
   String get loginDesktopContinueWithSso => 'المتابعة عبر SSO';

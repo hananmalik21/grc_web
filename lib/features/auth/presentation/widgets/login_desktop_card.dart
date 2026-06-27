@@ -1,6 +1,5 @@
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/localization/l10n/app_localizations.dart';
-import 'package:grc/core/theme/app_shadows.dart';
 import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/core/widgets/common/digify_divider.dart';
@@ -25,7 +24,6 @@ class LoginDesktopCard extends ConsumerWidget {
     required this.onLogin,
     this.onForgotPasswordTap,
     this.onSsoTap,
-    this.onCreateAccountTap,
   });
 
   final TextEditingController usernameController;
@@ -39,66 +37,73 @@ class LoginDesktopCard extends ConsumerWidget {
   final VoidCallback onLogin;
   final VoidCallback? onForgotPasswordTap;
   final VoidCallback? onSsoTap;
-  final VoidCallback? onCreateAccountTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localizations = AppLocalizations.of(context)!;
     final authState = ref.watch(authProvider);
     final isDark = context.isDark;
-    final cardColor = isDark ? context.themeCardBackground : Colors.white;
-    final titleColor = isDark ? context.themeTextPrimary : AppColors.authDesktopTitle;
-    final subtitleColor = isDark ? context.themeTextSecondary : AppColors.authDesktopBody;
-    final dividerColor = isDark ? context.themeBorderGrey : AppColors.authDesktopFieldBorder;
-    final dividerLabelColor = isDark ? context.themeTextMuted : AppColors.authDesktopMuted;
+    final titleColor = isDark
+        ? context.themeTextPrimary
+        : AppColors.authDesktopSignInTitle;
+    final subtitleColor = isDark
+        ? context.themeTextSecondary
+        : AppColors.authDesktopSignInSubtitle;
+    final dividerColor = isDark
+        ? context.themeBorderGrey
+        : AppColors.authDesktopSignInDivider;
+    final dividerLabelColor = isDark
+        ? context.themeTextMuted
+        : AppColors.authDesktopSignInDividerLabel;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(32.r),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(10.r),
-        boxShadow: isDark ? null : AppShadows.primaryShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            localizations.loginDesktopSignInTitle,
-            style: context.textTheme.displaySmall?.copyWith(color: titleColor),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          localizations.loginDesktopSignInTitle,
+          style: context.textTheme.displaySmall?.copyWith(
+            color: titleColor,
+            fontSize: 40.sp,
           ),
-          Gap(8.h),
-          Text(
-            localizations.loginDesktopSignInSubtitle,
-            style: context.textTheme.bodyMedium?.copyWith(color: subtitleColor),
+        ),
+        Gap(12.h),
+        Text(
+          localizations.loginDesktopSignInSubtitle,
+          style: context.textTheme.bodyLarge?.copyWith(
+            color: subtitleColor,
+            fontSize: 18.sp,
           ),
-          Gap(20.h),
-          LoginForm(
-            usernameController: usernameController,
-            passwordController: passwordController,
-            enterpriseIdController: enterpriseIdController,
-            usernameFocusNode: usernameFocusNode,
-            passwordFocusNode: passwordFocusNode,
-            enterpriseIdFocusNode: enterpriseIdFocusNode,
-            isLoading: authState.isLoading,
-            rememberMe: rememberMe,
-            onRememberMeChanged: onRememberMeChanged,
-            onLogin: onLogin,
-            onForgotPasswordTap: onForgotPasswordTap,
-          ),
-          Gap(20.h),
-          _SsoDivider(
-            label: localizations.loginDesktopOrSignInWithSso,
-            lineColor: dividerColor,
-            labelColor: dividerLabelColor,
-            backgroundColor: cardColor,
-          ),
-          Gap(20.h),
-          AppButton.outline(label: localizations.loginDesktopContinueWithSso, onPressed: onSsoTap),
-          Gap(20.h),
-        ],
-      ),
+        ),
+        Gap(32.h),
+        LoginForm(
+          usernameController: usernameController,
+          passwordController: passwordController,
+          enterpriseIdController: enterpriseIdController,
+          usernameFocusNode: usernameFocusNode,
+          passwordFocusNode: passwordFocusNode,
+          enterpriseIdFocusNode: enterpriseIdFocusNode,
+          isLoading: authState.isLoading,
+          rememberMe: rememberMe,
+          onRememberMeChanged: onRememberMeChanged,
+          onLogin: onLogin,
+          onForgotPasswordTap: onForgotPasswordTap,
+        ),
+        Gap(20.h),
+        _SsoDivider(
+          label: localizations.loginDesktopOrSignInWithSso,
+          lineColor: dividerColor,
+          labelColor: dividerLabelColor,
+          backgroundColor: isDark
+              ? context.themeCardBackground
+              : AppColors.authDesktopBackground,
+        ),
+        Gap(20.h),
+        AppButton.outline(
+          label: localizations.loginDesktopContinueWithSso,
+          onPressed: onSsoTap,
+        ),
+      ],
     );
   }
 }
@@ -125,7 +130,10 @@ class _SsoDivider extends StatelessWidget {
         Container(
           color: backgroundColor,
           padding: EdgeInsets.symmetric(horizontal: 8.w),
-          child: Text(label, style: context.textTheme.bodyMedium?.copyWith(color: labelColor)),
+          child: Text(
+            label,
+            style: context.textTheme.bodyMedium?.copyWith(color: labelColor),
+          ),
         ),
       ],
     );

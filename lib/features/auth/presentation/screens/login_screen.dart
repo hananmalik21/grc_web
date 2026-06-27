@@ -194,7 +194,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.authBgEnd,
+      backgroundColor: AppColors.authDesktopBackground,
       body: SizedBox.expand(
         child: LoginLayoutHandler(
           usernameController: _usernameController,

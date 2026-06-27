@@ -118,11 +118,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'A modern HR platform for managing employees, automating admin tasks, and improving employee satisfaction. Access your workspace and start managing your team efficiently.';
 
   @override
-  String get loginDesktopSignInTitle => 'Sign in to your workspace';
+  String get loginDesktopSignInTitle => 'Sign in';
 
   @override
   String get loginDesktopSignInSubtitle =>
-      'Enter your credentials to access your account';
+      'Please login to continue to your account.';
 
   @override
   String get loginDesktopEmailHint => 'Enter your work email';
@@ -141,16 +141,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a valid enterprise code';
 
   @override
-  String get loginDesktopRememberMe => 'Remember me';
+  String get loginDesktopRememberMe => 'Keep me logged in';
 
   @override
-  String get loginDesktopForgotPassword => 'Forgot password?';
+  String get loginDesktopForgotPassword => 'Forgot Password?';
 
   @override
   String get loginDesktopSignInButton => 'Sign in';
 
   @override
-  String get loginDesktopOrSignInWithSso => 'Or sign in with SSO';
+  String get loginDesktopOrSignInWithSso => 'or';
 
   @override
   String get loginDesktopContinueWithSso => 'Continue with SSO';

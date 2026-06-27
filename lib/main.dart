@@ -76,11 +76,7 @@ class GrcApp extends ConsumerWidget {
               routerConfig: router,
               builder: (context, child) {
                 if (child == null) return const SizedBox.shrink();
-                return EnterpriseStructureAssetScope(
-                  child: GrcSuiteAssetScope(
-                    child: SecurityConsoleAssetScope(child: child),
-                  ),
-                );
+                return child;
               },
             );
           },

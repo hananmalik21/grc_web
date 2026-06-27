@@ -1,6 +1,6 @@
+import 'package:grc/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
-import 'login_desktop_footer.dart';
 import 'login_desktop_left_panel.dart';
 import 'login_desktop_right_panel.dart';
 
@@ -32,32 +32,26 @@ class LoginDesktopLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: Column(
+    return ColoredBox(
+      color: AppColors.authDesktopBackground,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const Expanded(child: LoginDesktopLeftPanel()),
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Expanded(child: LoginDesktopLeftPanel()),
-                Expanded(
-                  child: LoginDesktopRightPanel(
-                    usernameController: usernameController,
-                    passwordController: passwordController,
-                    enterpriseIdController: enterpriseIdController,
-                    usernameFocusNode: usernameFocusNode,
-                    passwordFocusNode: passwordFocusNode,
-                    enterpriseIdFocusNode: enterpriseIdFocusNode,
-                    rememberMe: rememberMe,
-                    onRememberMeChanged: onRememberMeChanged,
-                    onLogin: onLogin,
-                    onForgotPasswordTap: onForgotPasswordTap,
-                  ),
-                ),
-              ],
+            child: LoginDesktopRightPanel(
+              usernameController: usernameController,
+              passwordController: passwordController,
+              enterpriseIdController: enterpriseIdController,
+              usernameFocusNode: usernameFocusNode,
+              passwordFocusNode: passwordFocusNode,
+              enterpriseIdFocusNode: enterpriseIdFocusNode,
+              rememberMe: rememberMe,
+              onRememberMeChanged: onRememberMeChanged,
+              onLogin: onLogin,
+              onForgotPasswordTap: onForgotPasswordTap,
             ),
           ),
-          const LoginDesktopFooter(),
         ],
       ),
     );

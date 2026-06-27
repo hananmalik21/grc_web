@@ -311,13 +311,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginDesktopSignInTitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to your workspace'**
+  /// **'Sign in'**
   String get loginDesktopSignInTitle;
 
   /// No description provided for @loginDesktopSignInSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your credentials to access your account'**
+  /// **'Please login to continue to your account.'**
   String get loginDesktopSignInSubtitle;
 
   /// No description provided for @loginDesktopEmailHint.
@@ -353,13 +353,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginDesktopRememberMe.
   ///
   /// In en, this message translates to:
-  /// **'Remember me'**
+  /// **'Keep me logged in'**
   String get loginDesktopRememberMe;
 
   /// No description provided for @loginDesktopForgotPassword.
   ///
   /// In en, this message translates to:
-  /// **'Forgot password?'**
+  /// **'Forgot Password?'**
   String get loginDesktopForgotPassword;
 
   /// No description provided for @loginDesktopSignInButton.
@@ -371,7 +371,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginDesktopOrSignInWithSso.
   ///
   /// In en, this message translates to:
-  /// **'Or sign in with SSO'**
+  /// **'or'**
   String get loginDesktopOrSignInWithSso;
 
   /// No description provided for @loginDesktopContinueWithSso.

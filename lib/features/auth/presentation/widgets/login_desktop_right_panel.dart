@@ -1,4 +1,3 @@
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/auth/presentation/widgets/login_desktop_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,7 +16,6 @@ class LoginDesktopRightPanel extends StatelessWidget {
     required this.onLogin,
     this.onForgotPasswordTap,
     this.onSsoTap,
-    this.onCreateAccountTap,
   });
 
   final TextEditingController usernameController;
@@ -31,21 +29,17 @@ class LoginDesktopRightPanel extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback? onForgotPasswordTap;
   final VoidCallback? onSsoTap;
-  final VoidCallback? onCreateAccountTap;
 
-  static const double _cardMaxWidth = 450;
+  static const double _formMaxWidth = 480;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.authBgEnd,
-        border: Border(left: BorderSide(color: AppColors.authInputBorder, width: 1)),
-      ),
+    return Padding(
+      padding: EdgeInsets.all(32.r),
       child: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: _cardMaxWidth.w),
+            constraints: BoxConstraints(maxWidth: _formMaxWidth.w),
             child: LoginDesktopCard(
               usernameController: usernameController,
               passwordController: passwordController,
@@ -58,7 +52,6 @@ class LoginDesktopRightPanel extends StatelessWidget {
               onLogin: onLogin,
               onForgotPasswordTap: onForgotPasswordTap,
               onSsoTap: onSsoTap,
-              onCreateAccountTap: onCreateAccountTap,
             ),
           ),
         ),

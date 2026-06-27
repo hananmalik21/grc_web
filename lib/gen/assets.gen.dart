@@ -1310,6 +1310,9 @@ class $AssetsIconsAuthGen {
   /// File path: assets/icons/auth/flash.svg
   SvgGenImage get flash => const SvgGenImage('assets/icons/auth/flash.svg');
 
+  /// File path: assets/icons/auth/left-banner.jpg
+  AssetGenImage get leftBanner => const AssetGenImage('assets/icons/auth/left-banner.jpg');
+
   /// File path: assets/icons/auth/lock.svg
   SvgGenImage get lock => const SvgGenImage('assets/icons/auth/lock.svg');
 
@@ -1326,7 +1329,18 @@ class $AssetsIconsAuthGen {
   SvgGenImage get window => const SvgGenImage('assets/icons/auth/window.svg');
 
   /// List of all assets
-  List<dynamic> get values => [authDashbaord, bg, fingerprint, flash, lock, mail, secureShield, star, window];
+  List<dynamic> get values => [
+    authDashbaord,
+    bg,
+    fingerprint,
+    flash,
+    leftBanner,
+    lock,
+    mail,
+    secureShield,
+    star,
+    window,
+  ];
 }
 
 class $AssetsIconsCompensationGen {
