@@ -1,0 +1,36 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.project
+.directory
+
+# IntelliJ related
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Visual Studio Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+
+# FVM Version Cache
+.fvm/
+# But do not ignore .fvm/fvm_config.json if the team shares the config.
+# Note: FVM documentation recommends adding .fvm/ to gitignore, but tracking fvm_config.json if desired.
+# To keep the configuration tracked while ignoring the heavy SDK symlinks/downloads:
+# .fvm/flutter_sdk

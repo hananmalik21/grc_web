@@ -1,0 +1,3 @@
+import 'package:grc/features/compensation/presentation/providers/create_employee_compensation/add_compensation_plans_provider.dart';
+
+typedef AddEmployeeCompensationState = AddCompensationPlansState;
