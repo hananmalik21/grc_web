@@ -14618,6 +14618,18 @@ abstract class AppLocalizations {
   /// **'GRC improvement programs and initiatives'**
   String get grcProgramsDescription;
 
+  /// No description provided for @grcReviewProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Progress'**
+  String get grcReviewProgress;
+
+  /// No description provided for @grcReviewProgressDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'GRC health score, trends, and review insights'**
+  String get grcReviewProgressDescription;
+
   /// No description provided for @grcAddControl.
   ///
   /// In en, this message translates to:

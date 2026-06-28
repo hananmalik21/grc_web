@@ -7781,6 +7781,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get grcProgramsDescription => 'برامج ومبادرات تحسين GRC';
 
   @override
+  String get grcReviewProgress => 'مراجعة التقدم';
+
+  @override
+  String get grcReviewProgressDescription =>
+      'درجة صحة GRC والاتجاهات ورؤى المراجعة';
+
+  @override
   String get grcAddControl => 'إضافة ضابط';
 
   @override

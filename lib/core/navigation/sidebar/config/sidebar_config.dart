@@ -221,6 +221,12 @@ class SidebarConfig {
             route: AppRoutes.grc,
             svgPath: Assets.grc.figma.dashboard.svg.programsIcon.path,
           ),
+          SidebarItem(
+            id: 'grcReviewProgress',
+            labelKey: 'grcReviewProgress',
+            route: AppRoutes.grc,
+            svgPath: Assets.grc.figma.dashboard.svg.dashboardIcon.path,
+          ),
         ],
       ),
     ]);
@@ -286,6 +292,8 @@ class SidebarConfig {
         return localizations.grcTprm;
       case 'grcPrograms':
         return localizations.grcPrograms;
+      case 'grcReviewProgress':
+        return localizations.grcReviewProgress;
       default:
         return key;
     }
@@ -312,6 +320,8 @@ class SidebarConfig {
         return localizations.grcTprmDescription;
       case 'grcPrograms':
         return localizations.grcProgramsDescription;
+      case 'grcReviewProgress':
+        return localizations.grcReviewProgressDescription;
       default:
         return null;
     }

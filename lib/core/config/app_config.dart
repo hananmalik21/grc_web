@@ -16,5 +16,5 @@ class AppConfig {
   static const String placeholderUserRole = 'System Admin';
 
   // Debug-only permission bypass switch for UI/layout inspection.
-  static const bool debugBypassAllPermissions = true;
+  static const bool debugBypassAllPermissions = false;
 }

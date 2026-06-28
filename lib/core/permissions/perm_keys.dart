@@ -236,4 +236,7 @@ class PermKeys {
   static final grcProgramsView = kGrcModule.subModules[7].action(
     PermAction.view,
   );
+  static final grcReviewProgressView = kGrcModule.subModules[8].action(
+    PermAction.view,
+  );
 }

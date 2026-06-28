@@ -2858,6 +2858,8 @@
   "grcTprmDescription": "Third-party and vendor risk management",
   "grcPrograms": "Programs",
   "grcProgramsDescription": "GRC improvement programs and initiatives",
+  "grcReviewProgress": "Review Progress",
+  "grcReviewProgressDescription": "GRC health score, trends, and review insights",
   "grcAddControl": "Add Control",
   "grcEditControl": "Edit Control",
   "grcAddAsset": "Add Asset",

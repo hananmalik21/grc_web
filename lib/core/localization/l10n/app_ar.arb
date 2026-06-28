@@ -2708,6 +2708,8 @@
   "grcTprmDescription": "إدارة مخاطر الموردين والأطراف الثالثة",
   "grcPrograms": "البرامج",
   "grcProgramsDescription": "برامج ومبادرات تحسين GRC",
+  "grcReviewProgress": "مراجعة التقدم",
+  "grcReviewProgressDescription": "درجة صحة GRC والاتجاهات ورؤى المراجعة",
   "grcAddControl": "إضافة ضابط",
   "grcEditControl": "تعديل ضابط",
   "grcAddAsset": "إضافة أصل",

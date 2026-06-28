@@ -145,6 +145,11 @@ const kGrcModule = PermModule(
       baseKey: 'grc.programs',
       route: AppRoutes.grc,
     ),
+    PermSubModule(
+      label: 'Review Progress',
+      baseKey: 'grc.review_progress',
+      route: AppRoutes.grc,
+    ),
   ],
 );
 

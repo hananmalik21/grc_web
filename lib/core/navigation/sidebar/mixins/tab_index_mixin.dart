@@ -65,6 +65,8 @@ mixin TabIndexMixin {
         return 6;
       case 'grcPrograms':
         return 7;
+      case 'grcReviewProgress':
+        return 8;
       default:
         return null;
     }

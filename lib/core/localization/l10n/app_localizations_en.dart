@@ -7866,6 +7866,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'GRC improvement programs and initiatives';
 
   @override
+  String get grcReviewProgress => 'Review Progress';
+
+  @override
+  String get grcReviewProgressDescription =>
+      'GRC health score, trends, and review insights';
+
+  @override
   String get grcAddControl => 'Add Control';
 
   @override

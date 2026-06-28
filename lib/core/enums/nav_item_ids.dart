@@ -14,6 +14,7 @@ class NavItemIds {
   static const grcControls = 'grcControls';
   static const grcTprm = 'grcTprm';
   static const grcPrograms = 'grcPrograms';
+  static const grcReviewProgress = 'grcReviewProgress';
 
   static const enterpriseStructureButton = 'enterprise-structure';
 }

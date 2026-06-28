@@ -39,6 +39,7 @@ mixin PermissionVisibilityMixin {
     NavItemIds.grcControls: PermKeys.grcControlsView,
     NavItemIds.grcTprm: PermKeys.grcTprmView,
     NavItemIds.grcPrograms: PermKeys.grcProgramsView,
+    NavItemIds.grcReviewProgress: PermKeys.grcReviewProgressView,
   };
 
   static final Map<String, PermModule> _dashboardModuleByButtonId = {

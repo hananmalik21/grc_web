@@ -262,7 +262,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "1e70b6c7475cfa7816fc3f450beda22bca1946ae"
+      resolved-ref: "0e927c9ee13adb2f90c9707a6c88ac525a49a02f"
       url: "https://github.com/hananmalik21/digify_core.git"
     source: git
     version: "0.1.0"
@@ -280,7 +280,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "27c25fbffb6f3323177bbb4aa11b61c3b116504e"
+      resolved-ref: "5aa8b86882e7d65e358f725f4bac0a45c9b91a21"
       url: "https://github.com/hananmalik21/grc_suite.git"
     source: git
     version: "0.1.0"
