@@ -28,6 +28,10 @@
 .packages
 build/
 
+# Render CI: private packages vendored at build time
+/_vendor/
+pubspec_overrides.yaml
+
 # FVM Version Cache
 .fvm/
 # But do not ignore .fvm/fvm_config.json if the team shares the config.

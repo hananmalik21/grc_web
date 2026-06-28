@@ -14,7 +14,7 @@ class _DigifyHrAuthTokenStorage implements grc_suite.AuthTokenStorage {
   Future<String?> readAccessToken() => _storage.getToken();
 }
 
-/// Wires [digify_hr_system] auth, API URL, and enterprise scope into [digify_grc_suite].
+/// Wires [grc] auth, API URL, and enterprise scope into [digify_grc_suite].
 List<Override> buildGrcSuiteHostOverrides() => [
       grc_suite.activeEnterpriseIdProvider.overrideWith(
         (ref) => ref.watch(activeEnterpriseIdProvider),
