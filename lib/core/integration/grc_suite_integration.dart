@@ -1,8 +1,8 @@
+import 'package:digify_core/permissions/perm_keys.dart';
+import 'package:digify_core/permissions/permission_service.dart';
 import 'package:digify_grc_suite/digify_grc_suite.dart' as grc_suite;
 import 'package:digify_grc_suite/grc/presentation/grc_ui/router/app_nav_item.dart';
 import 'package:grc/core/network/api_config.dart';
-import 'package:grc/core/permissions/perm_keys.dart';
-import 'package:grc/core/permissions/permission_service.dart';
 import 'package:grc/core/services/initialization/providers/initialization_providers.dart';
 import 'package:grc/features/auth/data/datasources/auth_local_storage.dart';
 import 'package:grc/features/auth/presentation/providers/auth_provider.dart';

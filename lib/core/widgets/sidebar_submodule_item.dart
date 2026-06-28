@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../permissions/perm_module.dart';
+import 'package:digify_core/permissions/perm_module.dart';
 
 class SidebarSubModuleItem extends StatelessWidget {
   const SidebarSubModuleItem({super.key, required this.sub});

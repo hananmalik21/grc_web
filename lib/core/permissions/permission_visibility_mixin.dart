@@ -1,9 +1,8 @@
+import 'package:digify_core/permissions/perm_module.dart';
 import 'package:grc/core/enums/nav_item_ids.dart';
-
-import 'perm_catalog.dart';
-import 'perm_keys.dart';
-import 'perm_module.dart';
-import 'permission_service.dart';
+import 'package:grc/core/permissions/perm_catalog.dart';
+import 'package:grc/core/permissions/perm_keys.dart';
+import 'package:grc/core/permissions/permission_service.dart';
 
 mixin PermissionVisibilityMixin {
   static final Map<String, PermModule> _sidebarModuleByItemId = {
@@ -14,13 +13,15 @@ mixin PermissionVisibilityMixin {
   };
 
   static final Map<String, String> _sidebarPermissionKeyByItemId = {
-    'manageEnterpriseStructure': PermKeys.enterpriseStructureManageView,
-    'manageComponentValues': PermKeys.enterpriseComponentValuesView,
-    'company': PermKeys.enterpriseCompanyView,
-    'division': PermKeys.enterpriseDivisionView,
-    'businessUnit': PermKeys.enterpriseBusinessUnitView,
-    'department': PermKeys.enterpriseDepartmentView,
-    'section': PermKeys.enterpriseSectionView,
+    'manageEnterpriseStructure':
+        EnterpriseStructurePermKeys.enterpriseStructureManageView,
+    'manageComponentValues':
+        EnterpriseStructurePermKeys.enterpriseComponentValuesView,
+    'company': EnterpriseStructurePermKeys.enterpriseCompanyView,
+    'division': EnterpriseStructurePermKeys.enterpriseDivisionView,
+    'businessUnit': EnterpriseStructurePermKeys.enterpriseBusinessUnitView,
+    'department': EnterpriseStructurePermKeys.enterpriseDepartmentView,
+    'section': EnterpriseStructurePermKeys.enterpriseSectionView,
     'securityOverview': PermKeys.securityOverviewView,
     'userManagement': PermKeys.securityUserManagementView,
     'accessManagement': PermKeys.securityAccessManagementView,
