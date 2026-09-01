@@ -35,6 +35,13 @@ List<DashboardButton> getDashboardButtons(AppLocalizations loc) {
       color: AppColors.dashCompliance,
       route: AppRoutes.grc,
     ),
+    DashboardButton(
+      id: NavItemIds.cyberSecurityButton,
+      icon: Assets.icons.auth.secureShield.path,
+      label: 'Cyber Security',
+      color: AppColors.dashCyberSecurity,
+      route: AppRoutes.cyberSecurity,
+    ),
   ];
 
   return buttons

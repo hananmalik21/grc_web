@@ -8,6 +8,7 @@ import 'package:grc/core/navigation/root_navigator_key.dart';
 import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:grc/features/auth/presentation/screens/login_screen.dart';
+import 'package:grc/features/cyber_security/presentation/screens/cyber_security_screen.dart';
 import 'package:grc/features/dashboard/presentation/module_selection/module_selection_screen.dart';
 import 'package:grc/features/dashboard/presentation/screens/dashboard_screen.dart';
 
@@ -65,6 +66,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ...const EnterpriseStructureModule().routes(),
           ...const SecurityConsoleModule().routes(),
           ...const GrcSuiteModule().routes(),
+          GoRoute(
+            path: AppRoutes.cyberSecurity,
+            name: 'cyberSecurity',
+            builder: (context, state) => const CyberSecurityScreen(),
+          ),
         ],
       ),
     ],

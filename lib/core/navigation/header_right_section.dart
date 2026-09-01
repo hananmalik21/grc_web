@@ -39,8 +39,8 @@ class HeaderRightSection extends StatelessWidget {
     final bool showLanguage = layout.isDesktop;
     final bool showHelpFav = layout.isDesktop;
     final double itemGap = context.responsiveFine(
-      mobile: 8.0,
-      tabletSmall: 8.0,
+      mobile: 4.0,
+      tabletSmall: 6.0,
       tabletMedium: 10.0,
       tabletLarge: 12.0,
       desktop: 14.0,

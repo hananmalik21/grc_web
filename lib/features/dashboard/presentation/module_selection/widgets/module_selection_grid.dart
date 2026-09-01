@@ -12,6 +12,7 @@ import 'package:grc/core/navigation/sidebar/mixins/tab_index_mixin.dart';
 import 'package:grc/core/navigation/sidebar/models/sidebar_item.dart';
 import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/router/breadcrumb_nav_extra.dart';
+import 'package:grc/features/cyber_security/presentation/providers/cyber_security_tab_state_provider.dart';
 import 'package:grc/features/dashboard/presentation/module_selection/module_selection_sizing.dart';
 import 'package:grc/features/dashboard/presentation/widgets/dashboard_button_model.dart';
 import 'package:grc/features/dashboard/presentation/widgets/sub_module_button.dart';
@@ -155,6 +156,13 @@ class ModuleSelectionGrid extends ConsumerWidget with TabIndexMixin {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         SecurityConsoleModule.applySidebarTab(ref, path, itemId);
       });
+    } else if (path == AppRoutes.cyberSecurity) {
+      final tabIndex = getCyberSecurityTabIndex(itemId);
+      if (tabIndex != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(cyberSecurityTabStateProvider.notifier).setTabIndex(tabIndex);
+        });
+      }
     }
   }
 

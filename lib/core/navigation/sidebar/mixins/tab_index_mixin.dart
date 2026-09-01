@@ -71,4 +71,33 @@ mixin TabIndexMixin {
         return null;
     }
   }
+
+  int? getCyberSecurityTabIndex(String itemId) {
+    switch (itemId) {
+      case 'cyberDashboard':
+        return 0;
+      case 'cyberCloudPosture':
+        return 1;
+      case 'cyberIdentityAccess':
+        return 2;
+      case 'cyberNetworkSecurity':
+        return 3;
+      case 'cyberAppApi':
+        return 4;
+      case 'cyberDataSecurity':
+        return 5;
+      case 'cyberSocCopilot':
+        return 6;
+      case 'cyberThreatDetection':
+        return 7;
+      case 'cyberIncidents':
+        return 8;
+      case 'cyberGrcCompliance':
+        return 9;
+      case 'cyberAiGovernance':
+        return 10;
+      default:
+        return null;
+    }
+  }
 }
