@@ -53,7 +53,9 @@ mixin PermissionVisibilityMixin {
 
   bool canAccessSidebarItemId(String itemId) {
     if (PermissionService.instance.isBypassAllPermissions) return true;
-    if (itemId == NavItemIds.dashboard) {
+    if (itemId == NavItemIds.dashboard ||
+        itemId == NavItemIds.cyberSecurity ||
+        itemId.startsWith('cyber')) {
       return true;
     }
     return _canAccess(
@@ -65,6 +67,10 @@ mixin PermissionVisibilityMixin {
 
   bool canAccessDashboardButtonId(String buttonId) {
     if (PermissionService.instance.isBypassAllPermissions) return true;
+    if (buttonId == NavItemIds.cyberSecurityButton ||
+        buttonId == NavItemIds.cyberSecurity) {
+      return true;
+    }
     return _canAccess(
       id: buttonId,
       moduleMap: _dashboardModuleByButtonId,

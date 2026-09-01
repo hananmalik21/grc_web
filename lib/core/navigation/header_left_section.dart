@@ -47,6 +47,7 @@ class HeaderLeftSection extends StatelessWidget {
         : AppColors.lightDark;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         GestureDetector(
           behavior: HitTestBehavior.opaque,

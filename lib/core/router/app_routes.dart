@@ -13,4 +13,5 @@ class AppRoutes {
   static const String enterpriseStructure = '/enterprise-structure';
   static const String securityManager = '/security-console';
   static const String grc = '/grc';
+  static const String cyberSecurity = '/cyber-security';
 }
