@@ -228,7 +228,18 @@ class AppColors {
   static const Color dashCompliance = Color(0xFFFB2C36);
   static const Color dashWorkforceStructure = Color(0xFF00BBA7);
   static const Color dashEnterpriseStructure = Color(0xFF615FFF);
+  static const Color dashCyberSecurity = Color(0xFF00B4D8);
   static const Color dashReports = Color(0xFF62748E);
+
+  // Cyber Security Specific Colors
+  static const Color cyberDarkBg = Color(0xFF0A0F1D);
+  static const Color cyberCardBg = Color(0xFF111827);
+  static const Color cyberCardBorder = Color(0xFF1F2937);
+  static const Color cyberCritical = Color(0xFFEF4444);
+  static const Color cyberHigh = Color(0xFFF97316);
+  static const Color cyberMedium = Color(0xFFFBBF24);
+  static const Color cyberLow = Color(0xFF38BDF8);
+  static const Color cyberLiveGreen = Color(0xFF10B981);
   static const Color dashEOSCalculator = Color(0xFF8E51FF);
   static const Color dashGovernmentForms = Color(0xFFFF2056);
   static const Color dashDEIDashboard = Color(0xFFE12AFB);

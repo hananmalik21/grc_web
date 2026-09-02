@@ -19,6 +19,7 @@ import 'package:grc/core/navigation/sidebar/widgets/sidebar_menu_item.dart';
 import 'package:grc/core/navigation/sidebar/widgets/sidebar_search_section.dart';
 import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/features/cyber_security/presentation/providers/cyber_security_tab_state_provider.dart';
 
 class Sidebar extends ConsumerStatefulWidget {
   const Sidebar({super.key});
@@ -46,6 +47,11 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
         SecurityConsoleModule.applySidebarTab(ref, item.route!, item.id);
       } else if (item.route == AppRoutes.grc) {
         GrcSuiteModule.applySidebarTab(ref, item.route!, item.id);
+      } else if (item.route == AppRoutes.cyberSecurity) {
+        final tabIndex = getCyberSecurityTabIndex(item.id);
+        if (tabIndex != null) {
+          ref.read(cyberSecurityTabStateProvider.notifier).setTabIndex(tabIndex);
+        }
       }
       context.go(item.route!);
       if (!ResponsiveHelper.isWeb(context)) {
@@ -69,6 +75,11 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
     } else if (route == AppRoutes.securityManager) {
       final state = ref.watch(securityManagerTabStateProvider);
       final itemTabIndex = getSecurityManagerTabIndex(itemId);
+      if (itemTabIndex == null) return false;
+      return itemTabIndex == state.currentTabIndex;
+    } else if (route == AppRoutes.cyberSecurity) {
+      final state = ref.watch(cyberSecurityTabStateProvider);
+      final itemTabIndex = getCyberSecurityTabIndex(itemId);
       if (itemTabIndex == null) return false;
       return itemTabIndex == state.currentTabIndex;
     }

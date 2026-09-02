@@ -229,6 +229,80 @@ class SidebarConfig {
           ),
         ],
       ),
+      SidebarItem(
+        id: 'cyberSecurity',
+        svgPath: Assets.icons.auth.secureShield.path,
+        labelKey: 'cyberSecurity',
+        subtitle: 'Cloud Security & Posture Monitoring',
+        children: [
+          SidebarItem(
+            id: 'cyberDashboard',
+            labelKey: 'cyberDashboard',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.dashboardIcon.path,
+          ),
+          SidebarItem(
+            id: 'cyberCloudPosture',
+            labelKey: 'cyberCloudPosture',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.manageEnterpriseIcon.path,
+          ),
+          SidebarItem(
+            id: 'cyberIdentityAccess',
+            labelKey: 'cyberIdentityAccess',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.usersIcon.path,
+          ),
+          SidebarItem(
+            id: 'cyberNetworkSecurity',
+            labelKey: 'cyberNetworkSecurity',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.securityIcon.path,
+          ),
+          SidebarItem(
+            id: 'cyberAppApi',
+            labelKey: 'cyberAppApi',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.manageEnterpriseIcon.path,
+          ),
+          SidebarItem(
+            id: 'cyberDataSecurity',
+            labelKey: 'cyberDataSecurity',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.securityManager.dataClassification.path,
+          ),
+          SidebarItem(
+            id: 'cyberSocCopilot',
+            labelKey: 'cyberSocCopilot',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.auth.secureShield.path,
+          ),
+          SidebarItem(
+            id: 'cyberThreatDetection',
+            labelKey: 'cyberThreatDetection',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.securityManager.securityAlerts.path,
+          ),
+          SidebarItem(
+            id: 'cyberIncidents',
+            labelKey: 'cyberIncidents',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.securityManager.securityAlerts.path,
+          ),
+          SidebarItem(
+            id: 'cyberGrcCompliance',
+            labelKey: 'cyberGrcCompliance',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.complianceIcon.path,
+          ),
+          SidebarItem(
+            id: 'cyberAiGovernance',
+            labelKey: 'cyberAiGovernance',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.securityManager.roleDelegation.path,
+          ),
+        ],
+      ),
     ]);
   }
 
@@ -294,6 +368,30 @@ class SidebarConfig {
         return localizations.grcPrograms;
       case 'grcReviewProgress':
         return localizations.grcReviewProgress;
+      case 'cyberSecurity':
+        return 'Cyber Security';
+      case 'cyberDashboard':
+        return 'Security Dashboard';
+      case 'cyberCloudPosture':
+        return 'Cloud Posture';
+      case 'cyberIdentityAccess':
+        return 'Identity & Access';
+      case 'cyberNetworkSecurity':
+        return 'Network Security';
+      case 'cyberAppApi':
+        return 'App & API';
+      case 'cyberDataSecurity':
+        return 'Data Security';
+      case 'cyberSocCopilot':
+        return 'AI SOC Copilot';
+      case 'cyberThreatDetection':
+        return 'Threat Detection';
+      case 'cyberIncidents':
+        return 'Incidents';
+      case 'cyberGrcCompliance':
+        return 'GRC & Compliance';
+      case 'cyberAiGovernance':
+        return 'AI Governance';
       default:
         return key;
     }
@@ -322,6 +420,28 @@ class SidebarConfig {
         return localizations.grcProgramsDescription;
       case 'grcReviewProgress':
         return localizations.grcReviewProgressDescription;
+      case 'cyberDashboard':
+        return 'Real-time security posture, findings & threat telemetry';
+      case 'cyberCloudPosture':
+        return 'Multi-cloud inventory, configuration drift & posture metrics';
+      case 'cyberIdentityAccess':
+        return 'IAM analytics, least-privilege analysis & entitlement drift';
+      case 'cyberNetworkSecurity':
+        return 'Ingress/egress security groups, zero trust & microsegmentation';
+      case 'cyberAppApi':
+        return 'API gateway security, container security & vulnerability scanning';
+      case 'cyberDataSecurity':
+        return 'Sensitive data discovery, encryption posture & DLP controls';
+      case 'cyberSocCopilot':
+        return 'Generative AI incident investigation & remediation copilot';
+      case 'cyberThreatDetection':
+        return 'Anomaly detection, behavioral analysis & live threat feeds';
+      case 'cyberIncidents':
+        return 'Active incident queue, investigation timelines & response playbooks';
+      case 'cyberGrcCompliance':
+        return 'Continuous compliance monitoring against NIST, CIS & SOC2';
+      case 'cyberAiGovernance':
+        return 'LLM security guardrails, model registry risk & safety audits';
       default:
         return null;
     }
