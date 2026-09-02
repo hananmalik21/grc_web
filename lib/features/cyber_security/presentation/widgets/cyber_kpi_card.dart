@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
 
 class CyberKpiCard extends StatelessWidget {
   final String title;
@@ -26,11 +25,11 @@ class CyberKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12.r),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
+        color: const Color(0xFF09101F),
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        border: Border.all(color: const Color(0xFF142036)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,45 +37,38 @@ class CyberKpiCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  title.toUpperCase(),
-                  style: TextStyle(
-                    color: AppColors.textTertiaryDark,
-                    fontSize: 9.5.sp,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.6,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                title.toUpperCase(),
+                style: TextStyle(
+                  color: const Color(0xFF5E738E),
+                  fontSize: 10.5.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
                 ),
               ),
-              const Gap(4),
               if (icon != null)
-                Icon(icon, size: 14.sp, color: accentColor ?? AppColors.textTertiaryDark)
+                Icon(icon, size: 15.sp, color: accentColor ?? const Color(0xFF94A3B8))
               else
                 ?trailingIcon,
             ],
           ),
-          const Gap(6),
+          const Gap(8),
           Text(
             value,
             style: TextStyle(
-              color: AppColors.textPrimaryDark,
-              fontSize: 22.sp,
+              color: Colors.white,
+              fontSize: 26.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const Gap(3),
+          const Gap(4),
           Text(
             subtitle,
             style: TextStyle(
-              color: subtitleColor ?? AppColors.textPlaceholderDark,
-              fontSize: 10.sp,
+              color: subtitleColor ?? const Color(0xFF64748B),
+              fontSize: 11.5.sp,
               fontWeight: FontWeight.w400,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/models/cyber_security/cloud_posture/cloud_account_model.dart';
-import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
+import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/cloud_account_model.dart';
 
 class CloudPostureAccountsView extends StatelessWidget {
-  final List<CloudAccountModel>? accounts;
   final VoidCallback? onFilterFindings;
 
-  const CloudPostureAccountsView({super.key, this.accounts, this.onFilterFindings});
+  const CloudPostureAccountsView({super.key, this.onFilterFindings});
 
   @override
   Widget build(BuildContext context) {
-    final effectiveAccounts = accounts ?? CyberCloudPostureMockData.getMockAccounts();
+    final accounts = CloudAccountModel.getMockAccounts();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,11 +23,11 @@ class CloudPostureAccountsView extends StatelessWidget {
 
             if (isDesktop) {
               return Row(
-                children: effectiveAccounts
+                children: accounts
                     .map(
                       (acc) => Expanded(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 5.w),
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
                           child: _buildAccountCard(acc),
                         ),
                       ),
@@ -43,17 +41,17 @@ class CloudPostureAccountsView extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildAccountCard(effectiveAccounts[0])),
+                      Expanded(child: _buildAccountCard(accounts[0])),
                       const Gap(10),
-                      Expanded(child: _buildAccountCard(effectiveAccounts[1])),
+                      Expanded(child: _buildAccountCard(accounts[1])),
                     ],
                   ),
                   const Gap(10),
                   Row(
                     children: [
-                      Expanded(child: _buildAccountCard(effectiveAccounts[2])),
+                      Expanded(child: _buildAccountCard(accounts[2])),
                       const Gap(10),
-                      Expanded(child: _buildAccountCard(effectiveAccounts[3])),
+                      Expanded(child: _buildAccountCard(accounts[3])),
                     ],
                   ),
                 ],
@@ -61,10 +59,10 @@ class CloudPostureAccountsView extends StatelessWidget {
             }
 
             return Column(
-              children: effectiveAccounts
+              children: accounts
                   .map(
                     (acc) => Padding(
-                      padding: EdgeInsets.only(bottom: 10.h),
+                      padding: const EdgeInsets.only(bottom: 10.0),
                       child: _buildAccountCard(acc),
                     ),
                   )
@@ -128,7 +126,7 @@ class CloudPostureAccountsView extends StatelessWidget {
                       DataColumn(label: _HeaderCell('LAST SCAN')),
                       DataColumn(label: _HeaderCell('RESOURCES')),
                     ],
-                    rows: effectiveAccounts.map((acc) {
+                    rows: accounts.map((acc) {
                       return DataRow(
                         cells: [
                           DataCell(Text(acc.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600))),

@@ -1,67 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
-import 'package:grc/core/models/cyber_security/dashboard/cyber_dashboard_models.dart';
-import 'package:grc/core/widgets/common/digify_status_capsule.dart';
-import 'package:grc/features/cyber_security/data/mock/cyber_dashboard_mock_data.dart';
+
+class IncidentItem {
+  final String severity;
+  final String title;
+  final String incidentId;
+  final String timestamp;
+  final String status;
+  final Color severityColor;
+  final Color statusColor;
+
+  const IncidentItem({
+    required this.severity,
+    required this.title,
+    required this.incidentId,
+    required this.timestamp,
+    required this.status,
+    required this.severityColor,
+    required this.statusColor,
+  });
+}
 
 class CyberRecentIncidentsList extends StatelessWidget {
   const CyberRecentIncidentsList({super.key});
 
+  static const List<IncidentItem> _incidents = [
+    IncidentItem(
+      severity: 'HIGH',
+      title: 'Suspicious Login from Tor Exit Node',
+      incidentId: 'INC-2847',
+      timestamp: '28 Jun 14:23',
+      status: 'Investigating',
+      severityColor: Color(0xFFF97316),
+      statusColor: Color(0xFFF59E0B),
+    ),
+    IncidentItem(
+      severity: 'CRITICAL',
+      title: 'Mass File Download — SharePoint Online',
+      incidentId: 'INC-2846',
+      timestamp: '28 Jun 13:51',
+      status: 'Open',
+      severityColor: Color(0xFFEF4444),
+      statusColor: Color(0xFFEF4444),
+    ),
+    IncidentItem(
+      severity: 'HIGH',
+      title: 'Lateral Movement — Internal SSH Scanning',
+      incidentId: 'INC-2845',
+      timestamp: '27 Jun 22:14',
+      status: 'Contained',
+      severityColor: Color(0xFFF97316),
+      statusColor: Color(0xFFF97316),
+    ),
+    IncidentItem(
+      severity: 'CRITICAL',
+      title: 'API Key Leaked in Public GitHub Repo',
+      incidentId: 'INC-2844',
+      timestamp: '27 Jun 09:33',
+      status: 'Resolved',
+      severityColor: Color(0xFFEF4444),
+      statusColor: Color(0xFF10B981),
+    ),
+    IncidentItem(
+      severity: 'HIGH',
+      title: 'Privilege Escalation — IAM Role Modification',
+      incidentId: 'INC-2843',
+      timestamp: '26 Jun 18:07',
+      status: 'Open',
+      severityColor: Color(0xFFF97316),
+      statusColor: Color(0xFFEF4444),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
+        color: const Color(0xFF070C18),
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        border: Border.all(color: const Color(0xFF131E30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'RECENT INCIDENTS',
-                style: TextStyle(
-                  color: AppColors.textTertiaryDark,
-                  fontSize: 11.5.sp,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(4.r),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                  child: Text(
-                    'View all →',
-                    style: TextStyle(
-                      color: AppColors.dashCyberSecurity,
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            'RECENT INCIDENTS',
+            style: TextStyle(
+              color: const Color(0xFF94A3B8),
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+            ),
           ),
-          const Gap(14),
+          const Gap(16),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: CyberDashboardMockData.recentIncidents.length,
-            separatorBuilder: (context, index) => const Divider(
-              color: AppColors.cyberCardBorder,
-              height: 14,
-            ),
+            itemCount: _incidents.length,
+            separatorBuilder: (_, _) => const Gap(14),
             itemBuilder: (context, index) {
-              final incident = CyberDashboardMockData.recentIncidents[index];
-              return _buildIncidentRow(incident);
+              final item = _incidents[index];
+              return _buildIncidentRow(item);
             },
           ),
         ],
@@ -69,64 +110,83 @@ class CyberRecentIncidentsList extends StatelessWidget {
     );
   }
 
-  Widget _buildIncidentRow(IncidentItem incident) {
+  Widget _buildIncidentRow(IncidentItem item) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        DigifyStatusCapsule(
-          status: incident.severity,
-          variant: DigifyStatusCapsuleVariant.boxy,
+        // Severity Tag
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+          decoration: BoxDecoration(
+            color: item.severityColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(4.r),
+            border: Border.all(
+              color: item.severityColor.withValues(alpha: 0.35),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            item.severity,
+            style: TextStyle(
+              color: item.severityColor,
+              fontSize: 9.sp,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
         ),
-        const Gap(10),
+        const Gap(12),
+        // Title & metadata
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                incident.title,
-                style: TextStyle(
-                  color: AppColors.textPrimaryDark,
-                  fontSize: 11.5.sp,
-                  fontWeight: FontWeight.w600,
-                ),
+                item.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: const Color(0xFFF1F5F9),
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const Gap(2),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 6.w,
-                children: [
-                  Text(
-                    incident.incidentId,
-                    style: TextStyle(
-                      color: AppColors.textPlaceholderDark,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    '•',
-                    style: TextStyle(
-                      color: AppColors.textPlaceholderDark,
-                      fontSize: 9.sp,
-                    ),
-                  ),
-                  Text(
-                    incident.timestamp,
-                    style: TextStyle(
-                      color: AppColors.textPlaceholderDark,
-                      fontSize: 10.sp,
-                    ),
-                  ),
-                ],
+              const Gap(3),
+              Text(
+                '${item.incidentId}  ·  ${item.timestamp}',
+                style: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ],
           ),
         ),
         const Gap(8),
-        DigifyStatusCapsule(
-          status: incident.status,
-          variant: DigifyStatusCapsuleVariant.pill,
+        // Status indicator with dot
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 6.r,
+              height: 6.r,
+              decoration: BoxDecoration(
+                color: item.statusColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const Gap(5),
+            Text(
+              item.status,
+              style: TextStyle(
+                color: item.statusColor,
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
 
 class CyberComplianceBars extends StatelessWidget {
   const CyberComplianceBars({super.key});
@@ -9,11 +8,11 @@ class CyberComplianceBars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
+        color: const Color(0xFF070C18),
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        border: Border.all(color: const Color(0xFF131E30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -21,60 +20,67 @@ class CyberComplianceBars extends StatelessWidget {
           Text(
             'FRAMEWORK COMPLIANCE',
             style: TextStyle(
-              color: AppColors.textTertiaryDark,
-              fontSize: 11.5.sp,
+              color: const Color(0xFF94A3B8),
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.8,
             ),
           ),
-          const Gap(16),
+          const Gap(20),
           _buildFrameworkRow(
-            label: 'NIST CSF',
+            label: 'NIST\nCSF',
             percentage: 0.72,
-            barColor: AppColors.dashCyberSecurity,
+            barColor: const Color(0xFF00BCD4),
           ),
-          const Gap(12),
+          const Gap(14),
           _buildFrameworkRow(
             label: 'CIS v8',
             percentage: 0.80,
-            barColor: AppColors.primaryLight,
+            barColor: const Color(0xFF448AFF),
           ),
-          const Gap(12),
+          const Gap(14),
           _buildFrameworkRow(
-            label: 'ISO 27001',
+            label: 'ISO\n27001',
             percentage: 0.68,
-            barColor: AppColors.barPurple,
+            barColor: const Color(0xFFA78BFA),
           ),
-          const Gap(12),
+          const Gap(14),
           _buildFrameworkRow(
             label: 'SOC 2',
             percentage: 0.85,
-            barColor: AppColors.cyberLiveGreen,
-          ),
-          const Gap(12),
-          _buildFrameworkRow(
-            label: 'CSA CCM',
-            percentage: 0.62,
-            barColor: AppColors.cyberMedium,
+            barColor: const Color(0xFF10B981),
           ),
           const Gap(14),
+          _buildFrameworkRow(
+            label: 'CSA\nCCM',
+            percentage: 0.62,
+            barColor: const Color(0xFFF59E0B),
+          ),
+          const Gap(16),
+          // Percentage Axis
           Row(
             children: [
-              SizedBox(width: 56.w),
-              const Gap(8),
+              SizedBox(width: 55.w), // alignment spacer matching labels
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildAxisLabel('0%'),
-                    _buildAxisLabel('25%'),
-                    _buildAxisLabel('50%'),
-                    _buildAxisLabel('75%'),
-                    _buildAxisLabel('100%'),
-                  ],
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('0%', style: _axisStyle),
+                      const Gap(16),
+                      Text('25%', style: _axisStyle),
+                      const Gap(16),
+                      Text('50%', style: _axisStyle),
+                      const Gap(16),
+                      Text('75%', style: _axisStyle),
+                      const Gap(16),
+                      Text('100%', style: _axisStyle),
+                    ],
+                  ),
                 ),
               ),
-              SizedBox(width: 38.w),
             ],
           ),
         ],
@@ -82,69 +88,55 @@ class CyberComplianceBars extends StatelessWidget {
     );
   }
 
-  Widget _buildAxisLabel(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: AppColors.textPlaceholderDark,
-        fontSize: 8.5.sp,
-        fontWeight: FontWeight.w400,
-      ),
-    );
-  }
+  TextStyle get _axisStyle => TextStyle(
+    color: const Color(0xFF64748B),
+    fontSize: 10.sp,
+    fontWeight: FontWeight.w500,
+  );
 
   Widget _buildFrameworkRow({
     required String label,
     required double percentage,
     required Color barColor,
   }) {
-    final pctInt = (percentage * 100).toInt();
-
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 56.w,
+          width: 55.w,
           child: Text(
             label,
+            textAlign: TextAlign.right,
             style: TextStyle(
-              color: AppColors.textTertiaryDark,
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w600,
+              color: const Color(0xFF94A3B8),
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w500,
+              height: 1.1,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
-        const Gap(8),
+        const Gap(12),
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(3.r),
-            child: Container(
-              height: 12.h,
-              color: AppColors.cardBackgroundGreyDark,
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: percentage,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: barColor,
-                    borderRadius: BorderRadius.circular(3.r),
-                  ),
-                ),
-              ),
+          child: Container(
+            height: 22.h,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              borderRadius: BorderRadius.circular(4.r),
             ),
-          ),
-        ),
-        const Gap(8),
-        SizedBox(
-          width: 30.w,
-          child: Text(
-            '$pctInt%',
-            textAlign: TextAlign.end,
-            style: TextStyle(
-              color: AppColors.textPrimaryDark,
-              fontSize: 10.5.sp,
-              fontWeight: FontWeight.w700,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    width: constraints.maxWidth * percentage,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: barColor,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),

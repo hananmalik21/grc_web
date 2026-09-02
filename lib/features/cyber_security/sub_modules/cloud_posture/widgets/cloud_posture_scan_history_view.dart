@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/models/cyber_security/cloud_posture/scan_history_model.dart';
-import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
+import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/scan_history_model.dart';
 
 class CloudPostureScanHistoryView extends StatelessWidget {
-  final List<ScanHistoryModel>? scanHistory;
-
-  const CloudPostureScanHistoryView({super.key, this.scanHistory});
+  const CloudPostureScanHistoryView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final scans = scanHistory ?? CyberCloudPostureMockData.getMockScanHistory();
+    final scans = ScanHistoryModel.getMockScanHistory();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

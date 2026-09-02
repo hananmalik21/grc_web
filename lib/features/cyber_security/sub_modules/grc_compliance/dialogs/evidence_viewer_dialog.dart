@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/models/cyber_security/grc_compliance/compliance_framework_model.dart';
-import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/features/cyber_security/sub_modules/grc_compliance/models/compliance_framework_model.dart';
 
 class EvidenceViewerDialog extends StatelessWidget {
   final ControlItemModel control;
@@ -169,10 +168,14 @@ class EvidenceViewerDialog extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    ToastService.show(
-                      context: context,
-                      message: 'Signed evidence bundle exported for ${control.controlId}.',
-                      type: ToastType.success,
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: const Color(0xFF131D31),
+                        content: Text(
+                          'Signed evidence bundle exported for ${control.controlId}.',
+                          style: const TextStyle(color: Color(0xFF00B4D8)),
+                        ),
+                      ),
                     );
                   },
                   icon: Icon(Icons.file_download_outlined, size: 14.sp),

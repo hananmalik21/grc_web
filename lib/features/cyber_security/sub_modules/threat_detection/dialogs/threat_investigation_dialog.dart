@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/models/cyber_security/threat_detection/threat_alert_model.dart';
-import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/features/cyber_security/sub_modules/threat_detection/models/threat_alert_model.dart';
 
 class ThreatInvestigationDialog extends StatefulWidget {
   final ThreatAlertModel alert;
@@ -152,10 +151,14 @@ class _ThreatInvestigationDialogState extends State<ThreatInvestigationDialog> {
                           setState(() => _currentStatus = ThreatStatus.investigating);
                           widget.onStatusChanged?.call(ThreatStatus.investigating);
                           Navigator.of(context).pop();
-                          ToastService.show(
-                            context: context,
-                            message: '${widget.alert.alertId} marked as Investigating.',
-                            type: ToastType.warning,
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: const Color(0xFF131D31),
+                              content: Text(
+                                '${widget.alert.alertId} marked as Investigating.',
+                                style: const TextStyle(color: Color(0xFFF59E0B)),
+                              ),
+                            ),
                           );
                         },
                         icon: Icon(Icons.visibility_outlined, size: 14.sp, color: const Color(0xFFF59E0B)),
@@ -170,10 +173,14 @@ class _ThreatInvestigationDialogState extends State<ThreatInvestigationDialog> {
                           setState(() => _currentStatus = ThreatStatus.closed);
                           widget.onStatusChanged?.call(ThreatStatus.closed);
                           Navigator.of(context).pop();
-                          ToastService.show(
-                            context: context,
-                            message: '${widget.alert.alertId} marked as Closed.',
-                            type: ToastType.success,
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: const Color(0xFF131D31),
+                              content: Text(
+                                '${widget.alert.alertId} marked as Closed.',
+                                style: const TextStyle(color: Color(0xFF10B981)),
+                              ),
+                            ),
                           );
                         },
                         icon: Icon(Icons.check_circle_outline, size: 14.sp, color: const Color(0xFF10B981)),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
-import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/finding_item_model.dart';
 
 class CreateRemediationTicketDialog extends StatefulWidget {
   final FindingItemModel finding;
@@ -430,10 +429,14 @@ class _CreateRemediationTicketDialogState
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        ToastService.show(
-                          context: context,
-                          message: 'Ticket successfully created in $_ticketingSystem!',
-                          type: ToastType.success,
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: const Color(0xFF131D31),
+                            content: Text(
+                              'Ticket successfully created in $_ticketingSystem!',
+                              style: const TextStyle(color: Color(0xFF00B4D8)),
+                            ),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(

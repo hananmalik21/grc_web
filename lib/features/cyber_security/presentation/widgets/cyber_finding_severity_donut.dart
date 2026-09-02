@@ -1,8 +1,7 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
-import 'package:grc/features/cyber_security/data/mock/cyber_dashboard_mock_data.dart';
 
 class CyberFindingSeverityDonut extends StatelessWidget {
   const CyberFindingSeverityDonut({super.key});
@@ -10,11 +9,11 @@ class CyberFindingSeverityDonut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
+        color: const Color(0xFF070C18),
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        border: Border.all(color: const Color(0xFF131E30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,26 +21,32 @@ class CyberFindingSeverityDonut extends StatelessWidget {
           Text(
             'FINDING SEVERITY',
             style: TextStyle(
-              color: AppColors.textTertiaryDark,
-              fontSize: 11.5.sp,
+              color: const Color(0xFF94A3B8),
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.8,
             ),
           ),
-          const Gap(14),
+          const Gap(16),
+          // Custom Canvas Donut Chart with Center Text
           Center(
             child: SizedBox(
-              width: 130.r,
-              height: 130.r,
+              width: 140.r,
+              height: 140.r,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   CustomPaint(
-                    size: Size(130.r, 130.r),
+                    size: Size(140.r, 140.r),
                     painter: const _DonutChartPainter(
-                      values: CyberDashboardMockData.findingSeverityValues,
-                      colors: CyberDashboardMockData.findingSeverityColors,
-                      strokeWidth: 15.0,
+                      values: [4, 14, 84, 210],
+                      colors: [
+                        Color(0xFFEF4444), // Critical
+                        Color(0xFFF97316), // High
+                        Color(0xFFFBBF24), // Medium
+                        Color(0xFF38BDF8), // Low
+                      ],
+                      strokeWidth: 16.0,
                     ),
                   ),
                   Column(
@@ -50,18 +55,18 @@ class CyberFindingSeverityDonut extends StatelessWidget {
                       Text(
                         '312',
                         style: TextStyle(
-                          color: AppColors.textPrimaryDark,
-                          fontSize: 20.sp,
+                          color: Colors.white,
+                          fontSize: 22.sp,
                           fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
                         ),
                       ),
                       Text(
-                        'TOTAL',
+                        'Total',
                         style: TextStyle(
-                          color: AppColors.textPlaceholderDark,
-                          fontSize: 8.5.sp,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.8,
+                          color: const Color(0xFF64748B),
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -70,31 +75,32 @@ class CyberFindingSeverityDonut extends StatelessWidget {
               ),
             ),
           ),
-          const Gap(16),
-          Wrap(
-            alignment: WrapAlignment.spaceAround,
-            spacing: 8.w,
-            runSpacing: 8.h,
+          const Gap(20),
+          // Legend
+          Column(
             children: const [
-              _SeverityLegendItem(
+              _SeverityLegendRow(
+                color: Color(0xFFEF4444),
                 label: 'Critical',
                 count: '4',
-                color: AppColors.cyberCritical,
               ),
-              _SeverityLegendItem(
+              Gap(8),
+              _SeverityLegendRow(
+                color: Color(0xFFF97316),
                 label: 'High',
                 count: '14',
-                color: AppColors.cyberHigh,
               ),
-              _SeverityLegendItem(
+              Gap(8),
+              _SeverityLegendRow(
+                color: Color(0xFFFBBF24),
                 label: 'Medium',
                 count: '84',
-                color: AppColors.cyberMedium,
               ),
-              _SeverityLegendItem(
+              Gap(8),
+              _SeverityLegendRow(
+                color: Color(0xFF38BDF8),
                 label: 'Low',
                 count: '210',
-                color: AppColors.cyberLow,
               ),
             ],
           ),
@@ -117,33 +123,28 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
-    final total = values.fold<double>(0, (sum, val) => sum + val);
-
+    final total = values.fold<double>(0.0, (sum, val) => sum + val);
     if (total == 0) return;
 
-    double startAngle = -3.141592653589793 / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (math.min(size.width, size.height) - strokeWidth) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    double startAngle = -math.pi / 2;
+    const gapAngle = 0.04; // subtle clean separation gap in radians
 
     for (int i = 0; i < values.length; i++) {
-      final sweepAngle = (values[i] / total) * 2 * 3.141592653589793;
-
+      final sweepAngle = (values[i] / total) * (2 * math.pi) - gapAngle;
       final paint = Paint()
         ..color = colors[i]
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.butt
-        ..isAntiAlias = true;
+        ..strokeCap = StrokeCap.butt;
 
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        sweepAngle,
-        false,
-        paint,
-      );
-
-      startAngle += sweepAngle;
+      if (sweepAngle > 0) {
+        canvas.drawArc(rect, startAngle + (gapAngle / 2), sweepAngle, false, paint);
+      }
+      startAngle += (values[i] / total) * (2 * math.pi);
     }
   }
 
@@ -151,51 +152,50 @@ class _DonutChartPainter extends CustomPainter {
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) => false;
 }
 
-class _SeverityLegendItem extends StatelessWidget {
+class _SeverityLegendRow extends StatelessWidget {
+  final Color color;
   final String label;
   final String count;
-  final Color color;
 
-  const _SeverityLegendItem({
+  const _SeverityLegendRow({
+    required this.color,
     required this.label,
     required this.count,
-    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 7.r,
-              height: 7.r,
+              width: 8.r,
+              height: 8.r,
               decoration: BoxDecoration(
                 color: color,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(2.r),
               ),
             ),
-            const Gap(4),
+            const Gap(8),
             Text(
               label,
               style: TextStyle(
-                color: AppColors.textTertiaryDark,
-                fontSize: 9.5.sp,
+                color: const Color(0xFFCBD5E1),
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w400,
               ),
             ),
           ],
         ),
-        const Gap(2),
         Text(
           count,
           style: TextStyle(
-            color: AppColors.textPrimaryDark,
-            fontSize: 11.sp,
-            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
