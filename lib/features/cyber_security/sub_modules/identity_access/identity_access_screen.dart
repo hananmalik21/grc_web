@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/core/models/cyber_security/identity_access/identity_user_model.dart';
+import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/identity_access/dialogs/user_access_review_dialog.dart';
-import 'package:grc/features/cyber_security/sub_modules/identity_access/models/identity_user_model.dart';
 import 'package:grc/features/cyber_security/sub_modules/identity_access/widgets/identity_kpi_row.dart';
 import 'package:grc/features/cyber_security/sub_modules/identity_access/widgets/identity_users_table.dart';
 
@@ -15,126 +16,109 @@ class IdentityAccessScreen extends StatefulWidget {
 }
 
 class _IdentityAccessScreenState extends State<IdentityAccessScreen> {
-  final List<IdentityUserModel> _users = IdentityUserModel.getMockUsers();
+  final List<IdentityUserModel> _users = const [
+    IdentityUserModel(
+      username: 'carlos.rodriguez',
+      department: 'Cloud Platform',
+      role: 'Cloud Admin',
+      riskScore: 94,
+      riskScoreColor: Color(0xFFEF4444),
+      alertsCount: 5,
+      hasMfa: true,
+      isPrivileged: true,
+      status: 'active',
+      statusColor: Color(0xFF10B981),
+    ),
+    IdentityUserModel(
+      username: 'ashley.wong',
+      department: 'IT Operations',
+      role: 'Sys Admin',
+      riskScore: 87,
+      riskScoreColor: Color(0xFFEF4444),
+      alertsCount: 3,
+      hasMfa: true,
+      isPrivileged: true,
+      status: 'active',
+      statusColor: Color(0xFF10B981),
+    ),
+    IdentityUserModel(
+      username: 'derek.okonkwo',
+      department: 'Finance',
+      role: 'AP Manager',
+      riskScore: 76,
+      riskScoreColor: Color(0xFFF97316),
+      alertsCount: 2,
+      hasMfa: false,
+      isPrivileged: false,
+      status: 'active',
+      statusColor: Color(0xFF10B981),
+    ),
+    IdentityUserModel(
+      username: 'svc-ci-pipeline',
+      department: 'DevOps',
+      role: 'Service Account',
+      riskScore: 72,
+      riskScoreColor: Color(0xFFF97316),
+      alertsCount: 4,
+      hasMfa: false,
+      isPrivileged: true,
+      status: 'active',
+      statusColor: Color(0xFF10B981),
+    ),
+    IdentityUserModel(
+      username: 'jen.martinez',
+      department: 'Finance',
+      role: 'Finance Analyst',
+      riskScore: 60,
+      riskScoreColor: Color(0xFFF97316),
+      alertsCount: 1,
+      hasMfa: false,
+      isPrivileged: false,
+      status: 'active',
+      statusColor: Color(0xFF10B981),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = context.isMobile;
-    final padding = ResponsiveHelper.getPagePadding(context);
-
-    final titleSection = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Identity & Access Security',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: isMobile ? 18.sp : 22.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const Gap(3),
-        Text(
-          'User risk scores, privilege analysis, and access anomalies',
-          style: TextStyle(
-            color: const Color(0xFF94A3B8),
-            fontSize: isMobile ? 11.sp : 12.sp,
-          ),
-        ),
-      ],
-    );
-
-    final actionsSection = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildHeaderButton(
-          icon: Icons.add,
+    return CyberScreenLayout(
+      title: 'Identity & Access Security',
+      subtitle: 'User risk scores, privilege analysis, and access anomalies',
+      actions: [
+        AppButton(
           label: 'Start Review',
-          onTap: () {
+          type: AppButtonType.primary,
+          size: AppButtonSize.sm,
+          onPressed: () {
             if (_users.isNotEmpty) {
               UserAccessReviewDialog.show(context, user: _users.first);
             }
           },
         ),
-        const Gap(10),
-        _buildHeaderButton(
-          icon: Icons.download_rounded,
-          label: 'Export',
-          onTap: () {},
+        const Gap(8),
+        AppButton(
+          label: 'Export Report',
+          type: AppButtonType.secondary,
+          size: AppButtonSize.sm,
+          onPressed: () {
+            ToastService.show(
+              context: context,
+              message: 'Identity risk & privilege report exported.',
+              type: ToastType.success,
+            );
+          },
         ),
       ],
-    );
-
-    return SingleChildScrollView(
-      padding: padding.copyWith(bottom: 24.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
-          if (isMobile) ...[
-            titleSection,
-            const Gap(12),
-            actionsSection,
-          ] else ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: titleSection),
-                actionsSection,
-              ],
-            ),
-          ],
-
-          const Gap(20),
-
-          // 4 Top KPI Cards
           const IdentityKpiRow(),
-
           const Gap(24),
-
-          // User Access Table
           IdentityUsersTable(
             users: _users,
-            onReviewUser: (user) {
-              UserAccessReviewDialog.show(context, user: user);
-            },
+            onReviewUser: (user) => UserAccessReviewDialog.show(context, user: user),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFF131D31),
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: const Color(0xFF1E293B)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14.sp, color: const Color(0xFFCBD5E1)),
-            const Gap(6),
-            Text(
-              label,
-              style: TextStyle(
-                color: const Color(0xFFCBD5E1),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

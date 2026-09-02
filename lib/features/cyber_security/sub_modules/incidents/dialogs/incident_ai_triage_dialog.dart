@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/incidents/models/incident_item_model.dart';
+import 'package:grc/core/models/cyber_security/incidents/incident_item_model.dart';
+import 'package:grc/core/services/toast_service.dart';
 
 class IncidentAiTriageDialog extends StatelessWidget {
   final IncidentItemModel incident;
@@ -241,14 +242,10 @@ class IncidentAiTriageDialog extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                     onExecuteContainment?.call();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: const Color(0xFF131D31),
-                        content: Text(
-                          'Containment playbook triggered for ${incident.id}.',
-                          style: const TextStyle(color: Color(0xFF00B4D8)),
-                        ),
-                      ),
+                    ToastService.show(
+                      context: context,
+                      message: 'Containment playbook triggered for ${incident.id}.',
+                      type: ToastType.success,
                     );
                   },
                   style: ElevatedButton.styleFrom(

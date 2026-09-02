@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/constants/app_colors.dart';
 
 class AppApiKpiRow extends StatelessWidget {
   const AppApiKpiRow({super.key});
@@ -10,32 +11,31 @@ class AppApiKpiRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= 950;
-        final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 950;
 
         final cards = [
           const _AppKpiCard(
             title: 'API ENDPOINTS',
             value: '142',
             icon: Icons.language_rounded,
-            accentColor: Color(0xFF00BCD4),
+            accentColor: AppColors.cyberLow,
           ),
           const _AppKpiCard(
             title: 'OWASP FINDINGS',
             value: '23',
             icon: Icons.warning_amber_rounded,
-            accentColor: Color(0xFFF97316),
+            accentColor: AppColors.cyberHigh,
           ),
           const _AppKpiCard(
             title: 'EXPOSED ENDPOINTS',
             value: '3',
             icon: Icons.error_outline_rounded,
-            accentColor: Color(0xFFEF4444),
+            accentColor: AppColors.cyberCritical,
           ),
           const _AppKpiCard(
             title: 'SECRETS IN CODE',
             value: '7',
             icon: Icons.vpn_key_outlined,
-            accentColor: Color(0xFFF59E0B),
+            accentColor: AppColors.cyberMedium,
           ),
         ];
 
@@ -54,37 +54,24 @@ class AppApiKpiRow extends StatelessWidget {
           );
         }
 
-        if (isTablet) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(child: cards[0]),
-                  const Gap(10),
-                  Expanded(child: cards[1]),
-                ],
-              ),
-              const Gap(10),
-              Row(
-                children: [
-                  Expanded(child: cards[2]),
-                  const Gap(10),
-                  Expanded(child: cards[3]),
-                ],
-              ),
-            ],
-          );
-        }
-
         return Column(
-          children: cards
-              .map(
-                (c) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: c,
-                ),
-              )
-              .toList(),
+          children: [
+            Row(
+              children: [
+                Expanded(child: cards[0]),
+                Gap(10.w),
+                Expanded(child: cards[1]),
+              ],
+            ),
+            Gap(10.h),
+            Row(
+              children: [
+                Expanded(child: cards[2]),
+                Gap(10.w),
+                Expanded(child: cards[3]),
+              ],
+            ),
+          ],
         );
       },
     );
@@ -107,11 +94,11 @@ class _AppKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
-        color: const Color(0xFF09101F),
+        color: AppColors.cyberCardBg,
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0xFF142036)),
+        border: Border.all(color: AppColors.cyberCardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +109,7 @@ class _AppKpiCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: const Color(0xFF5E738E),
+                  color: AppColors.textTertiaryDark,
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
@@ -131,12 +118,12 @@ class _AppKpiCard extends StatelessWidget {
               Icon(icon, size: 15.sp, color: accentColor),
             ],
           ),
-          const Gap(10),
+          Gap(10.h),
           Text(
             value,
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 26.sp,
+              color: AppColors.textPrimaryDark,
+              fontSize: 22.sp,
               fontWeight: FontWeight.w800,
             ),
           ),

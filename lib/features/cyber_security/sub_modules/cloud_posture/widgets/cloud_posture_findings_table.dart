@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/finding_item_model.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
 
 class CloudPostureFindingsTable extends StatefulWidget {
   final List<FindingItemModel> findings;

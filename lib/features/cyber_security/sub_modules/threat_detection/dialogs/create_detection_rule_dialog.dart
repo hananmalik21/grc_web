@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/threat_detection/models/threat_alert_model.dart';
+import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/widgets/buttons/app_button.dart';
 
 class CreateDetectionRuleDialog extends StatefulWidget {
   const CreateDetectionRuleDialog({super.key});
@@ -12,317 +14,275 @@ class CreateDetectionRuleDialog extends StatefulWidget {
 }
 
 class _CreateDetectionRuleDialogState extends State<CreateDetectionRuleDialog> {
-  final _ruleNameController = TextEditingController();
-  final _queryConditionController = TextEditingController(
-    text: 'log.event == "authentication.failed" && count() > 10 within 5m',
-  );
-  ThreatSeverity _severity = ThreatSeverity.high;
-  ThreatSource _source = ThreatSource.identity;
+  final TextEditingController _ruleNameController = TextEditingController();
+  final TextEditingController _mitreController = TextEditingController();
+  final TextEditingController _queryController = TextEditingController();
+
+  String _severity = 'High';
+  String _source = 'Cloud';
 
   @override
   void dispose() {
     _ruleNameController.dispose();
-    _queryConditionController.dispose();
+    _mitreController.dispose();
+    _queryController.dispose();
     super.dispose();
+  }
+
+  void _handleCreate() {
+    if (_ruleNameController.text.trim().isEmpty) {
+      ToastService.show(
+        context: context,
+        message: 'Rule name is required',
+        type: ToastType.error,
+      );
+      return;
+    }
+
+    Navigator.of(context).pop();
+    ToastService.show(
+      context: context,
+      message: 'Detection rule "${_ruleNameController.text.trim()}" activated across real-time telemetry.',
+      type: ToastType.success,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.cyberCardBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.r),
-        side: const BorderSide(color: Color(0xFF1E293B)),
+        side: const BorderSide(color: AppColors.cyberCardBorder),
       ),
       child: Container(
         width: 540.w,
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.bolt_rounded,
+        padding: EdgeInsets.all(20.r),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.bolt_rounded,
+                          size: 18.sp,
+                          color: AppColors.barPurple,
+                        ),
+                        const Gap(8),
+                        Expanded(
+                          child: Text(
+                            'Create Threat Detection Rule',
+                            style: TextStyle(
+                              color: AppColors.textPrimaryDark,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    borderRadius: BorderRadius.circular(4.r),
+                    child: Icon(
+                      Icons.close_rounded,
                       size: 18.sp,
-                      color: const Color(0xFFA855F7),
+                      color: AppColors.textPlaceholderDark,
                     ),
-                    const Gap(8),
-                    Text(
-                      'Create Threat Detection Rule',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(
-                    Icons.close_rounded,
-                    size: 18.sp,
-                    color: const Color(0xFF64748B),
                   ),
-                  splashRadius: 20.r,
-                ),
-              ],
-            ),
-            const Gap(16),
-
-            // Rule Name Field
-            Text(
-              'Rule Name',
-              style: TextStyle(
-                color: const Color(0xFF94A3B8),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
+                ],
               ),
-            ),
-            const Gap(6),
-            TextField(
-              controller: _ruleNameController,
-              style: TextStyle(color: Colors.white, fontSize: 12.sp),
-              decoration: InputDecoration(
-                hintText: 'e.g. Brute Force Login Threshold Exceeded',
-                hintStyle: TextStyle(color: const Color(0xFF64748B), fontSize: 11.5.sp),
-                filled: true,
-                fillColor: const Color(0xFF1E293B).withValues(alpha: 0.6),
-                border: OutlineInputBorder(
+              const Gap(18),
+              _buildFieldLabel('RULE NAME'),
+              const Gap(6),
+              _buildTextField(
+                controller: _ruleNameController,
+                hint: 'e.g. S3 Bucket Public Access Policy Modified',
+              ),
+              const Gap(14),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('SEVERITY'),
+                        const Gap(6),
+                        _buildDropdown(
+                          value: _severity,
+                          items: const ['Critical', 'High', 'Medium', 'Low'],
+                          onChanged: (v) => setState(() => _severity = v),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Gap(12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('SOURCE LAYER'),
+                        const Gap(6),
+                        _buildDropdown(
+                          value: _source,
+                          items: const ['Cloud', 'Identity', 'Network', 'AppSec', 'Data'],
+                          onChanged: (v) => setState(() => _source = v),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(14),
+              _buildFieldLabel('MITRE ATT&CK TECHNIQUE'),
+              const Gap(6),
+              _buildTextField(
+                controller: _mitreController,
+                hint: 'e.g. T1530: Data from Cloud Storage',
+              ),
+              const Gap(14),
+              _buildFieldLabel('DETECTION QUERY / LOG PATTERN'),
+              const Gap(6),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundDark,
                   borderRadius: BorderRadius.circular(6.r),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                  border: Border.all(color: AppColors.cyberCardBorder),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              ),
-            ),
-            const Gap(14),
-
-            // Security Layer & Severity
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Security Layer',
-                        style: TextStyle(
-                          color: const Color(0xFF94A3B8),
-                          fontSize: 11.5.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const Gap(6),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B).withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(6.r),
-                          border: Border.all(color: const Color(0xFF334155)),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<ThreatSource>(
-                            value: _source,
-                            isExpanded: true,
-                            dropdownColor: const Color(0xFF0F172A),
-                            items: ThreatSource.values.map((s) {
-                              return DropdownMenuItem(
-                                value: s,
-                                child: Text(
-                                  _getSourceName(s),
-                                  style: TextStyle(color: Colors.white, fontSize: 12.sp),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) setState(() => _source = val);
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                child: TextField(
+                  controller: _queryController,
+                  maxLines: 3,
+                  style: TextStyle(
+                    color: AppColors.textPrimaryDark,
+                    fontSize: 11.5.sp,
+                    fontFamily: 'monospace',
                   ),
-                ),
-                const Gap(12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Severity Level',
-                        style: TextStyle(
-                          color: const Color(0xFF94A3B8),
-                          fontSize: 11.5.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const Gap(6),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B).withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(6.r),
-                          border: Border.all(color: const Color(0xFF334155)),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<ThreatSeverity>(
-                            value: _severity,
-                            isExpanded: true,
-                            dropdownColor: const Color(0xFF0F172A),
-                            items: ThreatSeverity.values.map((sev) {
-                              return DropdownMenuItem<ThreatSeverity>(
-                                value: sev,
-                                child: Text(
-                                  _getSeverityName(sev),
-                                  style: TextStyle(
-                                    color: _getSeverityColor(sev),
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) setState(() => _severity = val);
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const Gap(14),
-
-            // Detection Logic / Query
-            Text(
-              'Detection Query Condition',
-              style: TextStyle(
-                color: const Color(0xFF94A3B8),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Gap(6),
-            TextField(
-              controller: _queryConditionController,
-              maxLines: 3,
-              style: TextStyle(
-                color: const Color(0xFF2DD4BF),
-                fontSize: 11.5.sp,
-                fontFamily: 'monospace',
-              ),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFF1E293B).withValues(alpha: 0.6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
-                ),
-                contentPadding: EdgeInsets.all(10.w),
-              ),
-            ),
-            const Gap(20),
-
-            // Dialog Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: const Color(0xFF94A3B8),
-                      fontSize: 12.sp,
+                  decoration: InputDecoration(
+                    hintText: 'event.source == "aws.s3" AND event.name == "PutBucketPolicy" AND request.policy.Statement[*].Principal == "*"',
+                    hintStyle: TextStyle(
+                      color: AppColors.textPlaceholderDark,
+                      fontSize: 10.5.sp,
+                      fontFamily: 'monospace',
                     ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.all(10.r),
                   ),
                 ),
-                const Gap(10),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        backgroundColor: Color(0xFF131D31),
-                        content: Text(
-                          'Detection rule deployed and synchronized across agents.',
-                          style: TextStyle(color: Color(0xFF00B4D8)),
-                        ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0284C7),
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
+              ),
+              const Gap(20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppButton(
+                    label: 'Cancel',
+                    type: AppButtonType.secondary,
+                    size: AppButtonSize.sm,
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
-                  child: Text(
-                    'Deploy Rule',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  const Gap(10),
+                  AppButton(
+                    label: 'Deploy Rule',
+                    type: AppButtonType.primary,
+                    size: AppButtonSize.sm,
+                    onPressed: _handleCreate,
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  String _getSourceName(ThreatSource s) {
-    switch (s) {
-      case ThreatSource.identity:
-        return 'Identity';
-      case ThreatSource.cloud:
-        return 'Cloud';
-      case ThreatSource.iam:
-        return 'IAM';
-      case ThreatSource.data:
-        return 'Data';
-      case ThreatSource.network:
-        return 'Network';
-      case ThreatSource.appSec:
-        return 'AppSec';
-    }
+  Widget _buildFieldLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: AppColors.textPlaceholderDark,
+        fontSize: 10.sp,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.8,
+      ),
+    );
   }
 
-  String _getSeverityName(ThreatSeverity s) {
-    switch (s) {
-      case ThreatSeverity.critical:
-        return 'CRITICAL';
-      case ThreatSeverity.high:
-        return 'HIGH';
-      case ThreatSeverity.medium:
-        return 'MEDIUM';
-      case ThreatSeverity.low:
-        return 'LOW';
-    }
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundDark,
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: AppColors.cyberCardBorder),
+      ),
+      child: TextField(
+        controller: controller,
+        style: TextStyle(
+          color: AppColors.textPrimaryDark,
+          fontSize: 12.sp,
+        ),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: AppColors.textPlaceholderDark,
+            fontSize: 11.sp,
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        ),
+      ),
+    );
   }
 
-  Color _getSeverityColor(ThreatSeverity s) {
-    switch (s) {
-      case ThreatSeverity.critical:
-        return const Color(0xFFEF4444);
-      case ThreatSeverity.high:
-        return const Color(0xFFF97316);
-      case ThreatSeverity.medium:
-        return const Color(0xFFEAB308);
-      case ThreatSeverity.low:
-        return const Color(0xFF10B981);
-    }
+  Widget _buildDropdown({
+    required String value,
+    required List<String> items,
+    required ValueChanged<String> onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundDark,
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: AppColors.cyberCardBorder),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          dropdownColor: AppColors.cyberCardBg,
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 16.sp,
+            color: AppColors.textPlaceholderDark,
+          ),
+          style: TextStyle(
+            color: AppColors.textPrimaryDark,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+          ),
+          onChanged: (val) {
+            if (val != null) onChanged(val);
+          },
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(item),
+            );
+          }).toList(),
+        ),
+      ),
+    );
   }
 }
