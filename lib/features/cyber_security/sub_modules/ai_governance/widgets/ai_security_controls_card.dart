@@ -1,90 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
-import 'package:grc/core/models/cyber_security/ai_governance/ai_governance_models.dart';
+import 'package:grc/features/cyber_security/sub_modules/ai_governance/models/ai_governance_models.dart';
 
 class AiSecurityControlsCard extends StatelessWidget {
   const AiSecurityControlsCard({super.key});
 
-  static const List<AiSecurityControl> defaultControls = [
-    AiSecurityControl(name: 'Prompt injection prevention'),
-    AiSecurityControl(name: 'Output validation before action'),
-    AiSecurityControl(name: 'Tenant data isolation'),
-    AiSecurityControl(name: 'Sensitive data masking (PII, secrets)'),
-    AiSecurityControl(name: 'Prompt + response audit logging'),
-    AiSecurityControl(name: 'Human approval for prod actions'),
-    AiSecurityControl(name: 'Model performance monitoring'),
-    AiSecurityControl(name: 'Hallucination detection', isPartial: true),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final controls = AiSecurityControl.getMockControls();
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
+        color: const Color(0xFF0F172A).withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        border: Border.all(color: const Color(0xFF1E293B)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title
           Text(
             'AI SECURITY CONTROLS',
             style: TextStyle(
-              color: AppColors.textTertiaryDark,
+              color: const Color(0xFF64748B),
               fontSize: 10.5.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
             ),
           ),
           const Gap(14),
-          ...defaultControls.map((ctrl) {
+
+          // Controls List
+          ...controls.map((ctrl) {
             return Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
+              padding: EdgeInsets.symmetric(vertical: 4.h),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 6.r,
-                    height: 6.r,
-                    decoration: BoxDecoration(
-                      color: ctrl.statusColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const Gap(10),
                   Expanded(
                     child: Text(
                       ctrl.name,
                       style: TextStyle(
-                        color: AppColors.textSecondaryDark,
-                        fontSize: 12.sp,
+                        color: const Color(0xFFCBD5E1),
+                        fontSize: 11.5.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 7.w,
-                      vertical: 2.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: ctrl.statusColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(4.r),
-                      border: Border.all(
-                        color: ctrl.statusColor.withValues(alpha: 0.3),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6.w,
+                        height: 6.w,
+                        decoration: BoxDecoration(
+                          color: ctrl.statusColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      ctrl.statusLabel,
-                      style: TextStyle(
-                        color: ctrl.statusColor,
-                        fontSize: 9.5.sp,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.4,
+                      const Gap(6),
+                      Text(
+                        ctrl.statusLabel,
+                        style: TextStyle(
+                          color: ctrl.statusColor,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),

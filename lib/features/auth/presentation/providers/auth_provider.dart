@@ -95,7 +95,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String username,
     String password, {
     required bool rememberMe,
-    int? enterpriseId,
+    required int enterpriseId,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -121,12 +121,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           return;
         }
         await _storage.saveToken(access);
-        if (response.refreshToken != null && response.refreshToken!.isNotEmpty) {
-          await _storage.saveRefreshToken(response.refreshToken!);
-        }
         await _storage.saveUserGuid(response.data.userGuid);
-        await _storage.saveOrgId(response.data.orgId);
-        await _storage.savePermissions(response.data.permissions);
         await _storage.saveEnterpriseId(response.data.enterpriseId);
         await _storage.setRememberMe(rememberMe);
         await _storage.setSavedEmail(rememberMe ? username.trim() : null);
@@ -184,89 +179,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         pendingLoginFeedback: const LoginFeedback(
           success: false,
           errorCode: 'network_error',
-        ),
-      );
-    }
-  }
-
-  Future<void> registerTenant({
-    required String orgName,
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    String? country,
-    String? industry,
-  }) async {
-    state = state.copyWith(isLoading: true, error: null);
-
-    try {
-      final response = await _remoteDataSource.registerTenant(
-        orgName: orgName.trim(),
-        email: email.trim(),
-        password: password.trim(),
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        country: country?.trim(),
-        industry: industry?.trim(),
-      );
-
-      if (response.success && response.accessToken != null && response.accessToken!.isNotEmpty) {
-        final access = response.accessToken!;
-        await _storage.saveToken(access);
-        if (response.refreshToken != null && response.refreshToken!.isNotEmpty) {
-          await _storage.saveRefreshToken(response.refreshToken!);
-        }
-        await _storage.saveUserGuid(response.data.userGuid);
-        await _storage.saveOrgId(response.data.orgId);
-        await _storage.savePermissions(response.data.permissions);
-        await _storage.saveEnterpriseId(response.data.enterpriseId);
-
-        state = state.copyWith(
-          isAuthenticated: true,
-          isLoading: false,
-          enterpriseId: response.data.enterpriseId,
-          pendingLoginFeedback: const LoginFeedback(success: true),
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'registration_failed',
-          pendingLoginFeedback: LoginFeedback(
-            success: false,
-            errorCode: 'registration_failed',
-            errorMessage: response.message,
-          ),
-        );
-      }
-    } on ConflictException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'email_exists',
-        pendingLoginFeedback: LoginFeedback(
-          success: false,
-          errorCode: 'email_exists',
-          errorMessage: e.message,
-        ),
-      );
-    } on AppException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'network_error',
-        pendingLoginFeedback: LoginFeedback(
-          success: false,
-          errorCode: 'network_error',
-          errorMessage: e.message,
-        ),
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'network_error',
-        pendingLoginFeedback: LoginFeedback(
-          success: false,
-          errorCode: 'network_error',
-          errorMessage: e.toString(),
         ),
       );
     }

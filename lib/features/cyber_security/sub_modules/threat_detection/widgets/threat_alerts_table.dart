@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
-import 'package:grc/core/models/cyber_security/threat_detection/threat_alert_model.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/dialogs/threat_investigation_dialog.dart';
+import 'package:grc/features/cyber_security/sub_modules/threat_detection/models/threat_alert_model.dart';
 
 enum ThreatFilterTab {
   all,
@@ -57,7 +56,9 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
         builder: (ctx) => ThreatInvestigationDialog(
           alert: alert,
           onStatusChanged: (newStatus) {
-            setState(() {});
+            setState(() {
+              // Status updated
+            });
           },
         ),
       );
@@ -71,118 +72,108 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildTabButton('ALL', ThreatFilterTab.all),
-              const Gap(8),
-              _buildTabButton('NEW', ThreatFilterTab.new_),
-              const Gap(8),
-              _buildTabButton('INVESTIGATING', ThreatFilterTab.investigating),
-              const Gap(8),
-              _buildTabButton('CLOSED', ThreatFilterTab.closed),
-            ],
-          ),
+        // Filter Tabs
+        Row(
+          children: [
+            _buildTabButton('ALL', ThreatFilterTab.all),
+            const Gap(8),
+            _buildTabButton('NEW', ThreatFilterTab.new_),
+            const Gap(8),
+            _buildTabButton('INVESTIGATING', ThreatFilterTab.investigating),
+            const Gap(8),
+            _buildTabButton('CLOSED', ThreatFilterTab.closed),
+          ],
         ),
         const Gap(16),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: AppColors.cyberCardBg,
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.cyberCardBorder),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final minWidth = constraints.maxWidth > 850 ? constraints.maxWidth : 850.0;
 
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: minWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundDark,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.r),
-                            topRight: Radius.circular(10.r),
-                          ),
-                          border: const Border(
-                            bottom: BorderSide(color: AppColors.cyberCardBorder),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 100.w,
-                              child: _buildHeaderLabel('ALERT ID'),
-                            ),
-                            SizedBox(
-                              width: 260.w,
-                              child: _buildHeaderLabel('TITLE'),
-                            ),
-                            SizedBox(
-                              width: 100.w,
-                              child: _buildHeaderLabel('SEVERITY'),
-                            ),
-                            SizedBox(
-                              width: 90.w,
-                              child: _buildHeaderLabel('SOURCE'),
-                            ),
-                            SizedBox(
-                              width: 90.w,
-                              child: _buildHeaderLabel('TIME'),
-                            ),
-                            SizedBox(
-                              width: 110.w,
-                              child: _buildHeaderLabel('STATUS'),
-                            ),
-                            SizedBox(
-                              width: 100.w,
-                              child: const SizedBox.shrink(),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (filtered.isEmpty)
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 36.h, horizontal: 20.w),
-                          child: Center(
-                            child: Text(
-                              'No threat alerts in this category.',
-                              style: TextStyle(
-                                color: AppColors.textPlaceholderDark,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        ...filtered.map((alert) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _AlertTableRow(
-                                alert: alert,
-                                onInvestigate: () => _openInvestigation(alert),
-                              ),
-                              const Divider(
-                                color: AppColors.cyberCardBorder,
-                                height: 1,
-                              ),
-                            ],
-                          );
-                        }),
-                    ],
+        // Table Container
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(color: const Color(0xFF1E293B)),
+          ),
+          child: Column(
+            children: [
+              // Header Row
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B132B).withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.r),
+                    topRight: Radius.circular(10.r),
+                  ),
+                  border: const Border(
+                    bottom: BorderSide(color: Color(0xFF1E293B)),
                   ),
                 ),
-              );
-            },
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 100.w,
+                      child: _buildHeaderLabel('ALERT ID'),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: _buildHeaderLabel('TITLE'),
+                    ),
+                    SizedBox(
+                      width: 100.w,
+                      child: _buildHeaderLabel('SEVERITY'),
+                    ),
+                    SizedBox(
+                      width: 90.w,
+                      child: _buildHeaderLabel('SOURCE'),
+                    ),
+                    SizedBox(
+                      width: 90.w,
+                      child: _buildHeaderLabel('TIME'),
+                    ),
+                    SizedBox(
+                      width: 110.w,
+                      child: _buildHeaderLabel('STATUS'),
+                    ),
+                    SizedBox(
+                      width: 100.w,
+                      child: const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Data Rows
+              if (filtered.isEmpty)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 36.h),
+                  child: Center(
+                    child: Text(
+                      'No threat alerts in this category.',
+                      style: TextStyle(
+                        color: const Color(0xFF64748B),
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: filtered.length,
+                  separatorBuilder: (context, index) => const Divider(
+                    color: Color(0xFF1E293B),
+                    height: 1,
+                  ),
+                  itemBuilder: (context, index) {
+                    final alert = filtered[index];
+                    return _AlertTableRow(
+                      alert: alert,
+                      onInvestigate: () => _openInvestigation(alert),
+                    );
+                  },
+                ),
+            ],
           ),
         ),
       ],
@@ -193,7 +184,7 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
     return Text(
       text,
       style: TextStyle(
-        color: AppColors.textPlaceholderDark,
+        color: const Color(0xFF64748B),
         fontSize: 10.5.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
@@ -207,16 +198,17 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
     return InkWell(
       onTap: () => setState(() => _selectedTab = tab),
       borderRadius: BorderRadius.circular(6.r),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.2)
+              ? const Color(0xFF0F3E57).withValues(alpha: 0.4)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6.r),
           border: Border.all(
             color: isSelected
-                ? AppColors.primary
+                ? const Color(0xFF0284C7).withValues(alpha: 0.8)
                 : Colors.transparent,
           ),
         ),
@@ -224,8 +216,8 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
           label,
           style: TextStyle(
             color: isSelected
-                ? AppColors.primaryLight
-                : AppColors.textPlaceholderDark,
+                ? const Color(0xFF38BDF8)
+                : const Color(0xFF64748B),
             fontSize: 11.5.sp,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
             letterSpacing: 0.6,
@@ -261,11 +253,12 @@ class _AlertTableRowState extends State<_AlertTableRow> {
       onExit: (_) => setState(() => _isHovered = false),
       child: Container(
         color: _isHovered
-            ? AppColors.cardBackgroundGreyDark.withValues(alpha: 0.3)
+            ? const Color(0xFF1E293B).withValues(alpha: 0.45)
             : Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
         child: Row(
           children: [
+            // Alert ID
             SizedBox(
               width: 100.w,
               child: GestureDetector(
@@ -273,19 +266,21 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                 child: Text(
                   alert.alertId,
                   style: TextStyle(
-                    color: AppColors.dashCyberSecurity,
+                    color: const Color(0xFF00B4D8),
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
-            SizedBox(
-              width: 260.w,
+
+            // Title
+            Expanded(
+              flex: 4,
               child: Text(
                 alert.title,
                 style: TextStyle(
-                  color: AppColors.textPrimaryDark,
+                  color: const Color(0xFFF1F5F9),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -293,6 +288,8 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+
+            // Severity Badge
             SizedBox(
               width: 100.w,
               child: Align(
@@ -321,34 +318,40 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                 ),
               ),
             ),
+
+            // Source Layer
             SizedBox(
               width: 90.w,
               child: Text(
                 alert.sourceLabel,
                 style: TextStyle(
-                  color: AppColors.textTertiaryDark,
+                  color: const Color(0xFF94A3B8),
                   fontSize: 11.5.sp,
                 ),
               ),
             ),
+
+            // Time Ago
             SizedBox(
               width: 90.w,
               child: Text(
                 alert.timeAgo,
                 style: TextStyle(
-                  color: AppColors.textPlaceholderDark,
+                  color: const Color(0xFF64748B),
                   fontSize: 11.sp,
                 ),
               ),
             ),
+
+            // Status Indicator with dot
             SizedBox(
               width: 110.w,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 6.r,
-                    height: 6.r,
+                    width: 6.w,
+                    height: 6.w,
                     decoration: BoxDecoration(
                       color: alert.statusDotColor,
                       shape: BoxShape.circle,
@@ -359,10 +362,10 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                     alert.statusLabel,
                     style: TextStyle(
                       color: alert.status == ThreatStatus.investigating
-                          ? AppColors.alertMedium
+                          ? const Color(0xFFF59E0B)
                           : alert.status == ThreatStatus.closed
-                              ? AppColors.textPlaceholderDark
-                              : AppColors.textPrimaryDark,
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFFE2E8F0),
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -370,6 +373,8 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                 ],
               ),
             ),
+
+            // Action Button: Investigate
             SizedBox(
               width: 100.w,
               child: Align(
@@ -383,16 +388,16 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                       vertical: 5.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: const Color(0xFF0F3E57).withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(6.r),
                       border: Border.all(
-                        color: AppColors.primaryLight.withValues(alpha: 0.5),
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.5),
                       ),
                     ),
                     child: Text(
                       'Investigate',
                       style: TextStyle(
-                        color: AppColors.cyberLow,
+                        color: const Color(0xFF38BDF8),
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                       ),

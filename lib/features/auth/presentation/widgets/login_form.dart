@@ -2,6 +2,7 @@ import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/localization/l10n/app_localizations.dart';
 import 'package:grc/core/services/responsive_service.dart';
 import 'package:grc/core/theme/theme_extensions.dart';
+import 'package:grc/core/utils/input_formatters.dart';
 import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/core/widgets/assets/digify_asset.dart';
 import 'package:grc/core/widgets/common/digify_checkbox.dart';
@@ -13,10 +14,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class LoginForm extends StatelessWidget {
   const LoginForm({
     super.key,
-    required this.emailController,
+    required this.usernameController,
     required this.passwordController,
-    required this.emailFocusNode,
+    required this.enterpriseIdController,
+    required this.usernameFocusNode,
     required this.passwordFocusNode,
+    required this.enterpriseIdFocusNode,
     required this.isLoading,
     required this.rememberMe,
     required this.onRememberMeChanged,
@@ -24,10 +27,12 @@ class LoginForm extends StatelessWidget {
     this.onForgotPasswordTap,
   });
 
-  final TextEditingController emailController;
+  final TextEditingController usernameController;
   final TextEditingController passwordController;
-  final FocusNode emailFocusNode;
+  final TextEditingController enterpriseIdController;
+  final FocusNode usernameFocusNode;
   final FocusNode passwordFocusNode;
+  final FocusNode enterpriseIdFocusNode;
   final bool isLoading;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
@@ -45,8 +50,8 @@ class LoginForm extends StatelessWidget {
       spacing: 20.h,
       children: [
         DigifyTextField(
-          controller: emailController,
-          focusNode: emailFocusNode,
+          controller: usernameController,
+          focusNode: usernameFocusNode,
           labelText: localizations.email,
           hintText: localizations.loginDesktopEmailHint,
           keyboardType: TextInputType.emailAddress,
@@ -62,10 +67,24 @@ class LoginForm extends StatelessWidget {
           labelText: localizations.password,
           hintText: localizations.loginDesktopPasswordHint,
           obscureText: true,
-          textInputAction: TextInputAction.done,
+          textInputAction: TextInputAction.next,
           borderColor: fieldBorder,
           focusedBorderColor: AppColors.authDesktopPrimary,
           prefixIcon: _LoginFieldIcon(assetPath: Assets.icons.auth.lock.path),
+          onSubmitted: (_) => enterpriseIdFocusNode.requestFocus(),
+        ),
+        DigifyTextField(
+          controller: enterpriseIdController,
+          focusNode: enterpriseIdFocusNode,
+          labelText: localizations.loginDesktopEnterpriseCode,
+          hintText: localizations.loginDesktopEnterpriseCodeHint,
+          isRequired: true,
+          keyboardType: FieldFormat.integer,
+          textInputAction: TextInputAction.done,
+          borderColor: fieldBorder,
+          focusedBorderColor: AppColors.authDesktopPrimary,
+          inputFormatters: FieldFormat.integerOnly,
+          prefixIcon: const _LoginEnterpriseFieldIcon(),
           onSubmitted: (_) => onLogin(),
         ),
         Row(
@@ -124,6 +143,38 @@ class _LoginFieldIcon extends StatelessWidget {
   }
 }
 
+class _LoginEnterpriseFieldIcon extends StatelessWidget {
+  const _LoginEnterpriseFieldIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    final iconPadding = context.responsiveFine<double>(
+      mobile: 12,
+      tabletSmall: 13,
+      tabletMedium: 14,
+      tabletLarge: 15,
+      desktop: 16,
+    );
+    final iconSize = context.responsiveFine<double>(
+      mobile: 18,
+      tabletSmall: 18.5,
+      tabletMedium: 19,
+      tabletLarge: 19.5,
+      desktop: 20,
+    );
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: iconPadding.w),
+      child: DigifyAsset(
+        assetPath: Assets.icons.basicInfoIcon.path,
+        width: iconSize.w,
+        height: iconSize.h,
+        color: AppColors.sidebarTextSecondary,
+      ),
+    );
+  }
+}
+
 class _LoginTextLink extends StatelessWidget {
   const _LoginTextLink({required this.label, this.onTap});
 
@@ -132,17 +183,16 @@ class _LoginTextLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(4.r),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+      child: MouseRegion(
+        cursor: onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
         child: Text(
           label,
-          style: context.textTheme.labelMedium?.copyWith(
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontSize: 14.sp,
             color: AppColors.authDesktopPrimary,
-            fontWeight: FontWeight.w600,
-            fontSize: 13.sp,
+            height: 20 / 14,
           ),
         ),
       ),

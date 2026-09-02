@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/models/cyber_security/cloud_posture/compliance_mapping_model.dart';
-import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
-import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/create_remediation_ticket_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/finding_detail_modal.dart';
+import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/compliance_mapping_model.dart';
+import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/finding_item_model.dart';
 
 class CloudPostureComplianceView extends StatelessWidget {
-  final List<ComplianceFindingMappingModel>? complianceFindings;
   final ValueChanged<FindingItemModel>? onOpenDetail;
 
-  const CloudPostureComplianceView({super.key, this.complianceFindings, this.onOpenDetail});
+  const CloudPostureComplianceView({super.key, this.onOpenDetail});
 
   @override
   Widget build(BuildContext context) {
-    final findings = complianceFindings ?? CyberCloudPostureMockData.getMockComplianceFindings();
+    final findings = ComplianceFindingMappingModel.getMockComplianceFindings();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +222,7 @@ class CloudPostureComplianceView extends StatelessWidget {
   }
 
   void _handleOpenDetail(BuildContext context, ComplianceFindingMappingModel f) {
-    final mockFindings = CyberCloudPostureMockData.getMockFindings();
+    final mockFindings = FindingItemModel.getMockFindings();
     final matching = mockFindings.firstWhere(
       (mf) => mf.id == f.id,
       orElse: () => FindingItemModel(

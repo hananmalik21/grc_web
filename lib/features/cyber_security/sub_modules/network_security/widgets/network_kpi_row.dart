@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
 
 class NetworkKpiRow extends StatelessWidget {
   const NetworkKpiRow({super.key});
@@ -11,6 +10,7 @@ class NetworkKpiRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= 950;
+        final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 950;
 
         final cards = [
           const _NetworkKpiCard(
@@ -18,28 +18,28 @@ class NetworkKpiRow extends StatelessWidget {
             value: '34',
             subtitle: 'assets with public IPs',
             icon: Icons.language_rounded,
-            accentColor: AppColors.cyberHigh,
+            accentColor: Color(0xFFF97316),
           ),
           const _NetworkKpiCard(
             title: 'RISKY RULES',
             value: '6',
             subtitle: 'need remediation',
             icon: Icons.warning_amber_rounded,
-            accentColor: AppColors.cyberCritical,
+            accentColor: Color(0xFFEF4444),
           ),
           const _NetworkKpiCard(
             title: 'VPCS / VNETS',
             value: '12',
             subtitle: 'across 3 platforms',
             icon: Icons.hub_outlined,
-            accentColor: AppColors.cyberLow,
+            accentColor: Color(0xFF00BCD4),
           ),
           const _NetworkKpiCard(
             title: 'WAF COVERAGE',
             value: '67%',
             subtitle: 'of public endpoints',
             icon: Icons.shield_outlined,
-            accentColor: AppColors.cyberLiveGreen,
+            accentColor: Color(0xFF10B981),
           ),
         ];
 
@@ -58,24 +58,37 @@ class NetworkKpiRow extends StatelessWidget {
           );
         }
 
+        if (isTablet) {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: cards[0]),
+                  const Gap(10),
+                  Expanded(child: cards[1]),
+                ],
+              ),
+              const Gap(10),
+              Row(
+                children: [
+                  Expanded(child: cards[2]),
+                  const Gap(10),
+                  Expanded(child: cards[3]),
+                ],
+              ),
+            ],
+          );
+        }
+
         return Column(
-          children: [
-            Row(
-              children: [
-                Expanded(child: cards[0]),
-                Gap(10.w),
-                Expanded(child: cards[1]),
-              ],
-            ),
-            Gap(10.h),
-            Row(
-              children: [
-                Expanded(child: cards[2]),
-                Gap(10.w),
-                Expanded(child: cards[3]),
-              ],
-            ),
-          ],
+          children: cards
+              .map(
+                (c) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: c,
+                ),
+              )
+              .toList(),
         );
       },
     );
@@ -100,11 +113,11 @@ class _NetworkKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(14.r),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
+        color: const Color(0xFF09101F),
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        border: Border.all(color: const Color(0xFF142036)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +128,7 @@ class _NetworkKpiCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: AppColors.textTertiaryDark,
+                  color: const Color(0xFF5E738E),
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
@@ -124,25 +137,23 @@ class _NetworkKpiCard extends StatelessWidget {
               Icon(icon, size: 15.sp, color: accentColor),
             ],
           ),
-          Gap(8.h),
+          const Gap(8),
           Text(
             value,
             style: TextStyle(
-              color: AppColors.textPrimaryDark,
-              fontSize: 22.sp,
+              color: Colors.white,
+              fontSize: 26.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
-          Gap(4.h),
+          const Gap(4),
           Text(
             subtitle,
             style: TextStyle(
-              color: AppColors.textPlaceholderDark,
-              fontSize: 10.5.sp,
+              color: const Color(0xFF64748B),
+              fontSize: 11.sp,
               fontWeight: FontWeight.w400,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
