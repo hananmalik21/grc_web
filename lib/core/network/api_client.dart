@@ -446,7 +446,12 @@ class ApiClient {
 }
 
 bool _pathSkipsAuthHeader(String path) {
-  return path == ApiEndpoints.securityAuthLogin || path.endsWith('/security/auth/login');
+  return path == ApiEndpoints.securityAuthLogin ||
+      path.endsWith('/security/auth/login') ||
+      path == ApiEndpoints.identityLogin ||
+      path.endsWith('/identity/login') ||
+      path == ApiEndpoints.identityRegister ||
+      path.endsWith('/identity/register');
 }
 
 class _AuthInterceptor extends Interceptor {

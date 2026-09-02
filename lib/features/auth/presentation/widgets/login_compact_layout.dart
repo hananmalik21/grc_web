@@ -8,12 +8,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class LoginCompactLayout extends ConsumerWidget {
   const LoginCompactLayout({
     super.key,
-    required this.usernameController,
+    required this.emailController,
     required this.passwordController,
-    required this.enterpriseIdController,
-    required this.usernameFocusNode,
+    required this.emailFocusNode,
     required this.passwordFocusNode,
-    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
@@ -21,12 +19,10 @@ class LoginCompactLayout extends ConsumerWidget {
     this.onSsoTap,
   });
 
-  final TextEditingController usernameController;
+  final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController enterpriseIdController;
-  final FocusNode usernameFocusNode;
+  final FocusNode emailFocusNode;
   final FocusNode passwordFocusNode;
-  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -48,12 +44,10 @@ class LoginCompactLayout extends ConsumerWidget {
           child: layout.isSideBySide
               ? _TabletWideBody(
                   cardMaxWidth: _cardMaxWidth(context, ref),
-                  usernameController: usernameController,
+                  emailController: emailController,
                   passwordController: passwordController,
-                  enterpriseIdController: enterpriseIdController,
-                  usernameFocusNode: usernameFocusNode,
+                  emailFocusNode: emailFocusNode,
                   passwordFocusNode: passwordFocusNode,
-                  enterpriseIdFocusNode: enterpriseIdFocusNode,
                   rememberMe: rememberMe,
                   onRememberMeChanged: onRememberMeChanged,
                   onLogin: onLogin,
@@ -62,12 +56,10 @@ class LoginCompactLayout extends ConsumerWidget {
                 )
               : _StackedBody(
                   cardMaxWidth: _cardMaxWidth(context, ref),
-                  usernameController: usernameController,
+                  emailController: emailController,
                   passwordController: passwordController,
-                  enterpriseIdController: enterpriseIdController,
-                  usernameFocusNode: usernameFocusNode,
+                  emailFocusNode: emailFocusNode,
                   passwordFocusNode: passwordFocusNode,
-                  enterpriseIdFocusNode: enterpriseIdFocusNode,
                   rememberMe: rememberMe,
                   onRememberMeChanged: onRememberMeChanged,
                   onLogin: onLogin,
@@ -79,37 +71,36 @@ class LoginCompactLayout extends ConsumerWidget {
     );
   }
 
-  EdgeInsetsDirectional _logoPadding(BuildContext context, WidgetRef ref) {
+  static double _cardMaxWidth(BuildContext context, WidgetRef ref) {
+    final layout = ref.screenLayout;
+    if (layout.isSideBySide) return 400.w;
     return context.responsiveFine(
-      mobile: EdgeInsetsDirectional.fromSTEB(20.w, 16.h, 20.w, 0),
-      tabletSmall: EdgeInsetsDirectional.fromSTEB(32.w, 20.h, 32.w, 0),
-      tabletMedium: EdgeInsetsDirectional.fromSTEB(40.w, 24.h, 40.w, 0),
-      tabletLarge: EdgeInsetsDirectional.fromSTEB(40.w, 24.h, 40.w, 0),
-      desktop: EdgeInsetsDirectional.zero,
+      mobile: double.infinity,
+      tabletSmall: 420.w,
+      tabletMedium: 460.w,
+      tabletLarge: 480.w,
+      desktop: double.infinity,
     );
   }
 
-  double _cardMaxWidth(BuildContext context, WidgetRef ref) {
-    final width = MediaQuery.sizeOf(context).width;
-    return ref.responsiveFine(
-      mobile: (width - 32.w).clamp(280.0, 420.0),
-      tabletSmall: 480.0,
-      tabletMedium: 440.0,
-      tabletLarge: 440.0,
-      desktop: 440.0,
+  static EdgeInsetsGeometry _logoPadding(BuildContext context, WidgetRef ref) {
+    return context.responsiveFine(
+      mobile: EdgeInsetsDirectional.only(start: 24.w, top: 16.h, end: 24.w, bottom: 8.h),
+      tabletSmall: EdgeInsetsDirectional.only(start: 32.w, top: 24.h, end: 32.w, bottom: 12.h),
+      tabletMedium: EdgeInsetsDirectional.only(start: 40.w, top: 28.h, end: 40.w, bottom: 16.h),
+      tabletLarge: EdgeInsetsDirectional.only(start: 40.w, top: 28.h, end: 40.w, bottom: 16.h),
+      desktop: EdgeInsetsDirectional.only(start: 24.w, top: 16.h, end: 24.w, bottom: 8.h),
     );
   }
 }
 
-class _StackedBody extends ConsumerWidget {
-  const _StackedBody({
+class _TabletWideBody extends ConsumerWidget {
+  const _TabletWideBody({
     required this.cardMaxWidth,
-    required this.usernameController,
+    required this.emailController,
     required this.passwordController,
-    required this.enterpriseIdController,
-    required this.usernameFocusNode,
+    required this.emailFocusNode,
     required this.passwordFocusNode,
-    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
@@ -118,12 +109,10 @@ class _StackedBody extends ConsumerWidget {
   });
 
   final double cardMaxWidth;
-  final TextEditingController usernameController;
+  final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController enterpriseIdController;
-  final FocusNode usernameFocusNode;
+  final FocusNode emailFocusNode;
   final FocusNode passwordFocusNode;
-  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -145,12 +134,10 @@ class _StackedBody extends ConsumerWidget {
         padding: EdgeInsetsDirectional.fromSTEB(horizontalPadding, 8.h, horizontalPadding, 24.h),
         child: LoginCard(
           maxWidth: cardMaxWidth,
-          usernameController: usernameController,
+          emailController: emailController,
           passwordController: passwordController,
-          enterpriseIdController: enterpriseIdController,
-          usernameFocusNode: usernameFocusNode,
+          emailFocusNode: emailFocusNode,
           passwordFocusNode: passwordFocusNode,
-          enterpriseIdFocusNode: enterpriseIdFocusNode,
           rememberMe: rememberMe,
           onRememberMeChanged: onRememberMeChanged,
           onLogin: onLogin,
@@ -162,15 +149,13 @@ class _StackedBody extends ConsumerWidget {
   }
 }
 
-class _TabletWideBody extends StatelessWidget {
-  const _TabletWideBody({
+class _StackedBody extends ConsumerWidget {
+  const _StackedBody({
     required this.cardMaxWidth,
-    required this.usernameController,
+    required this.emailController,
     required this.passwordController,
-    required this.enterpriseIdController,
-    required this.usernameFocusNode,
+    required this.emailFocusNode,
     required this.passwordFocusNode,
-    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
@@ -179,12 +164,10 @@ class _TabletWideBody extends StatelessWidget {
   });
 
   final double cardMaxWidth;
-  final TextEditingController usernameController;
+  final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController enterpriseIdController;
-  final FocusNode usernameFocusNode;
+  final FocusNode emailFocusNode;
   final FocusNode passwordFocusNode;
-  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -192,26 +175,29 @@ class _TabletWideBody extends StatelessWidget {
   final VoidCallback? onSsoTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final horizontalPadding = context.responsiveFine(
+      mobile: 20.w,
+      tabletSmall: 32.w,
+      tabletMedium: 40.w,
+      tabletLarge: 40.w,
+      desktop: 20.w,
+    );
+
     return Center(
       child: SingleChildScrollView(
-        padding: EdgeInsetsDirectional.fromSTEB(40.w, 8.h, 40.w, 32.h),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 480.w),
-          child: LoginCard(
-            maxWidth: cardMaxWidth,
-            usernameController: usernameController,
-            passwordController: passwordController,
-            enterpriseIdController: enterpriseIdController,
-            usernameFocusNode: usernameFocusNode,
-            passwordFocusNode: passwordFocusNode,
-            enterpriseIdFocusNode: enterpriseIdFocusNode,
-            rememberMe: rememberMe,
-            onRememberMeChanged: onRememberMeChanged,
-            onLogin: onLogin,
-            onForgotPasswordTap: onForgotPasswordTap,
-            onSsoTap: onSsoTap,
-          ),
+        padding: EdgeInsetsDirectional.fromSTEB(horizontalPadding, 8.h, horizontalPadding, 24.h),
+        child: LoginCard(
+          maxWidth: cardMaxWidth,
+          emailController: emailController,
+          passwordController: passwordController,
+          emailFocusNode: emailFocusNode,
+          passwordFocusNode: passwordFocusNode,
+          rememberMe: rememberMe,
+          onRememberMeChanged: onRememberMeChanged,
+          onLogin: onLogin,
+          onForgotPasswordTap: onForgotPasswordTap,
+          onSsoTap: onSsoTap,
         ),
       ),
     );

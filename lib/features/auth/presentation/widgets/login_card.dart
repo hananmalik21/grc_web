@@ -1,5 +1,7 @@
+import 'package:go_router/go_router.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/localization/l10n/app_localizations.dart';
+import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/theme/app_shadows.dart';
 import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/core/widgets/buttons/app_button.dart';
@@ -15,12 +17,10 @@ class LoginCard extends ConsumerWidget {
   const LoginCard({
     super.key,
     required this.maxWidth,
-    required this.usernameController,
+    required this.emailController,
     required this.passwordController,
-    required this.enterpriseIdController,
-    required this.usernameFocusNode,
+    required this.emailFocusNode,
     required this.passwordFocusNode,
-    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
@@ -29,12 +29,10 @@ class LoginCard extends ConsumerWidget {
   });
 
   final double maxWidth;
-  final TextEditingController usernameController;
+  final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController enterpriseIdController;
-  final FocusNode usernameFocusNode;
+  final FocusNode emailFocusNode;
   final FocusNode passwordFocusNode;
-  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -56,12 +54,12 @@ class LoginCard extends ConsumerWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(32.r),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 28.h),
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(10.r),
-            boxShadow: isDark ? null : AppShadows.primaryShadow,
+            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: AppShadows.loginCardShadow,
+            border: Border.all(color: dividerColor, width: 1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,21 +67,26 @@ class LoginCard extends ConsumerWidget {
             children: [
               Text(
                 localizations.loginDesktopSignInTitle,
-                style: context.textTheme.displaySmall?.copyWith(color: titleColor),
+                style: context.textTheme.headlineMedium?.copyWith(
+                  color: titleColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 26.sp,
+                ),
               ),
-              Gap(8.h),
+              Gap(6.h),
               Text(
                 localizations.loginDesktopSignInSubtitle,
-                style: context.textTheme.bodyMedium?.copyWith(color: subtitleColor),
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: subtitleColor,
+                  fontSize: 14.sp,
+                ),
               ),
-              Gap(20.h),
+              Gap(24.h),
               LoginForm(
-                usernameController: usernameController,
+                emailController: emailController,
                 passwordController: passwordController,
-                enterpriseIdController: enterpriseIdController,
-                usernameFocusNode: usernameFocusNode,
+                emailFocusNode: emailFocusNode,
                 passwordFocusNode: passwordFocusNode,
-                enterpriseIdFocusNode: enterpriseIdFocusNode,
                 isLoading: authState.isLoading,
                 rememberMe: rememberMe,
                 onRememberMeChanged: onRememberMeChanged,
@@ -99,7 +102,31 @@ class LoginCard extends ConsumerWidget {
               ),
               Gap(20.h),
               AppButton.outline(label: localizations.loginDesktopContinueWithSso, onPressed: onSsoTap),
-              Gap(20.h),
+              Gap(16.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Don't have an organization account? ",
+                    style: TextStyle(
+                      color: isDark ? context.themeTextSecondary : AppColors.authDesktopSignInSubtitle,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => context.go(AppRoutes.register),
+                    child: Text(
+                      'Register Now',
+                      style: TextStyle(
+                        color: AppColors.dashCyberSecurity,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Gap(16.h),
             ],
           ),
         ),

@@ -1,5 +1,7 @@
+import 'package:go_router/go_router.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/localization/l10n/app_localizations.dart';
+import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/core/widgets/common/digify_divider.dart';
@@ -13,12 +15,10 @@ import 'package:gap/gap.dart';
 class LoginDesktopCard extends ConsumerWidget {
   const LoginDesktopCard({
     super.key,
-    required this.usernameController,
+    required this.emailController,
     required this.passwordController,
-    required this.enterpriseIdController,
-    required this.usernameFocusNode,
+    required this.emailFocusNode,
     required this.passwordFocusNode,
-    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
@@ -26,12 +26,10 @@ class LoginDesktopCard extends ConsumerWidget {
     this.onSsoTap,
   });
 
-  final TextEditingController usernameController;
+  final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController enterpriseIdController;
-  final FocusNode usernameFocusNode;
+  final FocusNode emailFocusNode;
   final FocusNode passwordFocusNode;
-  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -77,12 +75,10 @@ class LoginDesktopCard extends ConsumerWidget {
         ),
         Gap(32.h),
         LoginForm(
-          usernameController: usernameController,
+          emailController: emailController,
           passwordController: passwordController,
-          enterpriseIdController: enterpriseIdController,
-          usernameFocusNode: usernameFocusNode,
+          emailFocusNode: emailFocusNode,
           passwordFocusNode: passwordFocusNode,
-          enterpriseIdFocusNode: enterpriseIdFocusNode,
           isLoading: authState.isLoading,
           rememberMe: rememberMe,
           onRememberMeChanged: onRememberMeChanged,
@@ -102,6 +98,30 @@ class LoginDesktopCard extends ConsumerWidget {
         AppButton.outline(
           label: localizations.loginDesktopContinueWithSso,
           onPressed: onSsoTap,
+        ),
+        Gap(16.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Don't have an organization account? ",
+              style: TextStyle(
+                color: subtitleColor,
+                fontSize: 13.sp,
+              ),
+            ),
+            InkWell(
+              onTap: () => context.go(AppRoutes.register),
+              child: Text(
+                'Register Now',
+                style: TextStyle(
+                  color: AppColors.dashCyberSecurity,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
