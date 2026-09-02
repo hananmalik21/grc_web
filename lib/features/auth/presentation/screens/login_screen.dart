@@ -20,12 +20,10 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _enterpriseIdController = TextEditingController();
-  final _usernameFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
-  final _enterpriseIdFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -35,38 +33,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ref.read(loginFormStateProvider.notifier).allowPrefillAgain();
     });
     if (kDebugMode) {
-      _usernameController.text = AppConfig.debugUsername;
+      _emailController.text = AppConfig.debugUsername;
       _passwordController.text = AppConfig.debugPassword;
     }
   }
 
   @override
   void dispose() {
-    _usernameFocusNode.dispose();
+    _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
-    _enterpriseIdFocusNode.dispose();
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
-    _enterpriseIdController.dispose();
     super.dispose();
   }
 
   Future<void> _handleLogin() async {
     final localizations = AppLocalizations.of(context)!;
-    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    final usernameValidation = FormValidators.combine(username, [
+    final emailValidation = FormValidators.combine(email, [
       (value) => FormValidators.required(
         value,
         errorMessage: localizations.fieldRequired,
       ),
+      (value) => FormValidators.email(
+        value,
+        errorMessage: localizations.invalidCredentials,
+      ),
     ]);
-    if (usernameValidation != null) {
-      _usernameFocusNode.requestFocus();
+    if (emailValidation != null) {
+      _emailFocusNode.requestFocus();
       ToastService.error(
         context,
-        usernameValidation,
+        emailValidation,
         title: localizations.loginFailed,
       );
       return;
@@ -79,8 +79,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       (value) => FormValidators.minLength(
         value,
-        6,
-        errorMessage: localizations.passwordTooShort,
+        8,
+        errorMessage: 'Password must be at least 8 characters',
       ),
     ]);
     if (passwordValidation != null) {
@@ -93,37 +93,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    final enterpriseCode = _enterpriseIdController.text.trim();
-    final enterpriseValidation = FormValidators.combine(enterpriseCode, [
-      (value) => FormValidators.required(
-        value,
-        errorMessage: localizations.fieldRequired,
-      ),
-      (value) => FormValidators.positiveInteger(
-        value,
-        errorMessage: localizations.loginDesktopEnterpriseCodeInvalid,
-      ),
-    ]);
-    if (enterpriseValidation != null) {
-      _enterpriseIdFocusNode.requestFocus();
-      ToastService.error(
-        context,
-        enterpriseValidation,
-        title: localizations.loginFailed,
-      );
-      return;
-    }
-
     final rememberMe = ref.read(loginFormStateProvider).rememberMe;
-    final enterpriseId = int.parse(enterpriseCode);
 
     await ref
         .read(authProvider.notifier)
         .login(
-          username,
+          email,
           password,
           rememberMe: rememberMe,
-          enterpriseId: enterpriseId,
         );
   }
 
@@ -155,9 +132,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .consumeSavedEmailForPrefill();
       if (email != null &&
           email.isNotEmpty &&
-          (kReleaseMode || _usernameController.text.isEmpty)) {
+          (kReleaseMode || _emailController.text.isEmpty)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _usernameController.text = email;
+          if (mounted) _emailController.text = email;
         });
       }
     });
@@ -197,12 +174,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       backgroundColor: AppColors.authDesktopBackground,
       body: SizedBox.expand(
         child: LoginLayoutHandler(
-          usernameController: _usernameController,
+          emailController: _emailController,
           passwordController: _passwordController,
-          enterpriseIdController: _enterpriseIdController,
-          usernameFocusNode: _usernameFocusNode,
+          emailFocusNode: _emailFocusNode,
           passwordFocusNode: _passwordFocusNode,
-          enterpriseIdFocusNode: _enterpriseIdFocusNode,
           rememberMe: formState.rememberMe,
           onRememberMeChanged: (value) =>
               ref.read(loginFormStateProvider.notifier).setRememberMe(value),

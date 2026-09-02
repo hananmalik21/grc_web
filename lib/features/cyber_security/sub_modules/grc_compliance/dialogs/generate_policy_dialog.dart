@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/widgets/buttons/app_button.dart';
 
 class GeneratePolicyDialog extends StatefulWidget {
   const GeneratePolicyDialog({super.key});
@@ -10,9 +13,10 @@ class GeneratePolicyDialog extends StatefulWidget {
 }
 
 class _GeneratePolicyDialogState extends State<GeneratePolicyDialog> {
-  final _policyNameController = TextEditingController(
-    text: 'Zero-Trust Access Control & MFA Policy',
+  final TextEditingController _policyNameController = TextEditingController(
+    text: 'Continuous Cloud Vulnerability Remediation Policy',
   );
+
   String _selectedFramework = 'NIST CSF 2.0';
   String _scope = 'All Production & Staging Environments';
 
@@ -22,226 +26,202 @@ class _GeneratePolicyDialogState extends State<GeneratePolicyDialog> {
     super.dispose();
   }
 
+  void _handlePublish() {
+    if (_policyNameController.text.trim().isEmpty) {
+      ToastService.show(
+        context: context,
+        message: 'Policy title is required',
+        type: ToastType.error,
+      );
+      return;
+    }
+
+    Navigator.of(context).pop();
+    ToastService.show(
+      context: context,
+      message: 'Policy "${_policyNameController.text.trim()}" generated and published to GRC catalog.',
+      type: ToastType.success,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.cyberCardBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.r),
-        side: const BorderSide(color: Color(0xFF1E293B)),
+        side: const BorderSide(color: AppColors.cyberCardBorder),
       ),
       child: Container(
         width: 520.w,
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.description_outlined,
-                      size: 18.sp,
-                      color: const Color(0xFF00B4D8),
-                    ),
-                    const Gap(8),
-                    Text(
-                      'Generate Compliance Policy',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(
-                    Icons.close_rounded,
-                    size: 18.sp,
-                    color: const Color(0xFF64748B),
-                  ),
-                  splashRadius: 20.r,
-                ),
-              ],
-            ),
-            const Gap(16),
-
-            // Policy Name
-            Text(
-              'Policy Title',
-              style: TextStyle(
-                color: const Color(0xFF94A3B8),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Gap(6),
-            TextField(
-              controller: _policyNameController,
-              style: TextStyle(color: Colors.white, fontSize: 12.sp),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFF1E293B).withValues(alpha: 0.6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
-                ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              ),
-            ),
-            const Gap(14),
-
-            // Framework dropdown
-            Text(
-              'Governing Framework',
-              style: TextStyle(
-                color: const Color(0xFF94A3B8),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Gap(6),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B).withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(color: const Color(0xFF334155)),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedFramework,
-                  isExpanded: true,
-                  dropdownColor: const Color(0xFF0F172A),
-                  items: const [
-                    DropdownMenuItem(
-                        value: 'NIST CSF 2.0',
-                        child: Text('NIST CSF 2.0',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 'SOC 2 Type II',
-                        child: Text('SOC 2 Type II',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 'ISO 27001:2022',
-                        child: Text('ISO 27001:2022',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 'CIS Controls v8',
-                        child: Text('CIS Controls v8',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 'CSA CCM v4',
-                        child: Text('CSA CCM v4',
-                            style: TextStyle(color: Colors.white))),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedFramework = val);
-                  },
-                ),
-              ),
-            ),
-            const Gap(14),
-
-            // Scope
-            Text(
-              'Enforcement Scope',
-              style: TextStyle(
-                color: const Color(0xFF94A3B8),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Gap(6),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B).withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(color: const Color(0xFF334155)),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _scope,
-                  isExpanded: true,
-                  dropdownColor: const Color(0xFF0F172A),
-                  items: const [
-                    DropdownMenuItem(
-                        value: 'All Production & Staging Environments',
-                        child: Text('All Production & Staging Environments',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 'AWS Member Accounts Only',
-                        child: Text('AWS Member Accounts Only',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 'Identity & SaaS Applications',
-                        child: Text('Identity & SaaS Applications',
-                            style: TextStyle(color: Colors.white))),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setState(() => _scope = val);
-                  },
-                ),
-              ),
-            ),
-            const Gap(20),
-
-            // Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: const Color(0xFF94A3B8),
-                      fontSize: 12.sp,
-                    ),
-                  ),
-                ),
-                const Gap(10),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: const Color(0xFF131D31),
-                        content: Text(
-                          'Policy "${_policyNameController.text}" generated and published to GRC catalog.',
-                          style: const TextStyle(color: Color(0xFF00B4D8)),
+        padding: EdgeInsets.all(20.r),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.description_outlined,
+                          size: 18.sp,
+                          color: AppColors.dashCyberSecurity,
                         ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0284C7),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.r),
+                        const Gap(8),
+                        Expanded(
+                          child: Text(
+                            'Generate Compliance Policy',
+                            style: TextStyle(
+                              color: AppColors.textPrimaryDark,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Text(
-                    'Publish Policy',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    borderRadius: BorderRadius.circular(4.r),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 18.sp,
+                      color: AppColors.textPlaceholderDark,
                     ),
+                  ),
+                ],
+              ),
+              const Gap(16),
+              _buildFieldLabel('POLICY TITLE'),
+              const Gap(6),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundDark,
+                  borderRadius: BorderRadius.circular(6.r),
+                  border: Border.all(color: AppColors.cyberCardBorder),
+                ),
+                child: TextField(
+                  controller: _policyNameController,
+                  style: TextStyle(
+                    color: AppColors.textPrimaryDark,
+                    fontSize: 12.sp,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                   ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const Gap(14),
+              _buildFieldLabel('GOVERNING FRAMEWORK'),
+              const Gap(6),
+              _buildDropdown(
+                value: _selectedFramework,
+                items: const [
+                  'NIST CSF 2.0',
+                  'SOC 2 Type II',
+                  'ISO 27001:2022',
+                  'CIS Controls v8',
+                  'CSA CCM v4',
+                ],
+                onChanged: (val) => setState(() => _selectedFramework = val),
+              ),
+              const Gap(14),
+              _buildFieldLabel('ENFORCEMENT SCOPE'),
+              const Gap(6),
+              _buildDropdown(
+                value: _scope,
+                items: const [
+                  'All Production & Staging Environments',
+                  'AWS Member Accounts Only',
+                  'Identity & SaaS Applications',
+                ],
+                onChanged: (val) => setState(() => _scope = val),
+              ),
+              const Gap(20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppButton(
+                    label: 'Cancel',
+                    type: AppButtonType.secondary,
+                    size: AppButtonSize.sm,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const Gap(10),
+                  AppButton(
+                    label: 'Publish Policy',
+                    type: AppButtonType.primary,
+                    size: AppButtonSize.sm,
+                    onPressed: _handlePublish,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFieldLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: AppColors.textPlaceholderDark,
+        fontSize: 10.sp,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.8,
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String value,
+    required List<String> items,
+    required ValueChanged<String> onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundDark,
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: AppColors.cyberCardBorder),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          dropdownColor: AppColors.cyberCardBg,
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 16.sp,
+            color: AppColors.textPlaceholderDark,
+          ),
+          style: TextStyle(
+            color: AppColors.textPrimaryDark,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+          ),
+          onChanged: (val) {
+            if (val != null) onChanged(val);
+          },
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                item,
+                overflow: TextOverflow.ellipsis,
+              ),
+            );
+          }).toList(),
         ),
       ),
     );

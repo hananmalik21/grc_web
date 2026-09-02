@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/data_security/models/datastore_item_model.dart';
+import 'package:grc/core/models/cyber_security/data_security/datastore_item_model.dart';
+import 'package:grc/core/services/toast_service.dart';
 
 class DataClassificationDialog extends StatelessWidget {
   final DatastoreItemModel datastore;
@@ -163,14 +164,10 @@ class DataClassificationDialog extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: const Color(0xFF131D31),
-                            content: Text(
-                              'DLP protection & encryption policy updated for ${datastore.source}',
-                              style: const TextStyle(color: Color(0xFF00B4D8)),
-                            ),
-                          ),
+                        ToastService.show(
+                          context: context,
+                          message: 'DLP protection & encryption policy updated for ${datastore.source}',
+                          type: ToastType.success,
                         );
                       },
                       style: ElevatedButton.styleFrom(

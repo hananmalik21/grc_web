@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/identity_access/models/identity_user_model.dart';
+import 'package:grc/core/models/cyber_security/identity_access/identity_user_model.dart';
+import 'package:grc/core/services/toast_service.dart';
 
 class UserAccessReviewDialog extends StatelessWidget {
   final IdentityUserModel user;
@@ -155,11 +156,10 @@ class UserAccessReviewDialog extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: const Color(0xFF131D31),
-                              content: Text('MFA enforcement notice sent to ${user.username}', style: const TextStyle(color: Color(0xFF00B4D8))),
-                            ),
+                          ToastService.show(
+                            context: context,
+                            message: 'MFA enforcement notice sent to ${user.username}',
+                            type: ToastType.warning,
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -174,11 +174,10 @@ class UserAccessReviewDialog extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: const Color(0xFF131D31),
-                            content: Text('Access permissions certified for ${user.username}', style: const TextStyle(color: Color(0xFF10B981))),
-                          ),
+                        ToastService.show(
+                          context: context,
+                          message: 'Access permissions certified for ${user.username}',
+                          type: ToastType.success,
                         );
                       },
                       style: ElevatedButton.styleFrom(

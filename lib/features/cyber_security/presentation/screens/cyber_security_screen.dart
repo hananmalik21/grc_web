@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/cyber_security/presentation/providers/cyber_security_tab_state_provider.dart';
 import 'package:grc/features/cyber_security/presentation/screens/cyber_security_dashboard_view.dart';
-import 'package:grc/features/cyber_security/presentation/widgets/cyber_sidebar.dart';
-import 'package:grc/features/cyber_security/presentation/widgets/cyber_top_bar.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_governance/ai_governance_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/ai_soc_copilot_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/app_api/app_api_screen.dart';
@@ -16,16 +14,8 @@ import 'package:grc/features/cyber_security/sub_modules/incidents/incidents_scre
 import 'package:grc/features/cyber_security/sub_modules/network_security/network_security_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/threat_detection_screen.dart';
 
-class CyberSecurityScreen extends ConsumerStatefulWidget {
+class CyberSecurityScreen extends ConsumerWidget {
   const CyberSecurityScreen({super.key});
-
-  @override
-  ConsumerState<CyberSecurityScreen> createState() =>
-      _CyberSecurityScreenState();
-}
-
-class _CyberSecurityScreenState extends ConsumerState<CyberSecurityScreen> {
-  bool _showMobileSidebar = false;
 
   Widget _buildActiveScreen(int index) {
     switch (index) {
@@ -57,76 +47,12 @@ class _CyberSecurityScreenState extends ConsumerState<CyberSecurityScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tabIndex = ref.watch(cyberSecurityTabStateProvider).currentTabIndex;
 
-    return Scaffold(
-      backgroundColor: AppColors.cyberDarkBg,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth >= 900;
-
-            return Row(
-              children: [
-                // Desktop Cyber Sidebar
-                if (isDesktop) const CyberSidebar(),
-
-                // Main Content Area with Top Bar
-                Expanded(
-                  child: Column(
-                    children: [
-                      // Cyber Top Bar
-                      CyberTopBar(
-                        onToggleSidebar: isDesktop
-                            ? null
-                            : () {
-                                setState(() {
-                                  _showMobileSidebar = !_showMobileSidebar;
-                                });
-                              },
-                      ),
-
-                      // Fast Direct Content View
-                      Expanded(
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: _buildActiveScreen(tabIndex),
-                            ),
-
-                            // Mobile/Tablet Drawer Overlay
-                            if (!isDesktop && _showMobileSidebar)
-                              Positioned.fill(
-                                child: Row(
-                                  children: [
-                                    const CyberSidebar(),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _showMobileSidebar = false;
-                                          });
-                                        },
-                                        child: Container(
-                                          color: Colors.black.withValues(alpha: 0.6),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+    return ColoredBox(
+      color: AppColors.cyberDarkBg,
+      child: _buildActiveScreen(tabIndex),
     );
   }
 }

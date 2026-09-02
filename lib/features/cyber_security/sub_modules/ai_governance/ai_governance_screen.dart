@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/models/cyber_security/ai_governance/ai_governance_models.dart';
 import 'package:grc/core/services/responsive_service.dart';
-import 'package:grc/features/cyber_security/sub_modules/ai_governance/models/ai_governance_models.dart';
+import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_governance/widgets/ai_governance_kpi_row.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_governance/widgets/ai_security_controls_card.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_governance/widgets/prompt_audit_log_table.dart';
@@ -16,110 +18,93 @@ class AiGovernanceScreen extends StatefulWidget {
 }
 
 class _AiGovernanceScreenState extends State<AiGovernanceScreen> {
-  final List<AiPromptLogItem> _logs = AiPromptLogItem.getMockPromptLogs();
+  final List<AiPromptLogItem> _logs = const [
+    AiPromptLogItem(
+      promptId: 'P-0892',
+      user: 'priya.nair',
+      actionQuery: 'Investigate alert ALT-4817',
+      model: 'Claude Sonnet',
+      timeAgo: '8 min ago',
+    ),
+    AiPromptLogItem(
+      promptId: 'P-0891',
+      user: 'ashley.wong',
+      actionQuery: 'Generate IAM remediation playbook',
+      model: 'Claude Sonnet',
+      timeAgo: '22 min ago',
+    ),
+    AiPromptLogItem(
+      promptId: 'P-0890',
+      user: 'carlos.rodriguez',
+      actionQuery: 'Draft executive incident report INC-2847',
+      model: 'Claude Sonnet',
+      timeAgo: '48 min ago',
+    ),
+    AiPromptLogItem(
+      promptId: 'P-0889',
+      user: 'priya.nair',
+      actionQuery: 'Correlate logs for INC-2846',
+      model: 'Claude Sonnet',
+      timeAgo: '1.2 hr ago',
+    ),
+    AiPromptLogItem(
+      promptId: 'P-0888',
+      user: 'system',
+      actionQuery: 'Auto-generate daily compliance summary',
+      model: 'Claude Haiku',
+      timeAgo: '3 hr ago',
+    ),
+    AiPromptLogItem(
+      promptId: 'P-0887',
+      user: 'jen.martinez',
+      actionQuery: 'Query: which databases contain payroll data?',
+      model: 'Claude Sonnet',
+      timeAgo: '4 hr ago',
+    ),
+    AiPromptLogItem(
+      promptId: 'P-0886',
+      user: 'system',
+      actionQuery: 'Risk score recalculation — 312 assets',
+      model: 'Claude Haiku',
+      timeAgo: '6 hr ago',
+    ),
+    AiPromptLogItem(
+      promptId: 'P-0885',
+      user: 'ashley.wong',
+      actionQuery: 'Generate NIST CSF gap report',
+      model: 'Claude Sonnet',
+      timeAgo: '8 hr ago',
+    ),
+  ];
 
   void _exportLogs() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Color(0xFF131D31),
-        content: Text(
-          'AI model activity and prompt audit logs exported to JSON.',
-          style: TextStyle(color: Color(0xFF00B4D8)),
-        ),
-      ),
+    ToastService.show(
+      context: context,
+      message: 'AI model activity and prompt audit logs exported to JSON.',
+      type: ToastType.success,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = context.isMobile;
     final isDesktop = context.isDesktop;
-    final padding = ResponsiveHelper.getPagePadding(context);
 
-    final titleSection = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'AI Governance',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: isMobile ? 18.sp : 22.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const Gap(4),
-        Text(
-          'Model activity log, prompt audit, approval queue, and security controls',
-          style: TextStyle(
-            color: const Color(0xFF94A3B8),
-            fontSize: isMobile ? 11.sp : 12.sp,
-          ),
+    return CyberScreenLayout(
+      title: 'AI Governance',
+      subtitle: 'Model activity log, prompt audit, approval queue, and security controls',
+      actions: [
+        AppButton(
+          label: 'Export Log',
+          type: AppButtonType.secondary,
+          size: AppButtonSize.sm,
+          onPressed: _exportLogs,
         ),
       ],
-    );
-
-    final actionButton = InkWell(
-      onTap: _exportLogs,
-      borderRadius: BorderRadius.circular(6.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 14.w,
-          vertical: 8.h,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF131D31),
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: const Color(0xFF1E293B)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.file_download_outlined,
-              size: 14.sp,
-              color: const Color(0xFFCBD5E1),
-            ),
-            const Gap(6),
-            Text(
-              'Export Log',
-              style: TextStyle(
-                color: const Color(0xFFCBD5E1),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    return SingleChildScrollView(
-      padding: padding.copyWith(bottom: 24.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
-          if (isMobile) ...[
-            titleSection,
-            const Gap(12),
-            actionButton,
-          ] else ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: titleSection),
-                actionButton,
-              ],
-            ),
-          ],
-          const Gap(20),
-
-          // 4 Top KPI Cards
           const AiGovernanceKpiRow(),
           const Gap(20),
-
-          // Middle 2-Column Grid (Security Controls + Recent Approval Queue)
           if (isDesktop)
             const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,8 +123,6 @@ class _AiGovernanceScreenState extends State<AiGovernanceScreen> {
               ],
             ),
           const Gap(24),
-
-          // Prompt Audit Log Table
           PromptAuditLogTable(logs: _logs),
         ],
       ),

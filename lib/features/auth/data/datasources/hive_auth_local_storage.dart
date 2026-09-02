@@ -7,6 +7,9 @@ const String _keyToken = 'auth_token';
 const String _keyUserGuid = 'user_guid';
 const String _keyRememberMe = 'remember_me';
 const String _keySavedEmail = 'saved_email';
+const String _keyRefreshToken = 'refresh_token';
+const String _keyOrgId = 'org_id';
+const String _keyPermissions = 'permissions';
 const String _keyEnterpriseId = 'enterprise_id';
 
 class HiveAuthLocalStorage implements AuthLocalStorage {
@@ -30,6 +33,48 @@ class HiveAuthLocalStorage implements AuthLocalStorage {
     final box = await _getBox();
     final value = box.get(_keyToken);
     return value is String ? value : null;
+  }
+
+  @override
+  Future<void> saveRefreshToken(String token) async {
+    final box = await _getBox();
+    await box.put(_keyRefreshToken, token);
+  }
+
+  @override
+  Future<String?> getRefreshToken() async {
+    final box = await _getBox();
+    final value = box.get(_keyRefreshToken);
+    return value is String ? value : null;
+  }
+
+  @override
+  Future<void> saveOrgId(String orgId) async {
+    final box = await _getBox();
+    await box.put(_keyOrgId, orgId);
+  }
+
+  @override
+  Future<String?> getOrgId() async {
+    final box = await _getBox();
+    final value = box.get(_keyOrgId);
+    return value is String ? value : null;
+  }
+
+  @override
+  Future<void> savePermissions(List<String> permissions) async {
+    final box = await _getBox();
+    await box.put(_keyPermissions, permissions);
+  }
+
+  @override
+  Future<List<String>> getPermissions() async {
+    final box = await _getBox();
+    final value = box.get(_keyPermissions);
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    return [];
   }
 
   @override
@@ -64,7 +109,10 @@ class HiveAuthLocalStorage implements AuthLocalStorage {
   Future<void> clearToken() async {
     final box = await _getBox();
     await box.delete(_keyToken);
+    await box.delete(_keyRefreshToken);
     await box.delete(_keyUserGuid);
+    await box.delete(_keyOrgId);
+    await box.delete(_keyPermissions);
     await box.delete(_keyEnterpriseId);
   }
 

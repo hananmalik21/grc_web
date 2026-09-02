@@ -8,6 +8,15 @@ abstract class AuthLocalStorage {
   Future<void> saveEnterpriseId(int enterpriseId);
   Future<int?> getEnterpriseId();
 
+  Future<void> saveRefreshToken(String token);
+  Future<String?> getRefreshToken();
+
+  Future<void> saveOrgId(String orgId);
+  Future<String?> getOrgId();
+
+  Future<void> savePermissions(List<String> permissions);
+  Future<List<String>> getPermissions();
+
   Future<void> clearToken();
 
   Future<bool> getRememberMe();
