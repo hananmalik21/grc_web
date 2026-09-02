@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:grc/features/cyber_security/sub_modules/network_security/models/firewall_rule_model.dart';
+import 'package:grc/core/models/cyber_security/network_security/firewall_rule_model.dart';
 
 class FirewallRulesTable extends StatelessWidget {
   final List<FirewallRuleModel> rules;

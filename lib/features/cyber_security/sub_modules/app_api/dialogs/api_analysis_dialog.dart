@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/app_api/models/api_endpoint_model.dart';
+import 'package:grc/core/models/cyber_security/app_api/api_endpoint_model.dart';
+import 'package:grc/core/services/toast_service.dart';
 
 class ApiAnalysisDialog extends StatelessWidget {
   final ApiEndpointModel endpoint;
@@ -192,14 +193,10 @@ class ApiAnalysisDialog extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: const Color(0xFF131D31),
-                            content: Text(
-                              'WAF protection rule applied for ${endpoint.endpoint}',
-                              style: const TextStyle(color: Color(0xFF00B4D8)),
-                            ),
-                          ),
+                        ToastService.show(
+                          context: context,
+                          message: 'WAF protection rule applied for ${endpoint.endpoint}',
+                          type: ToastType.success,
                         );
                       },
                       style: ElevatedButton.styleFrom(
