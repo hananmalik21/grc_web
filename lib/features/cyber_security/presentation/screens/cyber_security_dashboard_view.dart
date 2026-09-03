@@ -39,7 +39,7 @@ class CyberSecurityDashboardView extends StatelessWidget {
         const <FrameworkComplianceItem>[];
 
     return SingleChildScrollView(
-      padding: padding.copyWith(bottom: 30.h),
+      // padding: padding.copyWith(bottom: 30.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
