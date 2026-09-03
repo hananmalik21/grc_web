@@ -7,10 +7,7 @@ import 'package:grc/core/models/cyber_security/ai_soc_copilot/ai_soc_copilot_mod
 class QuickInvestigationsPanel extends StatelessWidget {
   final ValueChanged<String> onSelectPrompt;
 
-  const QuickInvestigationsPanel({
-    super.key,
-    required this.onSelectPrompt,
-  });
+  const QuickInvestigationsPanel({super.key, required this.onSelectPrompt});
 
   static const List<QuickInvestigationModel> defaultInvestigations = [
     QuickInvestigationModel(
@@ -21,7 +18,8 @@ class QuickInvestigationsPanel extends StatelessWidget {
     QuickInvestigationModel(
       id: 'qi-2',
       title: 'Analyze public S3 bucket F-2401',
-      queryPrompt: 'Analyze public S3 bucket F-2401 for sensitive data exposure',
+      queryPrompt:
+          'Analyze public S3 bucket F-2401 for sensitive data exposure',
     ),
     QuickInvestigationModel(
       id: 'qi-3',
@@ -78,10 +76,7 @@ class _QuickInvestigationCard extends StatefulWidget {
   final QuickInvestigationModel item;
   final VoidCallback onTap;
 
-  const _QuickInvestigationCard({
-    required this.item,
-    required this.onTap,
-  });
+  const _QuickInvestigationCard({required this.item, required this.onTap});
 
   @override
   State<_QuickInvestigationCard> createState() =>

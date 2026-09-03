@@ -7,10 +7,7 @@ import 'package:grc/core/services/toast_service.dart';
 class CreateIncidentDialog extends StatefulWidget {
   final ValueChanged<IncidentItemModel>? onCreated;
 
-  const CreateIncidentDialog({
-    super.key,
-    this.onCreated,
-  });
+  const CreateIncidentDialog({super.key, this.onCreated});
 
   @override
   State<CreateIncidentDialog> createState() => _CreateIncidentDialogState();
@@ -124,16 +121,20 @@ class _CreateIncidentDialogState extends State<CreateIncidentDialog> {
               style: TextStyle(color: Colors.white, fontSize: 12.sp),
               decoration: InputDecoration(
                 hintText: 'e.g. Unauthorized Credential Access on DB Host',
-                hintStyle:
-                    TextStyle(color: const Color(0xFF64748B), fontSize: 11.5.sp),
+                hintStyle: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontSize: 11.5.sp,
+                ),
                 filled: true,
                 fillColor: const Color(0xFF1E293B).withValues(alpha: 0.6),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6.r),
                   borderSide: const BorderSide(color: Color(0xFF334155)),
                 ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 10.h,
+                ),
               ),
             ),
             const Gap(14),
@@ -216,21 +217,33 @@ class _CreateIncidentDialogState extends State<CreateIncidentDialog> {
                             dropdownColor: const Color(0xFF0F172A),
                             items: const [
                               DropdownMenuItem(
-                                  value: 'Unassigned',
-                                  child: Text('Unassigned',
-                                      style: TextStyle(color: Colors.white))),
+                                value: 'Unassigned',
+                                child: Text(
+                                  'Unassigned',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                               DropdownMenuItem(
-                                  value: 'P. Nair',
-                                  child: Text('P. Nair (You)',
-                                      style: TextStyle(color: Colors.white))),
+                                value: 'P. Nair',
+                                child: Text(
+                                  'P. Nair (You)',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                               DropdownMenuItem(
-                                  value: 'A. Wong',
-                                  child: Text('A. Wong',
-                                      style: TextStyle(color: Colors.white))),
+                                value: 'A. Wong',
+                                child: Text(
+                                  'A. Wong',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                               DropdownMenuItem(
-                                  value: 'C. Rodriguez',
-                                  child: Text('C. Rodriguez',
-                                      style: TextStyle(color: Colors.white))),
+                                value: 'C. Rodriguez',
+                                child: Text(
+                                  'C. Rodriguez',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                             ],
                             onChanged: (val) {
                               if (val != null) setState(() => _owner = val);
@@ -260,16 +273,20 @@ class _CreateIncidentDialogState extends State<CreateIncidentDialog> {
               style: TextStyle(color: Colors.white, fontSize: 12.sp),
               decoration: InputDecoration(
                 hintText: 'e.g. T1078',
-                hintStyle:
-                    TextStyle(color: const Color(0xFF64748B), fontSize: 11.5.sp),
+                hintStyle: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontSize: 11.5.sp,
+                ),
                 filled: true,
                 fillColor: const Color(0xFF1E293B).withValues(alpha: 0.6),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6.r),
                   borderSide: const BorderSide(color: Color(0xFF334155)),
                 ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 10.h,
+                ),
               ),
             ),
             const Gap(20),
@@ -293,8 +310,10 @@ class _CreateIncidentDialogState extends State<CreateIncidentDialog> {
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0284C7),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 10.h,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6.r),
                     ),

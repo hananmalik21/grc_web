@@ -82,7 +82,8 @@ class _AppApiScreenState extends State<AppApiScreen> {
           onPressed: () {
             ToastService.show(
               context: context,
-              message: 'API security scan initiated across endpoints & microservices...',
+              message:
+                  'API security scan initiated across endpoints & microservices...',
               type: ToastType.info,
             );
           },
@@ -95,7 +96,8 @@ class _AppApiScreenState extends State<AppApiScreen> {
           const Gap(24),
           ApiEndpointsTable(
             endpoints: _endpoints,
-            onAnalyze: (endpoint) => ApiAnalysisDialog.show(context, endpoint: endpoint),
+            onAnalyze: (endpoint) =>
+                ApiAnalysisDialog.show(context, endpoint: endpoint),
           ),
         ],
       ),

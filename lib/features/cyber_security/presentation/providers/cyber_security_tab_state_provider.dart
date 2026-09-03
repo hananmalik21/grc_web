@@ -12,7 +12,8 @@ class CyberSecurityTabState {
   }
 }
 
-class CyberSecurityTabStateNotifier extends StateNotifier<CyberSecurityTabState> {
+class CyberSecurityTabStateNotifier
+    extends StateNotifier<CyberSecurityTabState> {
   CyberSecurityTabStateNotifier() : super(const CyberSecurityTabState());
 
   void setTabIndex(int index) {

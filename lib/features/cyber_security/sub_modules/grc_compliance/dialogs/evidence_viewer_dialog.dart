@@ -7,10 +7,7 @@ import 'package:grc/core/services/toast_service.dart';
 class EvidenceViewerDialog extends StatelessWidget {
   final ControlItemModel control;
 
-  const EvidenceViewerDialog({
-    super.key,
-    required this.control,
-  });
+  const EvidenceViewerDialog({super.key, required this.control});
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +168,8 @@ class EvidenceViewerDialog extends StatelessWidget {
                     Navigator.of(context).pop();
                     ToastService.show(
                       context: context,
-                      message: 'Signed evidence bundle exported for ${control.controlId}.',
+                      message:
+                          'Signed evidence bundle exported for ${control.controlId}.',
                       type: ToastType.success,
                     );
                   },

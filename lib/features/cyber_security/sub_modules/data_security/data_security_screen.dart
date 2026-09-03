@@ -78,7 +78,8 @@ class _DataSecurityScreenState extends State<DataSecurityScreen> {
   Widget build(BuildContext context) {
     return CyberScreenLayout(
       title: 'Data Security & Privacy',
-      subtitle: 'Sensitive data discovery, classification, and protection status',
+      subtitle:
+          'Sensitive data discovery, classification, and protection status',
       actions: [
         AppButton(
           label: 'Scan Datastores',
@@ -87,7 +88,8 @@ class _DataSecurityScreenState extends State<DataSecurityScreen> {
           onPressed: () {
             ToastService.show(
               context: context,
-              message: 'Scanning cloud storage buckets and relational databases for sensitive data...',
+              message:
+                  'Scanning cloud storage buckets and relational databases for sensitive data...',
               type: ToastType.info,
             );
           },
@@ -100,7 +102,8 @@ class _DataSecurityScreenState extends State<DataSecurityScreen> {
           const Gap(24),
           DatastoresTable(
             datastores: _datastores,
-            onClassify: (datastore) => DataClassificationDialog.show(context, datastore: datastore),
+            onClassify: (datastore) =>
+                DataClassificationDialog.show(context, datastore: datastore),
           ),
         ],
       ),

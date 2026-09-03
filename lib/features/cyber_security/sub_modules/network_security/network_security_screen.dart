@@ -93,7 +93,8 @@ class _NetworkSecurityScreenState extends State<NetworkSecurityScreen> {
           onPressed: () {
             ToastService.show(
               context: context,
-              message: 'Live network boundary & firewall exposure scan active...',
+              message:
+                  'Live network boundary & firewall exposure scan active...',
               type: ToastType.info,
             );
           },
@@ -106,7 +107,8 @@ class _NetworkSecurityScreenState extends State<NetworkSecurityScreen> {
           const Gap(24),
           FirewallRulesTable(
             rules: _rules,
-            onAnalyzeRule: (rule) => AiRuleAnalysisDialog.show(context, rule: rule),
+            onAnalyzeRule: (rule) =>
+                AiRuleAnalysisDialog.show(context, rule: rule),
           ),
         ],
       ),

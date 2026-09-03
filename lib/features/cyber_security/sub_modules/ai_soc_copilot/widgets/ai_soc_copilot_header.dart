@@ -30,10 +30,7 @@ class AiSocCopilotHeader extends StatelessWidget {
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildLeftSection(),
-                _buildRightSection(),
-              ],
+              children: [_buildLeftSection(), _buildRightSection()],
             ),
     );
   }
@@ -48,9 +45,7 @@ class AiSocCopilotHeader extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.teal.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(
-              color: AppColors.teal.withValues(alpha: 0.4),
-            ),
+            border: Border.all(color: AppColors.teal.withValues(alpha: 0.4)),
           ),
           child: Center(
             child: Icon(

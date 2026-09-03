@@ -5,12 +5,7 @@ import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/threat_detection/threat_alert_model.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/dialogs/threat_investigation_dialog.dart';
 
-enum ThreatFilterTab {
-  all,
-  new_,
-  investigating,
-  closed,
-}
+enum ThreatFilterTab { all, new_, investigating, closed }
 
 class ThreatAlertsTable extends StatefulWidget {
   final List<ThreatAlertModel> alerts;
@@ -95,7 +90,9 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final minWidth = constraints.maxWidth > 850 ? constraints.maxWidth : 850.0;
+              final minWidth = constraints.maxWidth > 850
+                  ? constraints.maxWidth
+                  : 850.0;
 
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -105,7 +102,10 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.cardBackgroundDark,
                           borderRadius: BorderRadius.only(
@@ -113,7 +113,9 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
                             topRight: Radius.circular(10.r),
                           ),
                           border: const Border(
-                            bottom: BorderSide(color: AppColors.cyberCardBorder),
+                            bottom: BorderSide(
+                              color: AppColors.cyberCardBorder,
+                            ),
                           ),
                         ),
                         child: Row(
@@ -151,7 +153,10 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
                       ),
                       if (filtered.isEmpty)
                         Padding(
-                          padding: EdgeInsets.symmetric(vertical: 36.h, horizontal: 20.w),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 36.h,
+                            horizontal: 20.w,
+                          ),
                           child: Center(
                             child: Text(
                               'No threat alerts in this category.',
@@ -215,9 +220,7 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6.r),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : Colors.transparent,
+            color: isSelected ? AppColors.primary : Colors.transparent,
           ),
         ),
         child: Text(
@@ -240,10 +243,7 @@ class _AlertTableRow extends StatefulWidget {
   final ThreatAlertModel alert;
   final VoidCallback onInvestigate;
 
-  const _AlertTableRow({
-    required this.alert,
-    required this.onInvestigate,
-  });
+  const _AlertTableRow({required this.alert, required this.onInvestigate});
 
   @override
   State<_AlertTableRow> createState() => _AlertTableRowState();
@@ -361,8 +361,8 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                       color: alert.status == ThreatStatus.investigating
                           ? AppColors.alertMedium
                           : alert.status == ThreatStatus.closed
-                              ? AppColors.textPlaceholderDark
-                              : AppColors.textPrimaryDark,
+                          ? AppColors.textPlaceholderDark
+                          : AppColors.textPrimaryDark,
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w500,
                     ),

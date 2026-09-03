@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/services/responsive_service.dart';
 
 class CyberScreenLayout extends StatelessWidget {
@@ -39,10 +38,10 @@ class CyberScreenLayout extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                color: AppColors.textPrimaryDark,
-                fontSize: isMobile ? 18.sp : 22.sp,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
+                color: const Color(0xFF0F172A), // Dark slate title
+                fontSize: isMobile ? 20.sp : 24.sp,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
             ),
             if (subtitle != null) ...[
@@ -50,8 +49,8 @@ class CyberScreenLayout extends StatelessWidget {
               Text(
                 subtitle!,
                 style: TextStyle(
-                  color: AppColors.textTertiaryDark,
-                  fontSize: isMobile ? 11.sp : 12.5.sp,
+                  color: const Color(0xFF64748B), // Muted grey subtitle
+                  fontSize: isMobile ? 11.5.sp : 13.sp,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -69,11 +68,7 @@ class CyberScreenLayout extends StatelessWidget {
             children: [
               titleSection,
               const Gap(12),
-              Wrap(
-                spacing: 8.w,
-                runSpacing: 8.h,
-                children: actions!,
-              ),
+              Wrap(spacing: 8.w, runSpacing: 8.h, children: actions!),
             ],
           );
         }
@@ -84,10 +79,7 @@ class CyberScreenLayout extends StatelessWidget {
           children: [
             Expanded(child: titleSection),
             const Gap(16),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: actions!,
-            ),
+            Row(mainAxisSize: MainAxisSize.min, children: actions!),
           ],
         );
       },
@@ -97,26 +89,20 @@ class CyberScreenLayout extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         header,
-        if (filterBar != null) ...[
-          const Gap(16),
-          filterBar!,
-        ],
+        if (filterBar != null) ...[const Gap(16), filterBar!],
         const Gap(20),
         child,
       ],
     );
 
     return ColoredBox(
-      color: AppColors.cyberDarkBg,
+      color: const Color(0xFFF8FAFC), // Solid light mode background
       child: isScrollable
           ? SingleChildScrollView(
               padding: effectivePadding.add(EdgeInsets.only(bottom: 24.h)),
               child: content,
             )
-          : Padding(
-              padding: effectivePadding,
-              child: content,
-            ),
+          : Padding(padding: effectivePadding, child: content),
     );
   }
 }

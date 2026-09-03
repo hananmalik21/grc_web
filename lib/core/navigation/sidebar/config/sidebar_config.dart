@@ -301,6 +301,24 @@ class SidebarConfig {
             route: AppRoutes.cyberSecurity,
             svgPath: Assets.icons.securityManager.roleDelegation.path,
           ),
+          SidebarItem(
+            id: 'cyberCloudConnectors',
+            labelKey: 'cyberCloudConnectors',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.manageEnterpriseIcon.path,
+          ),
+          SidebarItem(
+            id: 'cyberTelemetry',
+            labelKey: 'cyberTelemetry',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.securityManager.securityAlerts.path,
+          ),
+          SidebarItem(
+            id: 'cyberPeopleRisk',
+            labelKey: 'cyberPeopleRisk',
+            route: AppRoutes.cyberSecurity,
+            svgPath: Assets.icons.usersIcon.path,
+          ),
         ],
       ),
     ]);
@@ -392,6 +410,12 @@ class SidebarConfig {
         return 'GRC & Compliance';
       case 'cyberAiGovernance':
         return 'AI Governance';
+      case 'cyberCloudConnectors':
+        return 'Cloud Connectors';
+      case 'cyberTelemetry':
+        return 'Telemetry';
+      case 'cyberPeopleRisk':
+        return 'People Risk';
       default:
         return key;
     }
@@ -442,6 +466,12 @@ class SidebarConfig {
         return 'Continuous compliance monitoring against NIST, CIS & SOC2';
       case 'cyberAiGovernance':
         return 'LLM security guardrails, model registry risk & safety audits';
+      case 'cyberCloudConnectors':
+        return 'Secure AWS and Okta connections for live security data';
+      case 'cyberTelemetry':
+        return 'Normalized security events and live activity logs';
+      case 'cyberPeopleRisk':
+        return 'Behavioral risk signals and employee risk register';
       default:
         return null;
     }

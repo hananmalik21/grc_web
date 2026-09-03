@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/cyber_security/presentation/providers/cyber_security_tab_state_provider.dart';
 import 'package:grc/features/cyber_security/presentation/screens/cyber_security_dashboard_view.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_governance/ai_governance_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/ai_soc_copilot_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/app_api/app_api_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/cloud_posture_screen.dart';
+import 'package:grc/features/cyber_security/sub_modules/cloud_connectors/cloud_connectors_screen.dart';
+import 'package:grc/features/cyber_security/sub_modules/telemetry/telemetry_screen.dart';
+import 'package:grc/features/cyber_security/sub_modules/people_risk/people_risk_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/data_security/data_security_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/grc_compliance_screen.dart';
 import 'package:grc/features/cyber_security/sub_modules/identity_access/identity_access_screen.dart';
@@ -41,8 +43,16 @@ class CyberSecurityScreen extends ConsumerWidget {
         return const GrcComplianceScreen(key: ValueKey('cyber_tab_9'));
       case 10:
         return const AiGovernanceScreen(key: ValueKey('cyber_tab_10'));
+      case 11:
+        return const CloudConnectorsScreen(key: ValueKey('cyber_tab_11'));
+      case 12:
+        return const TelemetryScreen(key: ValueKey('cyber_tab_12'));
+      case 13:
+        return const PeopleRiskScreen(key: ValueKey('cyber_tab_13'));
       default:
-        return const CyberSecurityDashboardView(key: ValueKey('cyber_tab_default'));
+        return const CyberSecurityDashboardView(
+          key: ValueKey('cyber_tab_default'),
+        );
     }
   }
 
@@ -51,7 +61,7 @@ class CyberSecurityScreen extends ConsumerWidget {
     final tabIndex = ref.watch(cyberSecurityTabStateProvider).currentTabIndex;
 
     return ColoredBox(
-      color: AppColors.cyberDarkBg,
+      color: const Color(0xFFF8FAFC), // Solid light mode background
       child: _buildActiveScreen(tabIndex),
     );
   }

@@ -9,7 +9,10 @@ class DataClassificationDialog extends StatelessWidget {
 
   const DataClassificationDialog({super.key, required this.datastore});
 
-  static void show(BuildContext context, {required DatastoreItemModel datastore}) {
+  static void show(
+    BuildContext context, {
+    required DatastoreItemModel datastore,
+  }) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.75),
@@ -74,7 +77,10 @@ class DataClassificationDialog extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Color(0xFF94A3B8)),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Color(0xFF94A3B8),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -95,25 +101,68 @@ class DataClassificationDialog extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('CLASSIFICATION TIER', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'CLASSIFICATION TIER',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(datastore.classification.label, style: TextStyle(color: datastore.classification.color, fontWeight: FontWeight.bold)),
+                          Text(
+                            datastore.classification.label,
+                            style: TextStyle(
+                              color: datastore.classification.color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('SIZE / VOLUME', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'SIZE / VOLUME',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(datastore.size, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          Text(
+                            datastore.size,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('ENCRYPTION AT REST', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'ENCRYPTION AT REST',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(datastore.isEncrypted ? 'AES-256 (KMS)' : 'Unencrypted', style: TextStyle(color: datastore.isEncrypted ? const Color(0xFF10B981) : const Color(0xFFEF4444), fontWeight: FontWeight.w800)),
+                          Text(
+                            datastore.isEncrypted
+                                ? 'AES-256 (KMS)'
+                                : 'Unencrypted',
+                            style: TextStyle(
+                              color: datastore.isEncrypted
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -142,11 +191,27 @@ class DataClassificationDialog extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildDlpItem('Customer PII (Email, Phone, SSN)', datastore.classification == DataClassification.restricted ? 'Found (High Confidence)' : 'None Detected'),
+                      _buildDlpItem(
+                        'Customer PII (Email, Phone, SSN)',
+                        datastore.classification ==
+                                DataClassification.restricted
+                            ? 'Found (High Confidence)'
+                            : 'None Detected',
+                      ),
                       const Gap(6),
-                      _buildDlpItem('Payment Card Numbers (PCI-DSS)', datastore.source.contains('customer') ? '4,102 Records' : 'None Detected'),
+                      _buildDlpItem(
+                        'Payment Card Numbers (PCI-DSS)',
+                        datastore.source.contains('customer')
+                            ? '4,102 Records'
+                            : 'None Detected',
+                      ),
                       const Gap(6),
-                      _buildDlpItem('Dynamic Column Masking', datastore.isMasked ? 'Active (SHA-256)' : 'Missing - Raw Text Visible'),
+                      _buildDlpItem(
+                        'Dynamic Column Masking',
+                        datastore.isMasked
+                            ? 'Active (SHA-256)'
+                            : 'Missing - Raw Text Visible',
+                      ),
                     ],
                   ),
                 ),
@@ -158,7 +223,10 @@ class DataClassificationDialog extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close', style: TextStyle(color: Color(0xFF94A3B8))),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(color: Color(0xFF94A3B8)),
+                      ),
                     ),
                     const Gap(10),
                     ElevatedButton(
@@ -166,14 +234,17 @@ class DataClassificationDialog extends StatelessWidget {
                         Navigator.of(context).pop();
                         ToastService.show(
                           context: context,
-                          message: 'DLP protection & encryption policy updated for ${datastore.source}',
+                          message:
+                              'DLP protection & encryption policy updated for ${datastore.source}',
                           type: ToastType.success,
                         );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00B4D8),
                         foregroundColor: const Color(0xFF090E1A),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
                       ),
                       child: const Text('Update DLP Policy'),
                     ),
@@ -188,7 +259,10 @@ class DataClassificationDialog extends StatelessWidget {
   }
 
   Widget _buildDlpItem(String label, String status) {
-    final isNegative = status.contains('Found') || status.contains('Missing') || status.contains('Records');
+    final isNegative =
+        status.contains('Found') ||
+        status.contains('Missing') ||
+        status.contains('Records');
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -196,7 +270,9 @@ class DataClassificationDialog extends StatelessWidget {
         Text(
           status,
           style: TextStyle(
-            color: isNegative ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+            color: isNegative
+                ? const Color(0xFFEF4444)
+                : const Color(0xFF10B981),
             fontWeight: FontWeight.w600,
           ),
         ),

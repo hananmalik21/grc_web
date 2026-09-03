@@ -7,10 +7,7 @@ import 'package:grc/core/models/cyber_security/ai_soc_copilot/ai_soc_copilot_mod
 class OpenIncidentsPanel extends StatelessWidget {
   final ValueChanged<String> onSelectIncident;
 
-  const OpenIncidentsPanel({
-    super.key,
-    required this.onSelectIncident,
-  });
+  const OpenIncidentsPanel({super.key, required this.onSelectIncident});
 
   static const List<OpenIncidentItemModel> defaultIncidents = [
     OpenIncidentItemModel(
@@ -35,7 +32,8 @@ class OpenIncidentsPanel extends StatelessWidget {
       title: 'Privilege Escalation — IAM Role Modification',
       severity: 'HIGH',
       severityColor: AppColors.cyberHigh,
-      queryPrompt: 'Investigate INC-2843 IAM privilege escalation and unauthorized role binding',
+      queryPrompt:
+          'Investigate INC-2843 IAM privilege escalation and unauthorized role binding',
     ),
     OpenIncidentItemModel(
       id: 'inc-4',
@@ -43,7 +41,8 @@ class OpenIncidentsPanel extends StatelessWidget {
       title: 'Unusual Database Query Volume Spike',
       severity: 'MEDIUM',
       severityColor: AppColors.cyberMedium,
-      queryPrompt: 'Investigate INC-2840 unusual database query volume spike on RDS cluster',
+      queryPrompt:
+          'Investigate INC-2840 unusual database query volume spike on RDS cluster',
     ),
   ];
 
@@ -80,10 +79,7 @@ class _OpenIncidentCard extends StatefulWidget {
   final OpenIncidentItemModel incident;
   final VoidCallback onTap;
 
-  const _OpenIncidentCard({
-    required this.incident,
-    required this.onTap,
-  });
+  const _OpenIncidentCard({required this.incident, required this.onTap});
 
   @override
   State<_OpenIncidentCard> createState() => _OpenIncidentCardState();
@@ -126,10 +122,14 @@ class _OpenIncidentCardState extends State<_OpenIncidentCard> {
                       vertical: 2.h,
                     ),
                     decoration: BoxDecoration(
-                      color: widget.incident.severityColor.withValues(alpha: 0.18),
+                      color: widget.incident.severityColor.withValues(
+                        alpha: 0.18,
+                      ),
                       borderRadius: BorderRadius.circular(4.r),
                       border: Border.all(
-                        color: widget.incident.severityColor.withValues(alpha: 0.4),
+                        color: widget.incident.severityColor.withValues(
+                          alpha: 0.4,
+                        ),
                       ),
                     ),
                     child: Text(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/dashboard/cyber_dashboard_models.dart';
 import 'package:grc/core/permissions/permission_gate.dart';
 import 'package:grc/core/permissions/perm_keys.dart';
@@ -24,6 +23,8 @@ import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_la
 class CyberSecurityDashboardView extends ConsumerWidget {
   const CyberSecurityDashboardView({super.key});
 
+  static const Color skyBlue = Color(0xFF00B4D8);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(authProvider);
@@ -43,13 +44,14 @@ class CyberSecurityDashboardView extends ConsumerWidget {
       title: 'Security Dashboard',
       subtitle: 'Real-time posture monitoring - 2026-06-28 16:41 UTC',
       actions: [
+        // Live Badge
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
           decoration: BoxDecoration(
-            color: AppColors.cyberLiveGreen.withValues(alpha: 0.12),
+            color: const Color(0xFFDCFCE7),
             borderRadius: BorderRadius.circular(20.r),
             border: Border.all(
-              color: AppColors.cyberLiveGreen.withValues(alpha: 0.3),
+              color: const Color(0xFF86EFAC),
             ),
           ),
           child: Row(
@@ -59,7 +61,7 @@ class CyberSecurityDashboardView extends ConsumerWidget {
                 width: 6.r,
                 height: 6.r,
                 decoration: const BoxDecoration(
-                  color: AppColors.cyberLiveGreen,
+                  color: Color(0xFF16A34A),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -67,7 +69,7 @@ class CyberSecurityDashboardView extends ConsumerWidget {
               Text(
                 'LIVE',
                 style: TextStyle(
-                  color: AppColors.cyberLiveGreen,
+                  color: const Color(0xFF166534),
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
@@ -81,8 +83,8 @@ class CyberSecurityDashboardView extends ConsumerWidget {
           tooltip: 'Refresh Dashboard',
           icon: const Icon(
             Icons.refresh,
-            size: 18,
-            color: AppColors.dashCyberSecurity,
+            size: 20,
+            color: skyBlue,
           ),
           onPressed: () {
             ref.read(cyberDashboardProvider.notifier).refresh();
@@ -187,10 +189,10 @@ class CyberSecurityDashboardView extends ConsumerWidget {
                 ),
               ),
             ] else if (isTablet) ...[
-              const SizedBox(height: 310, child: CyberAlertVolumeChart()),
+              const SizedBox(height: 320, child: CyberAlertVolumeChart()),
               const Gap(18),
               SizedBox(
-                height: 300,
+                height: 320,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -211,15 +213,15 @@ class CyberSecurityDashboardView extends ConsumerWidget {
               ),
               const Gap(18),
               SizedBox(
-                height: 300,
+                height: 320,
                 child: CyberRecentIncidentsList(incidents: incidents),
               ),
             ] else ...[
-              // Mobile layout
-              const SizedBox(height: 280, child: CyberAlertVolumeChart()),
+              // Mobile layout with increased heights to prevent overflow
+              const SizedBox(height: 330, child: CyberAlertVolumeChart()),
               const Gap(16),
               SizedBox(
-                height: 280,
+                height: 350,
                 child: CyberFindingSeverityDonut(
                   values: severityValues,
                   colors: severityColors,
@@ -227,12 +229,12 @@ class CyberSecurityDashboardView extends ConsumerWidget {
               ),
               const Gap(16),
               SizedBox(
-                height: 280,
+                height: 320,
                 child: CyberComplianceBars(frameworks: frameworkCompliance),
               ),
               const Gap(16),
               SizedBox(
-                height: 300,
+                height: 320,
                 child: CyberRecentIncidentsList(incidents: incidents),
               ),
             ],
@@ -245,30 +247,33 @@ class CyberSecurityDashboardView extends ConsumerWidget {
   Widget _buildKpiGrid(double width, List<CyberKpiModel> kpis) {
     final isDesktop = width >= 1100;
 
+    final badgeValues = ['7', '4', '73%', '2.8k'];
+
     if (isDesktop) {
       // 4 cards in one row on Desktop
       return Row(
-        children: kpis
-            .map(
-              (card) => Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w),
-                  child: CyberKpiCard(
-                    title: card.title,
-                    value: card.value,
-                    subtitle: card.subtitle,
-                    icon: card.icon,
-                    accentColor: card.accentColor,
-                    subtitleColor: card.subtitleColor,
-                  ),
-                ),
+        children: List.generate(kpis.length, (index) {
+          final card = kpis[index];
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: CyberKpiCard(
+                title: card.title,
+                value: card.value,
+                subtitle: card.subtitle,
+                icon: card.icon,
+                accentColor: index == 0 ? skyBlue : card.accentColor,
+                subtitleColor: card.subtitleColor,
+                isSelected: index == 0,
+                badgeValue: badgeValues[index],
               ),
-            )
-            .toList(),
+            ),
+          );
+        }),
       );
     }
 
-    // Tablet and Mobile (2x2 grid: 2 cards in 1 row)
+    // Tablet and Mobile (2x2 grid)
     return Column(
       children: [
         Row(
@@ -279,8 +284,10 @@ class CyberSecurityDashboardView extends ConsumerWidget {
                 value: kpis[0].value,
                 subtitle: kpis[0].subtitle,
                 icon: kpis[0].icon,
-                accentColor: kpis[0].accentColor,
+                accentColor: skyBlue,
                 subtitleColor: kpis[0].subtitleColor,
+                isSelected: true,
+                badgeValue: badgeValues[0],
               ),
             ),
             Gap(10.w),
@@ -292,6 +299,7 @@ class CyberSecurityDashboardView extends ConsumerWidget {
                 icon: kpis[1].icon,
                 accentColor: kpis[1].accentColor,
                 subtitleColor: kpis[1].subtitleColor,
+                badgeValue: badgeValues[1],
               ),
             ),
           ],
@@ -307,6 +315,7 @@ class CyberSecurityDashboardView extends ConsumerWidget {
                 icon: kpis[2].icon,
                 accentColor: kpis[2].accentColor,
                 subtitleColor: kpis[2].subtitleColor,
+                badgeValue: badgeValues[2],
               ),
             ),
             Gap(10.w),
@@ -318,6 +327,7 @@ class CyberSecurityDashboardView extends ConsumerWidget {
                 icon: kpis[3].icon,
                 accentColor: kpis[3].accentColor,
                 subtitleColor: kpis[3].subtitleColor,
+                badgeValue: badgeValues[3],
               ),
             ),
           ],

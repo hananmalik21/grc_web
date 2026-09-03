@@ -39,7 +39,8 @@ class _GeneratePolicyDialogState extends State<GeneratePolicyDialog> {
     Navigator.of(context).pop();
     ToastService.show(
       context: context,
-      message: 'Policy "${_policyNameController.text.trim()}" generated and published to GRC catalog.',
+      message:
+          'Policy "${_policyNameController.text.trim()}" generated and published to GRC catalog.',
       type: ToastType.success,
     );
   }
@@ -115,7 +116,10 @@ class _GeneratePolicyDialogState extends State<GeneratePolicyDialog> {
                   ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 10.h,
+                    ),
                   ),
                 ),
               ),
@@ -216,10 +220,7 @@ class _GeneratePolicyDialogState extends State<GeneratePolicyDialog> {
           items: items.map((item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Text(
-                item,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(item, overflow: TextOverflow.ellipsis),
             );
           }).toList(),
         ),

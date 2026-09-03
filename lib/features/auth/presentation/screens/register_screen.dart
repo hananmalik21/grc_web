@@ -3,19 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/navigation/sidebar/sidebar_provider.dart';
 import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/services/toast_service.dart';
-import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/core/utils/form_validators.dart';
-import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/core/widgets/forms/digify_text_field.dart';
 import 'package:grc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:grc/features/auth/presentation/widgets/login_desktop_left_panel.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
+
+  static const Color skyBlue = Color(0xFF00B4D8);
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -150,10 +149,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     });
 
-    final isDark = context.isDark;
-
     return Scaffold(
-      backgroundColor: AppColors.authDesktopBackground,
+      backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= 1000;
@@ -162,14 +159,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Expanded(child: LoginDesktopLeftPanel()),
+                // 70% Left Hero Banner
+                const Expanded(
+                  flex: 7,
+                  child: LoginDesktopLeftPanel(),
+                ),
+                // 30% Right Form Container
                 Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 32.h),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: 520.w),
-                        child: _buildFormCard(context, isDark, authState.isLoading),
+                  flex: 3,
+                  child: Container(
+                    color: Colors.white,
+                    child: Center(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 32.h),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 440.w),
+                          child: _buildFormCard(context, authState.isLoading, false),
+                        ),
                       ),
                     ),
                   ),
@@ -178,12 +184,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             );
           }
 
-          return Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.r),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 480.w),
-                child: _buildFormCard(context, isDark, authState.isLoading),
+          // Compact / Mobile View
+          return Container(
+            color: Colors.white,
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: _buildFormCard(context, authState.isLoading, true),
+                ),
               ),
             ),
           );
@@ -192,187 +202,297 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildFormCard(BuildContext context, bool isDark, bool isLoading) {
-    final fieldBorder = isDark ? context.themeBorderGrey : AppColors.authDesktopFieldBorder;
+  Widget _buildFormCard(BuildContext context, bool isLoading, bool isMobile) {
+    const labelStyle = TextStyle(
+      color: Color(0xFF475569),
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.8,
+    );
+
+    final buttonText = isMobile ? 'Register' : 'Register Organization';
+
+    Widget buildFieldPair(Widget field1, Widget field2) {
+      if (isMobile) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            field1,
+            Gap(14.h),
+            field2,
+          ],
+        );
+      }
+      return Row(
+        children: [
+          Expanded(child: field1),
+          Gap(12.w),
+          Expanded(child: field2),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Organization Tag
         Text(
-          'Register Organization',
-          style: context.textTheme.displaySmall?.copyWith(
-            color: isDark ? context.themeTextPrimary : AppColors.authDesktopSignInTitle,
-            fontSize: 32.sp,
+          'ORGANIZATION',
+          style: TextStyle(
+            color: const Color(0xFF64748B),
+            fontSize: 11.sp,
             fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
           ),
         ),
         Gap(8.h),
         Text(
+          'Register Organization',
+          style: TextStyle(
+            color: const Color(0xFF101828),
+            fontSize: isMobile ? 24.sp : 32.sp,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+          ),
+        ),
+        Gap(6.h),
+        Text(
           'Create a new tenant organization and initial administrator account.',
-          style: context.textTheme.bodyLarge?.copyWith(
-            color: isDark ? context.themeTextSecondary : AppColors.authDesktopSignInSubtitle,
+          style: TextStyle(
+            color: const Color(0xFF64748B),
             fontSize: 14.sp,
+            height: 1.4,
           ),
         ),
         Gap(24.h),
 
         // Organization Name
+        const Text('ORGANIZATION NAME *', style: labelStyle),
+        Gap(6.h),
         DigifyTextField(
           controller: _orgNameController,
           focusNode: _orgNameFocusNode,
-          labelText: 'Organization Name *',
           hintText: 'e.g. Acme Global Security',
-          prefixIcon: const Icon(Icons.business_outlined, size: 20, color: AppColors.textPlaceholderDark),
           textInputAction: TextInputAction.next,
-          borderColor: fieldBorder,
-          focusedBorderColor: AppColors.authDesktopPrimary,
+          fillColor: const Color(0xFFF0F4F8),
+          filled: true,
+          borderColor: const Color(0xFFE2E8F0),
+          focusedBorderColor: RegisterScreen.skyBlue,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         ),
         Gap(14.h),
 
         // First & Last Name
-        Row(
-          children: [
-            Expanded(
-              child: DigifyTextField(
+        buildFieldPair(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('FIRST NAME *', style: labelStyle),
+              Gap(6.h),
+              DigifyTextField(
                 controller: _firstNameController,
                 focusNode: _firstNameFocusNode,
-                labelText: 'First Name *',
                 hintText: 'e.g. Alice',
-                prefixIcon: const Icon(Icons.person_outline, size: 20, color: AppColors.textPlaceholderDark),
                 textInputAction: TextInputAction.next,
-                borderColor: fieldBorder,
-                focusedBorderColor: AppColors.authDesktopPrimary,
+                fillColor: const Color(0xFFF0F4F8),
+                filled: true,
+                borderColor: const Color(0xFFE2E8F0),
+                focusedBorderColor: RegisterScreen.skyBlue,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
-            ),
-            Gap(12.w),
-            Expanded(
-              child: DigifyTextField(
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('LAST NAME *', style: labelStyle),
+              Gap(6.h),
+              DigifyTextField(
                 controller: _lastNameController,
                 focusNode: _lastNameFocusNode,
-                labelText: 'Last Name *',
                 hintText: 'e.g. Smith',
-                prefixIcon: const Icon(Icons.person_outline, size: 20, color: AppColors.textPlaceholderDark),
                 textInputAction: TextInputAction.next,
-                borderColor: fieldBorder,
-                focusedBorderColor: AppColors.authDesktopPrimary,
+                fillColor: const Color(0xFFF0F4F8),
+                filled: true,
+                borderColor: const Color(0xFFE2E8F0),
+                focusedBorderColor: RegisterScreen.skyBlue,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Gap(14.h),
 
         // Email
+        const Text('ADMINISTRATOR EMAIL *', style: labelStyle),
+        Gap(6.h),
         DigifyTextField(
           controller: _emailController,
           focusNode: _emailFocusNode,
-          labelText: 'Administrator Email *',
           hintText: 'admin@acme.com',
-          prefixIcon: const Icon(Icons.email_outlined, size: 20, color: AppColors.textPlaceholderDark),
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
-          borderColor: fieldBorder,
-          focusedBorderColor: AppColors.authDesktopPrimary,
+          fillColor: const Color(0xFFF0F4F8),
+          filled: true,
+          borderColor: const Color(0xFFE2E8F0),
+          focusedBorderColor: RegisterScreen.skyBlue,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         ),
         Gap(14.h),
 
         // Password & Confirm Password
-        Row(
-          children: [
-            Expanded(
-              child: DigifyTextField(
+        buildFieldPair(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('PASSWORD *', style: labelStyle),
+              Gap(6.h),
+              DigifyTextField(
                 controller: _passwordController,
                 focusNode: _passwordFocusNode,
-                labelText: 'Password (min 8 chars) *',
                 hintText: '••••••••',
                 obscureText: _obscurePassword,
-                prefixIcon: const Icon(Icons.lock_outline, size: 20, color: AppColors.textPlaceholderDark),
+                textInputAction: TextInputAction.next,
+                fillColor: const Color(0xFFF0F4F8),
+                filled: true,
+                borderColor: const Color(0xFFE2E8F0),
+                focusedBorderColor: RegisterScreen.skyBlue,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                     size: 18,
-                    color: AppColors.textPlaceholderDark,
+                    color: const Color(0xFF94A3B8),
                   ),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
-                textInputAction: TextInputAction.next,
-                borderColor: fieldBorder,
-                focusedBorderColor: AppColors.authDesktopPrimary,
               ),
-            ),
-            Gap(12.w),
-            Expanded(
-              child: DigifyTextField(
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('CONFIRM PASSWORD *', style: labelStyle),
+              Gap(6.h),
+              DigifyTextField(
                 controller: _confirmPasswordController,
                 focusNode: _confirmPasswordFocusNode,
-                labelText: 'Confirm Password *',
                 hintText: '••••••••',
                 obscureText: _obscureConfirmPassword,
-                prefixIcon: const Icon(Icons.lock_outline, size: 20, color: AppColors.textPlaceholderDark),
+                textInputAction: TextInputAction.next,
+                fillColor: const Color(0xFFF0F4F8),
+                filled: true,
+                borderColor: const Color(0xFFE2E8F0),
+                focusedBorderColor: RegisterScreen.skyBlue,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                     size: 18,
-                    color: AppColors.textPlaceholderDark,
+                    color: const Color(0xFF94A3B8),
                   ),
                   onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                 ),
-                textInputAction: TextInputAction.next,
-                borderColor: fieldBorder,
-                focusedBorderColor: AppColors.authDesktopPrimary,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Gap(14.h),
 
         // Country & Industry
-        Row(
-          children: [
-            Expanded(
-              child: DigifyTextField(
+        buildFieldPair(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('COUNTRY (OPTIONAL)', style: labelStyle),
+              Gap(6.h),
+              DigifyTextField(
                 controller: _countryController,
-                labelText: 'Country (Optional)',
                 hintText: 'e.g. United States',
-                prefixIcon: const Icon(Icons.public_outlined, size: 20, color: AppColors.textPlaceholderDark),
                 textInputAction: TextInputAction.next,
-                borderColor: fieldBorder,
-                focusedBorderColor: AppColors.authDesktopPrimary,
+                fillColor: const Color(0xFFF0F4F8),
+                filled: true,
+                borderColor: const Color(0xFFE2E8F0),
+                focusedBorderColor: RegisterScreen.skyBlue,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
-            ),
-            Gap(12.w),
-            Expanded(
-              child: DigifyTextField(
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('INDUSTRY (OPTIONAL)', style: labelStyle),
+              Gap(6.h),
+              DigifyTextField(
                 controller: _industryController,
-                labelText: 'Industry (Optional)',
                 hintText: 'e.g. Financial Services',
-                prefixIcon: const Icon(Icons.category_outlined, size: 20, color: AppColors.textPlaceholderDark),
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _handleRegister(),
-                borderColor: fieldBorder,
-                focusedBorderColor: AppColors.authDesktopPrimary,
+                fillColor: const Color(0xFFF0F4F8),
+                filled: true,
+                borderColor: const Color(0xFFE2E8F0),
+                focusedBorderColor: RegisterScreen.skyBlue,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Gap(24.h),
 
-        // Submit button
-        AppButton(
-          label: 'Register & Launch GRC',
-          isLoading: isLoading,
-          onPressed: _handleRegister,
+        // Submit Button (Sky Blue)
+        SizedBox(
+          height: 48.h,
+          child: ElevatedButton(
+            onPressed: isLoading ? null : _handleRegister,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: RegisterScreen.skyBlue,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+            child: isLoading
+                ? SizedBox(
+                    width: 20.r,
+                    height: 20.r,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          buttonText,
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Gap(6.w),
+                        Icon(Icons.arrow_forward_rounded, size: 18.sp),
+                      ],
+                    ),
+                  ),
+          ),
         ),
-        Gap(16.h),
+        Gap(20.h),
 
         // Link back to Login
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          runSpacing: 4.h,
           children: [
             Text(
               'Already have an account? ',
               style: TextStyle(
-                color: isDark ? context.themeTextSecondary : AppColors.authDesktopSignInSubtitle,
+                color: const Color(0xFF64748B),
                 fontSize: 13.sp,
               ),
             ),
@@ -381,13 +501,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               child: Text(
                 'Sign In',
                 style: TextStyle(
-                  color: AppColors.dashCyberSecurity,
+                  color: RegisterScreen.skyBlue,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ),
           ],
+        ),
+        Gap(24.h),
+
+        // Copyright Footer
+        Text(
+          isMobile ? '© 2026 Enterprise Edition' : '© 2026 GRC Platform • Enterprise Edition',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: const Color(0xFF94A3B8),
+            fontSize: 11.sp,
+          ),
         ),
       ],
     );

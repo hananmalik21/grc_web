@@ -145,11 +145,7 @@ class _IncidentKpiCard extends StatelessWidget {
           Positioned(
             top: 0,
             right: 0,
-            child: Icon(
-              icon,
-              size: 17.sp,
-              color: iconColor,
-            ),
+            child: Icon(icon, size: 17.sp, color: iconColor),
           ),
 
           // Content

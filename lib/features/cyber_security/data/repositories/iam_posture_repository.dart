@@ -10,6 +10,7 @@ class IamPostureData {
 
 abstract class IamPostureRepository {
   Future<IamPostureData> getPosture();
+  Future<int> syncConnector(String connectorId);
 }
 
 class IamPostureRepositoryImpl implements IamPostureRepository {
@@ -30,4 +31,8 @@ class IamPostureRepositoryImpl implements IamPostureRepository {
       principals: results[1] as List<IamPrincipalDto>,
     );
   }
+
+  @override
+  Future<int> syncConnector(String connectorId) =>
+      _remoteDataSource.syncConnector(connectorId);
 }

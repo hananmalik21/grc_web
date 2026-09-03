@@ -318,10 +318,17 @@ class ApiEndpoints {
       '$api/v1/dashboards/cloud-coverage';
   static const String dashboardPeopleHeatmap =
       '$api/v1/dashboards/people-heatmap';
+  static const String cloudConnectors = '$api/v1/telemetry/connectors';
   static const String threatsLive = '$api/v1/threats/live';
   static String threatStatus(String id) => '$api/v1/threats/live/$id/status';
   static const String iamPostureSummary = '$api/v1/iam-posture/summary';
   static const String iamPosturePrincipals = '$api/v1/iam-posture/principals';
+  static String iamPostureSync(String connectorId) =>
+      '$api/v1/iam-posture/connectors/$connectorId/sync';
+  static const String telemetryLogs = '$api/v1/telemetry/logs';
+  static const String telemetryIngest = '$api/v1/telemetry/ingest';
+  static const String peopleEvaluate = '$api/v1/people/evaluate';
+  static const String peopleHeatmap = '$api/v1/dashboards/people-heatmap';
   static const String peopleRiskRegister = '$api/v1/people/risk-register';
   static const String aiConversations = '$api/v1/ai/conversations';
   static String aiConversation(String id) => '$aiConversations/$id';

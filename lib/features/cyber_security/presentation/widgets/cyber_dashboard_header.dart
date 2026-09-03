@@ -6,11 +6,7 @@ class CyberDashboardHeader extends StatelessWidget {
   final VoidCallback? onRefresh;
   final VoidCallback? onExport;
 
-  const CyberDashboardHeader({
-    super.key,
-    this.onRefresh,
-    this.onExport,
-  });
+  const CyberDashboardHeader({super.key, this.onRefresh, this.onExport});
 
   @override
   Widget build(BuildContext context) {
@@ -107,11 +103,7 @@ class CyberDashboardHeader extends StatelessWidget {
         if (isNarrow) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              titleSection,
-              const Gap(12),
-              actionsSection,
-            ],
+            children: [titleSection, const Gap(12), actionsSection],
           );
         }
 

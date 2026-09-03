@@ -1,4 +1,3 @@
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 import 'login_desktop_left_panel.dart';
@@ -29,12 +28,18 @@ class LoginDesktopLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppColors.authDesktopBackground,
+      color: Colors.white,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Expanded(child: LoginDesktopLeftPanel()),
+          // 70% Left Hero Banner
+          const Expanded(
+            flex: 7,
+            child: LoginDesktopLeftPanel(),
+          ),
+          // 30% Right Login Form Panel (Solid Light Mode)
           Expanded(
+            flex: 3,
             child: LoginDesktopRightPanel(
               emailController: emailController,
               passwordController: passwordController,

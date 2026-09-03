@@ -1,9 +1,9 @@
-import 'package:grc/core/services/responsive_service.dart';
-import 'package:grc/features/auth/presentation/widgets/login_card.dart';
-import 'package:grc/features/auth/presentation/widgets/login_compact_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/features/auth/presentation/widgets/login_card.dart';
+import 'package:grc/features/auth/presentation/widgets/login_compact_logo.dart';
 
 class LoginCompactLayout extends ConsumerWidget {
   const LoginCompactLayout({
@@ -32,14 +32,19 @@ class LoginCompactLayout extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final layout = ref.screenLayout;
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: _logoPadding(context, ref),
-          child: const Align(alignment: AlignmentDirectional.topStart, child: LoginCompactLogo()),
-        ),
+        if (!isMobile)
+          Padding(
+            padding: _logoPadding(context, ref),
+            child: const Align(
+              alignment: AlignmentDirectional.topStart,
+              child: LoginCompactLogo(),
+            ),
+          ),
         Expanded(
           child: layout.isSideBySide
               ? _TabletWideBody(
@@ -122,7 +127,7 @@ class _TabletWideBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final horizontalPadding = context.responsiveFine(
-      mobile: 20.w,
+      mobile: 16.w,
       tabletSmall: 32.w,
       tabletMedium: 40.w,
       tabletLarge: 40.w,
@@ -177,7 +182,7 @@ class _StackedBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final horizontalPadding = context.responsiveFine(
-      mobile: 20.w,
+      mobile: 16.w,
       tabletSmall: 32.w,
       tabletMedium: 40.w,
       tabletLarge: 40.w,

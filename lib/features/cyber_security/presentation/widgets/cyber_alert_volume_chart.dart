@@ -15,12 +15,16 @@ class CyberAlertVolumeChart extends StatefulWidget {
     this.yLabels,
   });
 
+  static const Color skyBlue = Color(0xFF00B4D8);
+
   @override
   State<CyberAlertVolumeChart> createState() => _CyberAlertVolumeChartState();
 }
 
 class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
-  final ValueNotifier<Offset?> _hoverPositionNotifier = ValueNotifier<Offset?>(null);
+  final ValueNotifier<Offset?> _hoverPositionNotifier = ValueNotifier<Offset?>(
+    null,
+  );
 
   @override
   void dispose() {
@@ -33,9 +37,11 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
     final now = DateTime.now();
     final monthName = _getMonthName(now.month);
     final year = now.year;
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     final xLabels = widget.xLabels ?? _generateDateLabels(now);
-    final seriesData = widget.seriesData ??
+    final seriesData =
+        widget.seriesData ??
         [
           List.filled(xLabels.length, 0.0), // Low
           List.filled(xLabels.length, 0.0), // Medium
@@ -46,11 +52,18 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
     final hasAnyActivity = seriesData.any((series) => series.any((v) => v > 0));
 
     return Container(
-      padding: EdgeInsets.all(20.r),
+      padding: EdgeInsets.all(isMobile ? 14.r : 20.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        color: Colors.white, // Solid white card
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,28 +74,44 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
             spacing: 12,
             runSpacing: 8,
             children: [
-              Text(
-                'ALERT VOLUME — $monthName $year',
-                style: TextStyle(
-                  color: AppColors.textTertiaryDark,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const Wrap(
-                spacing: 10,
-                runSpacing: 4,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _LegendItem(color: AppColors.cyberCritical, label: 'Critical'),
+                  Text(
+                    'Performance by category',
+                    style: TextStyle(
+                      color: const Color(0xFF0F172A),
+                      fontSize: isMobile ? 14.sp : 15.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Gap(2.h),
+                  Text(
+                    'Hover for details • ALERT VOLUME — $monthName $year',
+                    style: TextStyle(
+                      color: const Color(0xFF64748B),
+                      fontSize: isMobile ? 10.5.sp : 11.5.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              Wrap(
+                spacing: isMobile ? 8 : 12,
+                runSpacing: 4,
+                children: const [
+                  _LegendItem(
+                    color: AppColors.cyberCritical,
+                    label: 'Critical',
+                  ),
                   _LegendItem(color: AppColors.cyberHigh, label: 'High'),
                   _LegendItem(color: AppColors.cyberMedium, label: 'Medium'),
-                  _LegendItem(color: AppColors.cyberLow, label: 'Low'),
+                  _LegendItem(color: CyberAlertVolumeChart.skyBlue, label: 'Low'),
                 ],
               ),
             ],
           ),
-          const Gap(20),
+          Gap(isMobile ? 10.h : 20.h),
           Expanded(
             child: SizedBox(
               width: double.infinity,
@@ -93,24 +122,27 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
                         children: [
                           Icon(
                             Icons.show_chart_rounded,
-                            size: 36.r,
-                            color: AppColors.dashCyberSecurity.withValues(alpha: 0.4),
+                            size: isMobile ? 28.r : 36.r,
+                            color: CyberAlertVolumeChart.skyBlue.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
-                          Gap(8.h),
+                          Gap(6.h),
                           Text(
                             'No Security Alerts Ingested',
                             style: TextStyle(
-                              color: AppColors.textPrimaryDark,
-                              fontSize: 12.5.sp,
+                              color: const Color(0xFF0F172A),
+                              fontSize: isMobile ? 12.sp : 13.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           Gap(2.h),
                           Text(
-                            'Connect cloud telemetry to visualize alert ingestion frequency',
+                            'Connect telemetry to visualize alert ingestion frequency',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: AppColors.textPlaceholderDark,
-                              fontSize: 11.sp,
+                              color: const Color(0xFF64748B),
+                              fontSize: isMobile ? 10.5.sp : 11.5.sp,
                             ),
                           ),
                         ],
@@ -146,8 +178,18 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
 
   static String _getMonthName(int month) {
     const months = [
-      'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-      'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+      'JANUARY',
+      'FEBRUARY',
+      'MARCH',
+      'APRIL',
+      'MAY',
+      'JUNE',
+      'JULY',
+      'AUGUST',
+      'SEPTEMBER',
+      'OCTOBER',
+      'NOVEMBER',
+      'DECEMBER',
     ];
     return (month >= 1 && month <= 12) ? months[month - 1] : 'CURRENT';
   }
@@ -193,11 +235,11 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
     if (chartWidth <= 0 || chartHeight <= 0) return;
 
     final gridPaint = Paint()
-      ..color = AppColors.cyberCardBorder
+      ..color = const Color(0xFFF1F5F9)
       ..strokeWidth = 1.0;
 
     final textStyle = TextStyle(
-      color: AppColors.textPlaceholderDark,
+      color: const Color(0xFF64748B),
       fontSize: 10.sp,
       fontWeight: FontWeight.w500,
     );
@@ -214,10 +256,8 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
       );
 
       final textSpan = TextSpan(text: '${yVal.toInt()}', style: textStyle);
-      final tp = TextPainter(
-        text: textSpan,
-        textDirection: TextDirection.ltr,
-      )..layout();
+      final tp = TextPainter(text: textSpan, textDirection: TextDirection.ltr)
+        ..layout();
 
       tp.paint(canvas, Offset(leftMargin - tp.width - 8, yPos - tp.height / 2));
     }
@@ -228,17 +268,18 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
         final xPos = leftMargin + (chartWidth / (numPoints - 1)) * i;
 
         final textSpan = TextSpan(text: xLabels[i], style: textStyle);
-        final tp = TextPainter(
-          text: textSpan,
-          textDirection: TextDirection.ltr,
-        )..layout();
+        final tp = TextPainter(text: textSpan, textDirection: TextDirection.ltr)
+          ..layout();
 
-        tp.paint(canvas, Offset(xPos - tp.width / 2, size.height - bottomMargin + 6));
+        tp.paint(
+          canvas,
+          Offset(xPos - tp.width / 2, size.height - bottomMargin + 6),
+        );
       }
     }
 
     final seriesColors = [
-      AppColors.cyberLow,
+      CyberAlertVolumeChart.skyBlue,
       AppColors.cyberMedium,
       AppColors.cyberHigh,
       AppColors.cyberCritical,
@@ -247,7 +288,9 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
     // Series curves
     for (int s = 0; s < seriesData.length; s++) {
       final data = seriesData[s];
-      final color = s < seriesColors.length ? seriesColors[s] : AppColors.dashCyberSecurity;
+      final color = s < seriesColors.length
+          ? seriesColors[s]
+          : CyberAlertVolumeChart.skyBlue;
 
       final points = <Offset>[];
       for (int i = 0; i < data.length; i++) {
@@ -273,16 +316,17 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
         ..close();
 
       final fillPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            color.withValues(alpha: 0.12),
-            color.withValues(alpha: 0.0),
-          ],
-        ).createShader(
-          Rect.fromLTWH(leftMargin, topMargin, chartWidth, chartHeight),
-        )
+        ..shader =
+            LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                color.withValues(alpha: 0.20),
+                color.withValues(alpha: 0.0),
+              ],
+            ).createShader(
+              Rect.fromLTWH(leftMargin, topMargin, chartWidth, chartHeight),
+            )
         ..style = PaintingStyle.fill;
 
       canvas.drawPath(fillPath, fillPaint);
@@ -290,7 +334,7 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
       final strokePaint = Paint()
         ..color = color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.2
+        ..strokeWidth = 2.4
         ..strokeCap = StrokeCap.round
         ..isAntiAlias = true;
 
@@ -300,7 +344,8 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AlertVolumeCanvasPainter oldDelegate) =>
-      oldDelegate.hoverPosition != hoverPosition || oldDelegate.seriesData != seriesData;
+      oldDelegate.hoverPosition != hoverPosition ||
+      oldDelegate.seriesData != seriesData;
 }
 
 class _LegendItem extends StatelessWidget {
@@ -315,19 +360,19 @@ class _LegendItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10.w,
-          height: 3.h,
+          width: 8.r,
+          height: 8.r,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(2.r),
+            shape: BoxShape.circle,
           ),
         ),
         const Gap(5),
         Text(
           label,
           style: TextStyle(
-            color: AppColors.textTertiaryDark,
-            fontSize: 11.sp,
+            color: const Color(0xFF475569),
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
         ),

@@ -7,10 +7,7 @@ import 'package:grc/core/models/cyber_security/ai_governance/ai_governance_model
 class PromptAuditLogTable extends StatelessWidget {
   final List<AiPromptLogItem> logs;
 
-  const PromptAuditLogTable({
-    super.key,
-    required this.logs,
-  });
+  const PromptAuditLogTable({super.key, required this.logs});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +20,9 @@ class PromptAuditLogTable extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final minWidth = constraints.maxWidth > 800 ? constraints.maxWidth : 800.0;
+          final minWidth = constraints.maxWidth > 800
+              ? constraints.maxWidth
+              : 800.0;
 
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -33,7 +32,10 @@ class PromptAuditLogTable extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.cardBackgroundDark,
                       borderRadius: BorderRadius.only(
@@ -62,10 +64,7 @@ class PromptAuditLogTable extends StatelessWidget {
                           width: 120.w,
                           child: _buildHeaderLabel('MODEL'),
                         ),
-                        SizedBox(
-                          width: 90.w,
-                          child: _buildHeaderLabel('TIME'),
-                        ),
+                        SizedBox(width: 90.w, child: _buildHeaderLabel('TIME')),
                         SizedBox(
                           width: 90.w,
                           child: _buildHeaderLabel('STATUS'),
@@ -75,7 +74,10 @@ class PromptAuditLogTable extends StatelessWidget {
                   ),
                   if (logs.isEmpty)
                     Padding(
-                      padding: EdgeInsets.symmetric(vertical: 36.h, horizontal: 20.w),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 36.h,
+                        horizontal: 20.w,
+                      ),
                       child: Center(
                         child: Text(
                           'No prompt logs recorded.',

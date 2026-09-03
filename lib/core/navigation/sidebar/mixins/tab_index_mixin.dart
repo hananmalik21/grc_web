@@ -96,6 +96,12 @@ mixin TabIndexMixin {
         return 9;
       case 'cyberAiGovernance':
         return 10;
+      case 'cyberCloudConnectors':
+        return 11;
+      case 'cyberTelemetry':
+        return 12;
+      case 'cyberPeopleRisk':
+        return 13;
       default:
         return null;
     }

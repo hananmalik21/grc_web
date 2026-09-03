@@ -5,14 +5,7 @@ import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/incidents/incident_item_model.dart';
 import 'package:grc/features/cyber_security/sub_modules/incidents/dialogs/incident_ai_triage_dialog.dart';
 
-enum IncidentFilterTab {
-  all,
-  open,
-  investigating,
-  contained,
-  resolved,
-  closed,
-}
+enum IncidentFilterTab { all, open, investigating, contained, resolved, closed }
 
 class IncidentsTable extends StatefulWidget {
   final List<IncidentItemModel> incidents;
@@ -109,7 +102,9 @@ class _IncidentsTableState extends State<IncidentsTable> {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final minWidth = constraints.maxWidth > 950 ? constraints.maxWidth : 950.0;
+              final minWidth = constraints.maxWidth > 950
+                  ? constraints.maxWidth
+                  : 950.0;
 
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -119,7 +114,10 @@ class _IncidentsTableState extends State<IncidentsTable> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.cardBackgroundDark,
                           borderRadius: BorderRadius.only(
@@ -127,7 +125,9 @@ class _IncidentsTableState extends State<IncidentsTable> {
                             topRight: Radius.circular(10.r),
                           ),
                           border: const Border(
-                            bottom: BorderSide(color: AppColors.cyberCardBorder),
+                            bottom: BorderSide(
+                              color: AppColors.cyberCardBorder,
+                            ),
                           ),
                         ),
                         child: Row(
@@ -169,7 +169,10 @@ class _IncidentsTableState extends State<IncidentsTable> {
                       ),
                       if (filtered.isEmpty)
                         Padding(
-                          padding: EdgeInsets.symmetric(vertical: 36.h, horizontal: 20.w),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 36.h,
+                            horizontal: 20.w,
+                          ),
                           child: Center(
                             child: Text(
                               'No incidents found under this filter.',
@@ -188,7 +191,8 @@ class _IncidentsTableState extends State<IncidentsTable> {
                               _IncidentTableRow(
                                 incident: incident,
                                 onTriage: () => _openTriage(incident),
-                                onTake: () => widget.onTakeOwnership?.call(incident),
+                                onTake: () =>
+                                    widget.onTakeOwnership?.call(incident),
                               ),
                               const Divider(
                                 color: AppColors.cyberCardBorder,
@@ -234,9 +238,7 @@ class _IncidentsTableState extends State<IncidentsTable> {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6.r),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : Colors.transparent,
+            color: isSelected ? AppColors.primary : Colors.transparent,
           ),
         ),
         child: Text(
@@ -276,7 +278,8 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
   @override
   Widget build(BuildContext context) {
     final incident = widget.incident;
-    final showTakeButton = incident.owner == 'Unassigned' ||
+    final showTakeButton =
+        incident.owner == 'Unassigned' ||
         incident.status == IncidentStatus.open ||
         incident.status == IncidentStatus.investigating;
 
@@ -365,12 +368,12 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
                       color: incident.status == IncidentStatus.open
                           ? AppColors.cyberCritical
                           : incident.status == IncidentStatus.investigating
-                              ? AppColors.alertMedium
-                              : incident.status == IncidentStatus.contained
-                                  ? AppColors.cyberHigh
-                                  : incident.status == IncidentStatus.resolved
-                                      ? AppColors.cyberLiveGreen
-                                      : AppColors.textPlaceholderDark,
+                          ? AppColors.alertMedium
+                          : incident.status == IncidentStatus.contained
+                          ? AppColors.cyberHigh
+                          : incident.status == IncidentStatus.resolved
+                          ? AppColors.cyberLiveGreen
+                          : AppColors.textPlaceholderDark,
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -408,10 +411,7 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 6.w,
-                    vertical: 2.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                   decoration: BoxDecoration(
                     color: AppColors.purple.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4.r),
@@ -473,9 +473,7 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
                         decoration: BoxDecoration(
                           color: AppColors.cardBackgroundGreyDark,
                           borderRadius: BorderRadius.circular(6.r),
-                          border: Border.all(
-                            color: AppColors.cyberCardBorder,
-                          ),
+                          border: Border.all(color: AppColors.cyberCardBorder),
                         ),
                         child: Text(
                           'Take',

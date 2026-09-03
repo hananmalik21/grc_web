@@ -59,7 +59,11 @@ class CyberSubmoduleView extends StatelessWidget {
                     color: const Color(0xFF00B4D8).withValues(alpha: 0.35),
                   ),
                 ),
-                child: Icon(spec.icon, color: const Color(0xFF00B4D8), size: 20.sp),
+                child: Icon(
+                  spec.icon,
+                  color: const Color(0xFF00B4D8),
+                  size: 20.sp,
+                ),
               ),
               const Gap(14),
               Expanded(
@@ -165,7 +169,8 @@ class CyberSubmoduleView extends StatelessWidget {
                         Text(
                           metric.change,
                           style: TextStyle(
-                            color: metric.changeColor ?? const Color(0xFF94A3B8),
+                            color:
+                                metric.changeColor ?? const Color(0xFF94A3B8),
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w500,
                           ),
@@ -203,7 +208,10 @@ class CyberSubmoduleView extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF1E293B),
                         borderRadius: BorderRadius.circular(6.r),
@@ -228,7 +236,10 @@ class CyberSubmoduleView extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final finding = spec.primaryFindings[index];
                     return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 11.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF090E1A),
                         borderRadius: BorderRadius.circular(8.r),

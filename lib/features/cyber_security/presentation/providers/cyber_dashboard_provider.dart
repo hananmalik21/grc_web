@@ -10,17 +10,21 @@ final cyberDashboardApiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(baseUrl: ApiConfig.baseUrl, authStorage: storage);
 });
 
-final cyberDashboardRemoteDataSourceProvider = Provider<CyberDashboardRemoteDataSource>((ref) {
-  final apiClient = ref.watch(cyberDashboardApiClientProvider);
-  return DioCyberDashboardRemoteDataSource(apiClient: apiClient);
-});
+final cyberDashboardRemoteDataSourceProvider =
+    Provider<CyberDashboardRemoteDataSource>((ref) {
+      final apiClient = ref.watch(cyberDashboardApiClientProvider);
+      return DioCyberDashboardRemoteDataSource(apiClient: apiClient);
+    });
 
-final cyberDashboardRepositoryProvider = Provider<CyberDashboardRepository>((ref) {
+final cyberDashboardRepositoryProvider = Provider<CyberDashboardRepository>((
+  ref,
+) {
   final remoteDataSource = ref.watch(cyberDashboardRemoteDataSourceProvider);
   return CyberDashboardRepositoryImpl(remoteDataSource: remoteDataSource);
 });
 
-class CyberDashboardNotifier extends StateNotifier<AsyncValue<CyberDashboardData>> {
+class CyberDashboardNotifier
+    extends StateNotifier<AsyncValue<CyberDashboardData>> {
   CyberDashboardNotifier(this._repository) : super(const AsyncValue.loading()) {
     loadDashboard();
   }
@@ -48,7 +52,10 @@ class CyberDashboardNotifier extends StateNotifier<AsyncValue<CyberDashboardData
 }
 
 final cyberDashboardProvider =
-    StateNotifierProvider<CyberDashboardNotifier, AsyncValue<CyberDashboardData>>((ref) {
-  final repository = ref.watch(cyberDashboardRepositoryProvider);
-  return CyberDashboardNotifier(repository);
-});
+    StateNotifierProvider<
+      CyberDashboardNotifier,
+      AsyncValue<CyberDashboardData>
+    >((ref) {
+      final repository = ref.watch(cyberDashboardRepositoryProvider);
+      return CyberDashboardNotifier(repository);
+    });

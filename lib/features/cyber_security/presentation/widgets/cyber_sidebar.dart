@@ -8,10 +8,7 @@ class CyberSidebarGroup {
   final String title;
   final List<CyberSidebarItemData> items;
 
-  const CyberSidebarGroup({
-    required this.title,
-    required this.items,
-  });
+  const CyberSidebarGroup({required this.title, required this.items});
 }
 
 class CyberSidebarItemData {
@@ -118,15 +115,14 @@ class _CyberSidebarState extends ConsumerState<CyberSidebar> {
         ),
       ],
     ),
-    CyberSidebarGroup(
-      title: 'PLATFORM',
-      items: [],
-    ),
+    CyberSidebarGroup(title: 'PLATFORM', items: []),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = ref.watch(cyberSecurityTabStateProvider).currentTabIndex;
+    final selectedIndex = ref
+        .watch(cyberSecurityTabStateProvider)
+        .currentTabIndex;
 
     return Container(
       width: 235.w,
@@ -272,12 +268,13 @@ class _CyberSidebarState extends ConsumerState<CyberSidebar> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color(0xFF0F2B38)
-                  : Colors.transparent,
+              color: isSelected ? const Color(0xFF0F2B38) : Colors.transparent,
               borderRadius: BorderRadius.circular(6.r),
               border: isSelected
-                  ? Border.all(color: const Color(0xFF00B4D8).withValues(alpha: 0.4), width: 1)
+                  ? Border.all(
+                      color: const Color(0xFF00B4D8).withValues(alpha: 0.4),
+                      width: 1,
+                    )
                   : null,
             ),
             child: Row(
@@ -314,15 +311,17 @@ class _CyberSidebarState extends ConsumerState<CyberSidebar> {
                       color: isSelected
                           ? const Color(0xFF00B4D8).withValues(alpha: 0.25)
                           : (item.badgeCount! > 2 && item.tabIndex != 0
-                              ? const Color(0xFFEF4444).withValues(alpha: 0.2)
-                              : const Color(0xFF1E293B)),
+                                ? const Color(0xFFEF4444).withValues(alpha: 0.2)
+                                : const Color(0xFF1E293B)),
                       borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(
                         color: isSelected
                             ? const Color(0xFF00B4D8).withValues(alpha: 0.5)
                             : (item.badgeCount! > 2 && item.tabIndex != 0
-                                ? const Color(0xFFEF4444).withValues(alpha: 0.4)
-                                : const Color(0xFF334155)),
+                                  ? const Color(
+                                      0xFFEF4444,
+                                    ).withValues(alpha: 0.4)
+                                  : const Color(0xFF334155)),
                         width: 0.8,
                       ),
                     ),
@@ -332,8 +331,8 @@ class _CyberSidebarState extends ConsumerState<CyberSidebar> {
                         color: isSelected
                             ? const Color(0xFF00B4D8)
                             : (item.badgeCount! > 2 && item.tabIndex != 0
-                                ? const Color(0xFFEF4444)
-                                : const Color(0xFF94A3B8)),
+                                  ? const Color(0xFFEF4444)
+                                  : const Color(0xFF94A3B8)),
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
                       ),

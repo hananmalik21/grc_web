@@ -9,6 +9,7 @@ abstract class IamPostureRemoteDataSource {
     int page = 1,
     int pageSize = 100,
   });
+  Future<int> syncConnector(String connectorId);
 }
 
 class DioIamPostureRemoteDataSource implements IamPostureRemoteDataSource {
@@ -55,6 +56,24 @@ class DioIamPostureRemoteDataSource implements IamPostureRemoteDataSource {
     } catch (e) {
       throw UnknownException(
         'Failed to load IAM principals: ${e.toString()}',
+        originalError: e,
+      );
+    }
+  }
+
+  @override
+  Future<int> syncConnector(String connectorId) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.iamPostureSync(connectorId),
+      );
+      final data = response['data'];
+      return data is Map ? int.tryParse('${data['synced']}') ?? 0 : 0;
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw UnknownException(
+        'Failed to sync IAM posture: ${e.toString()}',
         originalError: e,
       );
     }

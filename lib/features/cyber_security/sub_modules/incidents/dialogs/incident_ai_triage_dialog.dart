@@ -163,10 +163,13 @@ class IncidentAiTriageDialog extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('• ',
-                                style: TextStyle(
-                                    color: const Color(0xFF00B4D8),
-                                    fontSize: 11.5.sp)),
+                            Text(
+                              '• ',
+                              style: TextStyle(
+                                color: const Color(0xFF00B4D8),
+                                fontSize: 11.5.sp,
+                              ),
+                            ),
                             Expanded(
                               child: Text(
                                 item,
@@ -244,7 +247,8 @@ class IncidentAiTriageDialog extends StatelessWidget {
                     onExecuteContainment?.call();
                     ToastService.show(
                       context: context,
-                      message: 'Containment playbook triggered for ${incident.id}.',
+                      message:
+                          'Containment playbook triggered for ${incident.id}.',
                       type: ToastType.success,
                     );
                   },

@@ -8,17 +8,12 @@ import 'package:grc/features/cyber_security/sub_modules/grc_compliance/dialogs/e
 class ComplianceControlsTable extends StatelessWidget {
   final ComplianceFrameworkModel framework;
 
-  const ComplianceControlsTable({
-    super.key,
-    required this.framework,
-  });
+  const ComplianceControlsTable({super.key, required this.framework});
 
   void _openEvidence(BuildContext context, ControlItemModel control) {
     showDialog(
       context: context,
-      builder: (ctx) => EvidenceViewerDialog(
-        control: control,
-      ),
+      builder: (ctx) => EvidenceViewerDialog(control: control),
     );
   }
 
@@ -58,7 +53,9 @@ class ComplianceControlsTable extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final minWidth = constraints.maxWidth > 850 ? constraints.maxWidth : 850.0;
+              final minWidth = constraints.maxWidth > 850
+                  ? constraints.maxWidth
+                  : 850.0;
 
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -68,7 +65,10 @@ class ComplianceControlsTable extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.cardBackgroundDark,
                           borderRadius: BorderRadius.only(
@@ -76,7 +76,9 @@ class ComplianceControlsTable extends StatelessWidget {
                             topRight: Radius.circular(10.r),
                           ),
                           border: const Border(
-                            bottom: BorderSide(color: AppColors.cyberCardBorder),
+                            bottom: BorderSide(
+                              color: AppColors.cyberCardBorder,
+                            ),
                           ),
                         ),
                         child: Row(
@@ -110,7 +112,8 @@ class ComplianceControlsTable extends StatelessWidget {
                           children: [
                             _ControlTableRow(
                               control: control,
-                              onGetEvidence: () => _openEvidence(context, control),
+                              onGetEvidence: () =>
+                                  _openEvidence(context, control),
                             ),
                             const Divider(
                               color: AppColors.cyberCardBorder,
@@ -147,10 +150,7 @@ class _ControlTableRow extends StatefulWidget {
   final ControlItemModel control;
   final VoidCallback onGetEvidence;
 
-  const _ControlTableRow({
-    required this.control,
-    required this.onGetEvidence,
-  });
+  const _ControlTableRow({required this.control, required this.onGetEvidence});
 
   @override
   State<_ControlTableRow> createState() => _ControlTableRowState();

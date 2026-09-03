@@ -91,7 +91,8 @@ class _AiGovernanceScreenState extends State<AiGovernanceScreen> {
 
     return CyberScreenLayout(
       title: 'AI Governance',
-      subtitle: 'Model activity log, prompt audit, approval queue, and security controls',
+      subtitle:
+          'Model activity log, prompt audit, approval queue, and security controls',
       actions: [
         AppButton(
           label: 'Export Log',

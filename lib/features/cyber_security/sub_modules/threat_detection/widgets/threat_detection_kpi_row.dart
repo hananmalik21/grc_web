@@ -136,11 +136,7 @@ class _ThreatKpiCard extends StatelessWidget {
                 ),
               ),
               const Gap(4),
-              Icon(
-                icon,
-                size: 15.sp,
-                color: iconColor,
-              ),
+              Icon(icon, size: 15.sp, color: iconColor),
             ],
           ),
           const Gap(6),

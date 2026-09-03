@@ -42,7 +42,8 @@ class _CreateDetectionRuleDialogState extends State<CreateDetectionRuleDialog> {
     Navigator.of(context).pop();
     ToastService.show(
       context: context,
-      message: 'Detection rule "${_ruleNameController.text.trim()}" activated across real-time telemetry.',
+      message:
+          'Detection rule "${_ruleNameController.text.trim()}" activated across real-time telemetry.',
       type: ToastType.success,
     );
   }
@@ -134,7 +135,13 @@ class _CreateDetectionRuleDialogState extends State<CreateDetectionRuleDialog> {
                         const Gap(6),
                         _buildDropdown(
                           value: _source,
-                          items: const ['Cloud', 'Identity', 'Network', 'AppSec', 'Data'],
+                          items: const [
+                            'Cloud',
+                            'Identity',
+                            'Network',
+                            'AppSec',
+                            'Data',
+                          ],
                           onChanged: (v) => setState(() => _source = v),
                         ),
                       ],
@@ -167,7 +174,8 @@ class _CreateDetectionRuleDialogState extends State<CreateDetectionRuleDialog> {
                     fontFamily: 'monospace',
                   ),
                   decoration: InputDecoration(
-                    hintText: 'event.source == "aws.s3" AND event.name == "PutBucketPolicy" AND request.policy.Statement[*].Principal == "*"',
+                    hintText:
+                        'event.source == "aws.s3" AND event.name == "PutBucketPolicy" AND request.policy.Statement[*].Principal == "*"',
                     hintStyle: TextStyle(
                       color: AppColors.textPlaceholderDark,
                       fontSize: 10.5.sp,
@@ -228,10 +236,7 @@ class _CreateDetectionRuleDialogState extends State<CreateDetectionRuleDialog> {
       ),
       child: TextField(
         controller: controller,
-        style: TextStyle(
-          color: AppColors.textPrimaryDark,
-          fontSize: 12.sp,
-        ),
+        style: TextStyle(color: AppColors.textPrimaryDark, fontSize: 12.sp),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
@@ -239,7 +244,10 @@ class _CreateDetectionRuleDialogState extends State<CreateDetectionRuleDialog> {
             fontSize: 11.sp,
           ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 12.w,
+            vertical: 10.h,
+          ),
         ),
       ),
     );
@@ -276,10 +284,7 @@ class _CreateDetectionRuleDialogState extends State<CreateDetectionRuleDialog> {
             if (val != null) onChanged(val);
           },
           items: items.map((item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            );
+            return DropdownMenuItem<String>(value: item, child: Text(item));
           }).toList(),
         ),
       ),
