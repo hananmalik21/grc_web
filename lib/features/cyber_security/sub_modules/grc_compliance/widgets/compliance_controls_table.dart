@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
-import 'package:grc/core/models/cyber_security/grc_compliance/compliance_framework_model.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/dialogs/evidence_viewer_dialog.dart';
+import 'package:grc/features/cyber_security/sub_modules/grc_compliance/models/compliance_framework_model.dart';
 
 class ComplianceControlsTable extends StatelessWidget {
   final ComplianceFrameworkModel framework;
@@ -16,9 +15,7 @@ class ComplianceControlsTable extends StatelessWidget {
   void _openEvidence(BuildContext context, ControlItemModel control) {
     showDialog(
       context: context,
-      builder: (ctx) => EvidenceViewerDialog(
-        control: control,
-      ),
+      builder: (ctx) => EvidenceViewerDialog(control: control),
     );
   }
 
@@ -27,103 +24,97 @@ class ComplianceControlsTable extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Section Header Row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${framework.name.toUpperCase()} CONTROLS',
+              '${framework.name.toUpperCase()} — CONTROL SAMPLE',
               style: TextStyle(
-                color: AppColors.textPlaceholderDark,
+                color: const Color(0xFF00B4D8),
                 fontSize: 11.5.sp,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
+                letterSpacing: 0.6,
               ),
             ),
             Text(
-              '${framework.controls.length} controls mapped',
+              '${framework.totalControls} total controls',
               style: TextStyle(
-                color: AppColors.textPlaceholderDark,
+                color: const Color(0xFF64748B),
                 fontSize: 11.sp,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
         const Gap(14),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: AppColors.cyberCardBg,
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.cyberCardBorder),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final minWidth = constraints.maxWidth > 850 ? constraints.maxWidth : 850.0;
 
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: minWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundDark,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.r),
-                            topRight: Radius.circular(10.r),
-                          ),
-                          border: const Border(
-                            bottom: BorderSide(color: AppColors.cyberCardBorder),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 120.w,
-                              child: _buildHeaderLabel('CONTROL ID'),
-                            ),
-                            SizedBox(
-                              width: 250.w,
-                              child: _buildHeaderLabel('CONTROL NAME'),
-                            ),
-                            SizedBox(
-                              width: 100.w,
-                              child: _buildHeaderLabel('STATUS'),
-                            ),
-                            SizedBox(
-                              width: 130.w,
-                              child: _buildHeaderLabel('SCORE'),
-                            ),
-                            SizedBox(
-                              width: 110.w,
-                              child: const SizedBox.shrink(),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ...framework.controls.map((control) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _ControlTableRow(
-                              control: control,
-                              onGetEvidence: () => _openEvidence(context, control),
-                            ),
-                            const Divider(
-                              color: AppColors.cyberCardBorder,
-                              height: 1,
-                            ),
-                          ],
-                        );
-                      }),
-                    ],
+        // Table Container
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(color: const Color(0xFF1E293B)),
+          ),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B132B).withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.r),
+                    topRight: Radius.circular(10.r),
+                  ),
+                  border: const Border(
+                    bottom: BorderSide(color: Color(0xFF1E293B)),
                   ),
                 ),
-              );
-            },
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 120.w,
+                      child: _buildHeaderLabel('CONTROL ID'),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: _buildHeaderLabel('CONTROL NAME'),
+                    ),
+                    SizedBox(
+                      width: 100.w,
+                      child: _buildHeaderLabel('STATUS'),
+                    ),
+                    SizedBox(
+                      width: 130.w,
+                      child: _buildHeaderLabel('SCORE'),
+                    ),
+                    SizedBox(
+                      width: 110.w,
+                      child: const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Rows
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: framework.controls.length,
+                separatorBuilder: (context, index) => const Divider(
+                  color: Color(0xFF1E293B),
+                  height: 1,
+                ),
+                itemBuilder: (context, index) {
+                  final control = framework.controls[index];
+                  return _ControlTableRow(
+                    control: control,
+                    onGetEvidence: () => _openEvidence(context, control),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ],
@@ -134,7 +125,7 @@ class ComplianceControlsTable extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: AppColors.textPlaceholderDark,
+        color: const Color(0xFF64748B),
         fontSize: 10.5.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
@@ -168,11 +159,12 @@ class _ControlTableRowState extends State<_ControlTableRow> {
       onExit: (_) => setState(() => _isHovered = false),
       child: Container(
         color: _isHovered
-            ? AppColors.cardBackgroundGreyDark.withValues(alpha: 0.3)
+            ? const Color(0xFF1E293B).withValues(alpha: 0.45)
             : Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
         child: Row(
           children: [
+            // Control ID
             SizedBox(
               width: 120.w,
               child: GestureDetector(
@@ -180,19 +172,21 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                 child: Text(
                   control.controlId,
                   style: TextStyle(
-                    color: AppColors.dashCyberSecurity,
+                    color: const Color(0xFF00B4D8),
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
-            SizedBox(
-              width: 250.w,
+
+            // Control Name
+            Expanded(
+              flex: 4,
               child: Text(
                 control.controlName,
                 style: TextStyle(
-                  color: AppColors.textPrimaryDark,
+                  color: const Color(0xFFF1F5F9),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -200,14 +194,16 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+
+            // Status indicator with dot
             SizedBox(
               width: 100.w,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 6.r,
-                    height: 6.r,
+                    width: 6.w,
+                    height: 6.w,
                     decoration: BoxDecoration(
                       color: control.statusColor,
                       shape: BoxShape.circle,
@@ -225,6 +221,8 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                 ],
               ),
             ),
+
+            // Score with progress bar
             SizedBox(
               width: 130.w,
               child: Row(
@@ -234,7 +232,7 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                       borderRadius: BorderRadius.circular(2.r),
                       child: LinearProgressIndicator(
                         value: control.score / 100,
-                        backgroundColor: AppColors.cardBackgroundGreyDark,
+                        backgroundColor: const Color(0xFF1E293B),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           control.statusColor,
                         ),
@@ -246,7 +244,7 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                   Text(
                     '${control.score}%',
                     style: TextStyle(
-                      color: AppColors.textSecondaryDark,
+                      color: const Color(0xFFCBD5E1),
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
                     ),
@@ -254,6 +252,8 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                 ],
               ),
             ),
+
+            // Action Button: Get Evidence
             SizedBox(
               width: 110.w,
               child: Align(
@@ -267,16 +267,16 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                       vertical: 5.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: const Color(0xFF0F3E57).withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(6.r),
                       border: Border.all(
-                        color: AppColors.primaryLight.withValues(alpha: 0.5),
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.5),
                       ),
                     ),
                     child: Text(
                       'Get Evidence',
                       style: TextStyle(
-                        color: AppColors.cyberLow,
+                        color: const Color(0xFF38BDF8),
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                       ),

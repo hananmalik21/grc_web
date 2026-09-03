@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/models/cyber_security/network_security/firewall_rule_model.dart';
-import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/features/cyber_security/sub_modules/network_security/models/firewall_rule_model.dart';
 
 class AiRuleAnalysisDialog extends StatelessWidget {
   final FirewallRuleModel rule;
@@ -196,10 +195,14 @@ class AiRuleAnalysisDialog extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        ToastService.show(
-                          context: context,
-                          message: 'Remediation playbook queued for rule ${rule.ruleId}',
-                          type: ToastType.info,
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: const Color(0xFF131D31),
+                            content: Text(
+                              'Remediation playbook queued for rule ${rule.ruleId}',
+                              style: const TextStyle(color: Color(0xFF00B4D8)),
+                            ),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
