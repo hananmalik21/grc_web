@@ -306,6 +306,38 @@ class ApiEndpoints {
 
   // Security Auth endpoints
   static const String securityAuthLogin = '$api/security/auth/login';
+  static const String identityLogin = '$api/v1/identity/login';
+  static const String identityRegister = '$api/v1/identity/register';
+  static const String identityRefresh = '$api/v1/identity/refresh';
+  static const String identityLogout = '$api/v1/identity/logout';
+  static const String identityMe = '$api/v1/identity/me';
+
+  // Cybersecurity Dashboard & Threats endpoints
+  static const String dashboardOverview = '$api/v1/dashboards/overview';
+  static const String dashboardCloudCoverage =
+      '$api/v1/dashboards/cloud-coverage';
+  static const String dashboardPeopleHeatmap =
+      '$api/v1/dashboards/people-heatmap';
+  static const String threatsLive = '$api/v1/threats/live';
+  static String threatStatus(String id) => '$api/v1/threats/live/$id/status';
+  static const String iamPostureSummary = '$api/v1/iam-posture/summary';
+  static const String iamPosturePrincipals = '$api/v1/iam-posture/principals';
+  static const String peopleRiskRegister = '$api/v1/people/risk-register';
+  static const String aiConversations = '$api/v1/ai/conversations';
+  static String aiConversation(String id) => '$aiConversations/$id';
+  static String aiConversationMessages(String id) =>
+      '${aiConversation(id)}/messages';
+  static const String complianceFrameworks = '$api/v1/compliance/frameworks';
+  static String complianceFrameworkControls(String frameworkId) =>
+      '$complianceFrameworks/$frameworkId/controls';
+  static const String complianceAssessments = '$api/v1/compliance/assessments';
+  static String complianceAssessment(String id) => '$complianceAssessments/$id';
+  static String complianceAssessmentControls(String assessmentId) =>
+      '${complianceAssessment(assessmentId)}/controls';
+  static String complianceAssessmentControl(
+    String assessmentId,
+    String controlId,
+  ) => '${complianceAssessmentControls(assessmentId)}/$controlId';
 
   // Security Manager endpoints
   static const String securityJobRoles = '$api/security/job-roles';

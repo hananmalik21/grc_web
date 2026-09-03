@@ -3,7 +3,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 
 class IdentityKpiRow extends StatelessWidget {
-  const IdentityKpiRow({super.key});
+  const IdentityKpiRow({
+    super.key,
+    this.totalUsers = 0,
+    this.privilegedUsers = 0,
+    this.noMfa = 0,
+    this.highRiskUsers = 0,
+  });
+
+  final int totalUsers;
+  final int privilegedUsers;
+  final int noMfa;
+  final int highRiskUsers;
 
   @override
   Widget build(BuildContext context) {
@@ -13,30 +24,30 @@ class IdentityKpiRow extends StatelessWidget {
         final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 950;
 
         final cards = [
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'TOTAL USERS',
-            value: '847',
+            value: '$totalUsers',
             subtitle: 'across all systems',
             icon: Icons.people_outline_rounded,
             accentColor: Color(0xFF00BCD4),
           ),
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'PRIVILEGED USERS',
-            value: '24',
+            value: '$privilegedUsers',
             subtitle: 'Admin / elevated access',
             icon: Icons.vpn_key_outlined,
             accentColor: Color(0xFFF59E0B),
           ),
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'NO MFA',
-            value: '127',
+            value: '$noMfa',
             subtitle: 'require immediate action',
             icon: Icons.warning_amber_rounded,
             accentColor: Color(0xFFEF4444),
           ),
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'HIGH-RISK USERS',
-            value: '8',
+            value: '$highRiskUsers',
             subtitle: 'Risk score above 65',
             icon: Icons.info_outline_rounded,
             accentColor: Color(0xFFF97316),

@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/cloud_account_model.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/cloud_account_model.dart';
+import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
 
 class CloudPostureAccountsView extends StatelessWidget {
+  final List<CloudAccountModel>? accounts;
   final VoidCallback? onFilterFindings;
 
-  const CloudPostureAccountsView({super.key, this.onFilterFindings});
+  const CloudPostureAccountsView({
+    super.key,
+    this.accounts,
+    this.onFilterFindings,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final accounts = CloudAccountModel.getMockAccounts();
+    final effectiveAccounts =
+        accounts ?? CyberCloudPostureMockData.getMockAccounts();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -19,15 +26,16 @@ class CloudPostureAccountsView extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final isDesktop = constraints.maxWidth >= 1000;
-            final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 1000;
+            final isTablet =
+                constraints.maxWidth >= 600 && constraints.maxWidth < 1000;
 
             if (isDesktop) {
               return Row(
-                children: accounts
+                children: effectiveAccounts
                     .map(
                       (acc) => Expanded(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          padding: EdgeInsets.symmetric(horizontal: 5.w),
                           child: _buildAccountCard(acc),
                         ),
                       ),
@@ -36,22 +44,22 @@ class CloudPostureAccountsView extends StatelessWidget {
               );
             }
 
-            if (isTablet) {
+            if (isTablet && effectiveAccounts.length >= 4) {
               return Column(
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildAccountCard(accounts[0])),
+                      Expanded(child: _buildAccountCard(effectiveAccounts[0])),
                       const Gap(10),
-                      Expanded(child: _buildAccountCard(accounts[1])),
+                      Expanded(child: _buildAccountCard(effectiveAccounts[1])),
                     ],
                   ),
                   const Gap(10),
                   Row(
                     children: [
-                      Expanded(child: _buildAccountCard(accounts[2])),
+                      Expanded(child: _buildAccountCard(effectiveAccounts[2])),
                       const Gap(10),
-                      Expanded(child: _buildAccountCard(accounts[3])),
+                      Expanded(child: _buildAccountCard(effectiveAccounts[3])),
                     ],
                   ),
                 ],
@@ -59,10 +67,10 @@ class CloudPostureAccountsView extends StatelessWidget {
             }
 
             return Column(
-              children: accounts
+              children: effectiveAccounts
                   .map(
                     (acc) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10.0),
+                      padding: EdgeInsets.only(bottom: 10.h),
                       child: _buildAccountCard(acc),
                     ),
                   )
@@ -99,71 +107,167 @@ class CloudPostureAccountsView extends StatelessWidget {
               const Divider(color: Color(0xFF131E30), height: 1),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final tableMinWidth = constraints.maxWidth > 900 ? constraints.maxWidth : 900.0;
+                  final tableMinWidth = constraints.maxWidth > 900
+                      ? constraints.maxWidth
+                      : 900.0;
                   return SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(minWidth: tableMinWidth),
                       child: DataTable(
-                    headingRowHeight: 40.h,
-                    dataRowMinHeight: 48.h,
-                    dataRowMaxHeight: 52.h,
-                    horizontalMargin: 16.w,
-                    columnSpacing: 16.w,
-                    headingRowColor: WidgetStateProperty.all(
-                      const Color(0xFF080E1C),
-                    ),
-                    columns: const [
-                      DataColumn(label: _HeaderCell('ACCOUNT')),
-                      DataColumn(label: _HeaderCell('PLATFORM')),
-                      DataColumn(label: _HeaderCell('ACCOUNT ID')),
-                      DataColumn(label: _HeaderCell('REGION')),
-                      DataColumn(label: _HeaderCell('CRITICAL')),
-                      DataColumn(label: _HeaderCell('HIGH')),
-                      DataColumn(label: _HeaderCell('MEDIUM')),
-                      DataColumn(label: _HeaderCell('LOW')),
-                      DataColumn(label: _HeaderCell('RISK SCORE')),
-                      DataColumn(label: _HeaderCell('LAST SCAN')),
-                      DataColumn(label: _HeaderCell('RESOURCES')),
-                    ],
-                    rows: accounts.map((acc) {
-                      return DataRow(
-                        cells: [
-                          DataCell(Text(acc.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600))),
-                          DataCell(
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                              decoration: BoxDecoration(
-                                color: acc.platform.color.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4.r),
-                                border: Border.all(color: acc.platform.color.withValues(alpha: 0.4)),
-                              ),
-                              child: Text(
-                                acc.platform.label,
-                                style: TextStyle(color: acc.platform.color, fontSize: 10.sp, fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ),
-                          DataCell(Text(acc.accountId, style: const TextStyle(color: Color(0xFF94A3B8), fontFamily: 'monospace'))),
-                          DataCell(Text(acc.region, style: const TextStyle(color: Color(0xFF94A3B8)))),
-                          DataCell(Text('${acc.criticalCount}', style: TextStyle(color: acc.criticalCount > 0 ? const Color(0xFFEF4444) : const Color(0xFF64748B), fontWeight: FontWeight.bold))),
-                          DataCell(Text('${acc.highCount}', style: TextStyle(color: acc.highCount > 0 ? const Color(0xFFF97316) : const Color(0xFF64748B), fontWeight: FontWeight.bold))),
-                          DataCell(Text('${acc.mediumCount}', style: const TextStyle(color: Color(0xFFFBBF24), fontWeight: FontWeight.bold))),
-                          DataCell(Text('${acc.lowCount}', style: const TextStyle(color: Color(0xFF38BDF8), fontWeight: FontWeight.bold))),
-                          DataCell(Text('${acc.riskScore}', style: TextStyle(color: acc.riskScoreColor, fontWeight: FontWeight.w800))),
-                          DataCell(Text(acc.lastScan, style: const TextStyle(color: Color(0xFF64748B)))),
-                          DataCell(Text('${acc.totalResources}', style: const TextStyle(color: Color(0xFFCBD5E1)))),
+                        headingRowHeight: 40.h,
+                        dataRowMinHeight: 48.h,
+                        dataRowMaxHeight: 52.h,
+                        horizontalMargin: 16.w,
+                        columnSpacing: 16.w,
+                        headingRowColor: WidgetStateProperty.all(
+                          const Color(0xFF080E1C),
+                        ),
+                        columns: const [
+                          DataColumn(label: _HeaderCell('ACCOUNT')),
+                          DataColumn(label: _HeaderCell('PLATFORM')),
+                          DataColumn(label: _HeaderCell('ACCOUNT ID')),
+                          DataColumn(label: _HeaderCell('REGION')),
+                          DataColumn(label: _HeaderCell('CRITICAL')),
+                          DataColumn(label: _HeaderCell('HIGH')),
+                          DataColumn(label: _HeaderCell('MEDIUM')),
+                          DataColumn(label: _HeaderCell('LOW')),
+                          DataColumn(label: _HeaderCell('RISK SCORE')),
+                          DataColumn(label: _HeaderCell('LAST SCAN')),
+                          DataColumn(label: _HeaderCell('RESOURCES')),
                         ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              );
-            },
+                        rows: effectiveAccounts.map((acc) {
+                          return DataRow(
+                            cells: [
+                              DataCell(
+                                Text(
+                                  acc.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                    vertical: 2.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: acc.platform.color.withValues(
+                                      alpha: 0.15,
+                                    ),
+                                    borderRadius: BorderRadius.circular(4.r),
+                                    border: Border.all(
+                                      color: acc.platform.color.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    acc.platform.label,
+                                    style: TextStyle(
+                                      color: acc.platform.color,
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  acc.accountId,
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  acc.region,
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  '${acc.criticalCount}',
+                                  style: TextStyle(
+                                    color: acc.criticalCount > 0
+                                        ? const Color(0xFFEF4444)
+                                        : const Color(0xFF64748B),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  '${acc.highCount}',
+                                  style: TextStyle(
+                                    color: acc.highCount > 0
+                                        ? const Color(0xFFF97316)
+                                        : const Color(0xFF64748B),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  '${acc.mediumCount}',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFBBF24),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  '${acc.lowCount}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF38BDF8),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  '${acc.riskScore}',
+                                  style: TextStyle(
+                                    color: acc.riskScoreColor,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  acc.lastScan,
+                                  style: const TextStyle(
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  '${acc.totalResources}',
+                                  style: const TextStyle(
+                                    color: Color(0xFFCBD5E1),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
+        ),
       ],
     );
   }
@@ -188,7 +292,9 @@ class CloudPostureAccountsView extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: acc.platform.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4.r),
-                  border: Border.all(color: acc.platform.color.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: acc.platform.color.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Text(
                   acc.platform.label,
@@ -251,7 +357,10 @@ class CloudPostureAccountsView extends StatelessWidget {
             children: [
               Text(
                 'Risk score',
-                style: TextStyle(color: const Color(0xFF64748B), fontSize: 10.sp),
+                style: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontSize: 10.sp,
+                ),
               ),
               Text(
                 '${acc.riskScore}',
@@ -292,9 +401,17 @@ class CloudPostureAccountsView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildMiniCount('C', '${acc.criticalCount}', const Color(0xFFEF4444)),
+              _buildMiniCount(
+                'C',
+                '${acc.criticalCount}',
+                const Color(0xFFEF4444),
+              ),
               _buildMiniCount('H', '${acc.highCount}', const Color(0xFFF97316)),
-              _buildMiniCount('M', '${acc.mediumCount}', const Color(0xFFFBBF24)),
+              _buildMiniCount(
+                'M',
+                '${acc.mediumCount}',
+                const Color(0xFFFBBF24),
+              ),
               _buildMiniCount('L', '${acc.lowCount}', const Color(0xFF38BDF8)),
             ],
           ),
@@ -303,10 +420,7 @@ class CloudPostureAccountsView extends StatelessWidget {
           // Metadata footer
           Text(
             '${acc.totalResources} resources · ${acc.region} · Scan: Jun 28',
-            style: TextStyle(
-              color: const Color(0xFF64748B),
-              fontSize: 9.5.sp,
-            ),
+            style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.5.sp),
           ),
           const Gap(10),
 

@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/models/cyber_security/dashboard/cyber_dashboard_models.dart';
+import 'package:grc/core/permissions/permission_gate.dart';
+import 'package:grc/core/permissions/perm_keys.dart';
+import 'package:grc/core/permissions/permission_service.dart';
+import 'package:grc/features/auth/presentation/providers/auth_provider.dart';
+import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:grc/features/cyber_security/data/mock/cyber_dashboard_mock_data.dart';
+import 'package:grc/features/cyber_security/data/models/compliance_dto.dart';
+import 'package:grc/features/cyber_security/presentation/providers/compliance_provider.dart';
+import 'package:grc/features/cyber_security/presentation/providers/cyber_dashboard_provider.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_alert_volume_chart.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_compliance_bars.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_dashboard_header.dart';
@@ -13,8 +24,19 @@ class CyberSecurityDashboardView extends StatelessWidget {
   const CyberSecurityDashboardView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final padding = ResponsiveHelper.getPagePadding(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(authProvider);
+    if (!PermissionService.instance.can(CyberPermKeys.dashboardRead)) {
+      return PermissionGate(
+        permKey: CyberPermKeys.dashboardRead,
+        fallback: _buildPermissionDenied(context),
+        child: const SizedBox.shrink(),
+      );
+    }
+    final dashboardAsync = ref.watch(cyberDashboardProvider);
+    final frameworkCompliance =
+        ref.watch(frameworkComplianceProvider).valueOrNull ??
+        const <FrameworkComplianceItem>[];
 
     return SingleChildScrollView(
       padding: padding.copyWith(bottom: 30.h),
@@ -77,46 +99,69 @@ class CyberSecurityDashboardView extends StatelessWidget {
               );
             },
           ),
-        ],
+        ),
+        const Gap(8),
+        IconButton(
+          tooltip: 'Refresh Dashboard',
+          icon: const Icon(
+            Icons.refresh,
+            size: 18,
+            color: AppColors.dashCyberSecurity,
+          ),
+          onPressed: () {
+            ref.read(cyberDashboardProvider.notifier).refresh();
+            ToastService.show(
+              context: context,
+              message: 'Refreshing security metrics...',
+              type: ToastType.info,
+            );
+          },
+        ),
+        const Gap(4),
+        AppButton(
+          label: 'Export',
+          type: AppButtonType.secondary,
+          size: AppButtonSize.sm,
+          onPressed: () {
+            ToastService.show(
+              context: context,
+              message: 'Executive security posture report exported.',
+              type: ToastType.success,
+            );
+          },
+        ),
+      ],
+      child: dashboardAsync.when(
+        loading: () => _buildContent(context, null, frameworkCompliance),
+        error: (error, stack) =>
+            _buildContent(context, null, frameworkCompliance),
+        data: (data) => _buildContent(context, data, frameworkCompliance),
       ),
     );
   }
 
-  Widget _buildKpiGrid() {
-    final kpis = [
-      const CyberKpiCard(
-        title: 'OPEN FINDINGS',
-        value: '312',
-        subtitle: '4 critical need action',
-        subtitleColor: Color(0xFF64748B),
-        icon: Icons.warning_amber_rounded,
-        accentColor: Color(0xFFF59E0B),
-      ),
-      const CyberKpiCard(
-        title: 'ACTIVE INCIDENTS',
-        value: '4',
-        subtitle: '2 unassigned',
-        subtitleColor: Color(0xFF64748B),
-        icon: Icons.error_outline_rounded,
-        accentColor: Color(0xFFEF4444),
-      ),
-      const CyberKpiCard(
-        title: 'POSTURE SCORE',
-        value: '73%',
-        subtitle: '+2% from last month',
-        subtitleColor: Color(0xFF10B981),
-        icon: Icons.shield_outlined,
-        accentColor: Color(0xFF10B981),
-      ),
-      const CyberKpiCard(
-        title: 'PROTECTED ASSETS',
-        value: '2,847',
-        subtitle: 'Across 3 cloud platforms',
-        subtitleColor: Color(0xFF64748B),
-        icon: Icons.dns_outlined,
-        accentColor: Color(0xFF00BCD4),
-      ),
-    ];
+  Widget _buildPermissionDenied(BuildContext context) {
+    return CyberScreenLayout(
+      title: 'Security Dashboard',
+      subtitle: 'You do not have permission to view security telemetry.',
+      child: const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    dynamic data,
+    List<FrameworkComplianceItem> frameworkCompliance,
+  ) {
+    final kpis = data?.kpiCards ?? CyberDashboardMockData.kpiCards;
+    final severityValues =
+        data?.findingSeverityValues ??
+        CyberDashboardMockData.findingSeverityValues;
+    final severityColors =
+        data?.findingSeverityColors ??
+        CyberDashboardMockData.findingSeverityColors;
+    final incidents =
+        data?.recentIncidents ?? CyberDashboardMockData.recentIncidents;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -139,21 +184,94 @@ class CyberSecurityDashboardView extends StatelessWidget {
 
         return Column(
           children: [
-            Row(
-              children: [
-                Expanded(child: kpis[0]),
-                const Gap(8),
-                Expanded(child: kpis[1]),
-              ],
-            ),
-            const Gap(8),
-            Row(
-              children: [
-                Expanded(child: kpis[2]),
-                const Gap(8),
-                Expanded(child: kpis[3]),
-              ],
-            ),
+            _buildKpiGrid(width, kpis),
+            const Gap(18),
+            if (isDesktop) ...[
+              SizedBox(
+                height: 330,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Expanded(flex: 3, child: CyberAlertVolumeChart()),
+                    const Gap(18),
+                    Expanded(
+                      flex: 2,
+                      child: CyberFindingSeverityDonut(
+                        values: severityValues,
+                        colors: severityColors,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(18),
+              SizedBox(
+                height: 320,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: CyberComplianceBars(
+                        frameworks: frameworkCompliance,
+                      ),
+                    ),
+                    const Gap(18),
+                    Expanded(
+                      child: CyberRecentIncidentsList(incidents: incidents),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (isTablet) ...[
+              const SizedBox(height: 310, child: CyberAlertVolumeChart()),
+              const Gap(18),
+              SizedBox(
+                height: 300,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: CyberFindingSeverityDonut(
+                        values: severityValues,
+                        colors: severityColors,
+                      ),
+                    ),
+                    const Gap(18),
+                    Expanded(
+                      child: CyberComplianceBars(
+                        frameworks: frameworkCompliance,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(18),
+              SizedBox(
+                height: 300,
+                child: CyberRecentIncidentsList(incidents: incidents),
+              ),
+            ] else ...[
+              // Mobile layout
+              const SizedBox(height: 280, child: CyberAlertVolumeChart()),
+              const Gap(16),
+              SizedBox(
+                height: 280,
+                child: CyberFindingSeverityDonut(
+                  values: severityValues,
+                  colors: severityColors,
+                ),
+              ),
+              const Gap(16),
+              SizedBox(
+                height: 280,
+                child: CyberComplianceBars(frameworks: frameworkCompliance),
+              ),
+              const Gap(16),
+              SizedBox(
+                height: 300,
+                child: CyberRecentIncidentsList(incidents: incidents),
+              ),
+            ],
           ],
         );
       },

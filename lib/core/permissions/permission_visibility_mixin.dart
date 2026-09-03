@@ -53,10 +53,11 @@ mixin PermissionVisibilityMixin {
 
   bool canAccessSidebarItemId(String itemId) {
     if (PermissionService.instance.isBypassAllPermissions) return true;
-    if (itemId == NavItemIds.dashboard ||
-        itemId == NavItemIds.cyberSecurity ||
-        itemId.startsWith('cyber')) {
+    if (itemId == NavItemIds.dashboard) {
       return true;
+    }
+    if (itemId == NavItemIds.cyberSecurity || itemId.startsWith('cyber')) {
+      return _canAccessCyberSecurity();
     }
     return _canAccess(
       id: itemId,
@@ -69,13 +70,18 @@ mixin PermissionVisibilityMixin {
     if (PermissionService.instance.isBypassAllPermissions) return true;
     if (buttonId == NavItemIds.cyberSecurityButton ||
         buttonId == NavItemIds.cyberSecurity) {
-      return true;
+      return _canAccessCyberSecurity();
     }
     return _canAccess(
       id: buttonId,
       moduleMap: _dashboardModuleByButtonId,
       keyMap: _dashboardPermissionKeyByButtonId,
     );
+  }
+
+  bool _canAccessCyberSecurity() {
+    return PermissionService.instance.can(CyberPermKeys.dashboardRead) ||
+        PermissionService.instance.can(CyberPermKeys.aiCopilotQuery);
   }
 
   bool _canAccess({

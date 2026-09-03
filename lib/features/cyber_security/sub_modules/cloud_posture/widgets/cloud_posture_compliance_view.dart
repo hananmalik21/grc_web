@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/compliance_mapping_model.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
+import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/create_remediation_ticket_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/finding_detail_modal.dart';
-import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/compliance_mapping_model.dart';
-import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/finding_item_model.dart';
 
 class CloudPostureComplianceView extends StatelessWidget {
+  final List<ComplianceFindingMappingModel>? complianceFindings;
   final ValueChanged<FindingItemModel>? onOpenDetail;
 
-  const CloudPostureComplianceView({super.key, this.onOpenDetail});
+  const CloudPostureComplianceView({
+    super.key,
+    this.complianceFindings,
+    this.onOpenDetail,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final findings = ComplianceFindingMappingModel.getMockComplianceFindings();
+    final findings =
+        complianceFindings ??
+        CyberCloudPostureMockData.getMockComplianceFindings();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,165 +72,172 @@ class CloudPostureComplianceView extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final tableMinWidth = constraints.maxWidth > 950 ? constraints.maxWidth : 950.0;
+              final tableMinWidth = constraints.maxWidth > 950
+                  ? constraints.maxWidth
+                  : 950.0;
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minWidth: tableMinWidth),
                   child: DataTable(
-                headingRowHeight: 40.h,
-                dataRowMinHeight: 44.h,
-                dataRowMaxHeight: 48.h,
-                horizontalMargin: 16.w,
-                columnSpacing: 18.w,
-                headingRowColor: WidgetStateProperty.all(
-                  const Color(0xFF080E1C),
-                ),
-                columns: const [
-                  DataColumn(label: _ComplianceHeaderCell('FINDING ID')),
-                  DataColumn(label: _ComplianceHeaderCell('TYPE')),
-                  DataColumn(label: _ComplianceHeaderCell('SEVERITY')),
-                  DataColumn(label: _ComplianceHeaderCell('NIST CSF')),
-                  DataColumn(label: _ComplianceHeaderCell('CIS CONTROLS')),
-                  DataColumn(label: _ComplianceHeaderCell('ISO 27001')),
-                  DataColumn(label: _ComplianceHeaderCell('SOC 2')),
-                  DataColumn(label: _ComplianceHeaderCell('')),
-                ],
-                rows: findings.map((f) {
-                  return DataRow(
-                    cells: [
-                      // Finding ID (Cyan Link)
-                      DataCell(
-                        InkWell(
-                          onTap: () => _handleOpenDetail(context, f),
-                          child: Text(
-                            f.id,
-                            style: TextStyle(
-                              color: const Color(0xFF00B4D8),
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Type (Description)
-                      DataCell(
-                        Text(
-                          f.type,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-
-                      // Severity Badge
-                      DataCell(
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: f.severity.color.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(4.r),
-                            border: Border.all(
-                              color: f.severity.color.withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: Text(
-                            f.severity.label,
-                            style: TextStyle(
-                              color: f.severity.color,
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // NIST CSF (Cyan Code)
-                      DataCell(
-                        Text(
-                          f.nistCsf,
-                          style: TextStyle(
-                            color: const Color(0xFF00B4D8),
-                            fontSize: 11.5.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-
-                      // CIS Controls
-                      DataCell(
-                        Text(
-                          f.cisControls,
-                          style: TextStyle(
-                            color: const Color(0xFFCBD5E1),
-                            fontSize: 11.5.sp,
-                          ),
-                        ),
-                      ),
-
-                      // ISO 27001
-                      DataCell(
-                        Text(
-                          f.iso27001,
-                          style: TextStyle(
-                            color: const Color(0xFF94A3B8),
-                            fontSize: 11.5.sp,
-                          ),
-                        ),
-                      ),
-
-                      // SOC 2 (Greenish-Cyan)
-                      DataCell(
-                        Text(
-                          f.soc2,
-                          style: TextStyle(
-                            color: const Color(0xFF10B981),
-                            fontSize: 11.5.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-
-                      // Detail Action Link
-                      DataCell(
-                        InkWell(
-                          onTap: () => _handleOpenDetail(context, f),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '→ Detail',
+                    headingRowHeight: 40.h,
+                    dataRowMinHeight: 44.h,
+                    dataRowMaxHeight: 48.h,
+                    horizontalMargin: 16.w,
+                    columnSpacing: 18.w,
+                    headingRowColor: WidgetStateProperty.all(
+                      const Color(0xFF080E1C),
+                    ),
+                    columns: const [
+                      DataColumn(label: _ComplianceHeaderCell('FINDING ID')),
+                      DataColumn(label: _ComplianceHeaderCell('TYPE')),
+                      DataColumn(label: _ComplianceHeaderCell('SEVERITY')),
+                      DataColumn(label: _ComplianceHeaderCell('NIST CSF')),
+                      DataColumn(label: _ComplianceHeaderCell('CIS CONTROLS')),
+                      DataColumn(label: _ComplianceHeaderCell('ISO 27001')),
+                      DataColumn(label: _ComplianceHeaderCell('SOC 2')),
+                      DataColumn(label: _ComplianceHeaderCell('')),
+                    ],
+                    rows: findings.map((f) {
+                      return DataRow(
+                        cells: [
+                          // Finding ID (Cyan Link)
+                          DataCell(
+                            InkWell(
+                              onTap: () => _handleOpenDetail(context, f),
+                              child: Text(
+                                f.id,
                                 style: TextStyle(
                                   color: const Color(0xFF00B4D8),
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ),
-          );
-        },
-      ),
-    ),
+
+                          // Type (Description)
+                          DataCell(
+                            Text(
+                              f.type,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+
+                          // Severity Badge
+                          DataCell(
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: f.severity.color.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4.r),
+                                border: Border.all(
+                                  color: f.severity.color.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                f.severity.label,
+                                style: TextStyle(
+                                  color: f.severity.color,
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // NIST CSF (Cyan Code)
+                          DataCell(
+                            Text(
+                              f.nistCsf,
+                              style: TextStyle(
+                                color: const Color(0xFF00B4D8),
+                                fontSize: 11.5.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+
+                          // CIS Controls
+                          DataCell(
+                            Text(
+                              f.cisControls,
+                              style: TextStyle(
+                                color: const Color(0xFFCBD5E1),
+                                fontSize: 11.5.sp,
+                              ),
+                            ),
+                          ),
+
+                          // ISO 27001
+                          DataCell(
+                            Text(
+                              f.iso27001,
+                              style: TextStyle(
+                                color: const Color(0xFF94A3B8),
+                                fontSize: 11.5.sp,
+                              ),
+                            ),
+                          ),
+
+                          // SOC 2 (Greenish-Cyan)
+                          DataCell(
+                            Text(
+                              f.soc2,
+                              style: TextStyle(
+                                color: const Color(0xFF10B981),
+                                fontSize: 11.5.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+
+                          // Detail Action Link
+                          DataCell(
+                            InkWell(
+                              onTap: () => _handleOpenDetail(context, f),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '→ Detail',
+                                    style: TextStyle(
+                                      color: const Color(0xFF00B4D8),
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
 
-  void _handleOpenDetail(BuildContext context, ComplianceFindingMappingModel f) {
-    final mockFindings = FindingItemModel.getMockFindings();
+  void _handleOpenDetail(
+    BuildContext context,
+    ComplianceFindingMappingModel f,
+  ) {
+    final mockFindings = CyberCloudPostureMockData.getMockFindings();
     final matching = mockFindings.firstWhere(
       (mf) => mf.id == f.id,
       orElse: () => FindingItemModel(
@@ -235,10 +250,10 @@ class CloudPostureComplianceView extends StatelessWidget {
         riskScore: f.severity == FindingSeverity.critical
             ? 95
             : f.severity == FindingSeverity.high
-                ? 85
-                : f.severity == FindingSeverity.medium
-                    ? 65
-                    : 45,
+            ? 85
+            : f.severity == FindingSeverity.medium
+            ? 65
+            : 45,
         age: '6d',
         status: FindingStatus.open,
         resourceUri: 'arn:aws:security:${f.id.toLowerCase()}',

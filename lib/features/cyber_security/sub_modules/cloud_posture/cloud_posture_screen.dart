@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/cloud_account_model.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/compliance_mapping_model.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/scan_history_model.dart';
+import 'package:grc/core/permissions/permission_gate.dart';
+import 'package:grc/core/permissions/perm_keys.dart';
+import 'package:grc/core/permissions/permission_service.dart';
+import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
+import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
+import 'package:grc/features/cyber_security/data/models/cloud_posture_dto.dart';
+import 'package:grc/features/cyber_security/presentation/providers/cloud_posture_provider.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/create_remediation_ticket_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/finding_detail_modal.dart';
-import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/finding_item_model.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_accounts_view.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_compliance_view.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_filters.dart';
@@ -13,14 +24,14 @@ import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cl
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_scan_history_view.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_tab_bar.dart';
 
-class CloudPostureScreen extends StatefulWidget {
+class CloudPostureScreen extends ConsumerStatefulWidget {
   const CloudPostureScreen({super.key});
 
   @override
-  State<CloudPostureScreen> createState() => _CloudPostureScreenState();
+  ConsumerState<CloudPostureScreen> createState() => _CloudPostureScreenState();
 }
 
-class _CloudPostureScreenState extends State<CloudPostureScreen> {
+class _CloudPostureScreenState extends ConsumerState<CloudPostureScreen> {
   int _activeSubTabIndex = 0;
   String _searchQuery = '';
   String _selectedSeverity = 'ALL';
@@ -29,16 +40,21 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
   String _selectedStatus = 'All statuses';
 
   late List<FindingItemModel> _allFindings;
+  late List<ComplianceFindingMappingModel> _complianceFindings;
+  late List<ScanHistoryModel> _scanHistory;
 
   @override
   void initState() {
     super.initState();
-    _allFindings = FindingItemModel.getMockFindings();
+    _allFindings = CyberCloudPostureMockData.getMockFindings();
+    _complianceFindings = CyberCloudPostureMockData.getMockComplianceFindings();
+    _scanHistory = CyberCloudPostureMockData.getMockScanHistory();
   }
 
   List<FindingItemModel> get _filteredFindings {
     return _allFindings.where((f) {
-      if (_selectedSeverity != 'ALL' && f.severity.name.toUpperCase() != _selectedSeverity) {
+      if (_selectedSeverity != 'ALL' &&
+          f.severity.name.toUpperCase() != _selectedSeverity) {
         return false;
       }
       if (_selectedAccount != 'All accounts' && f.account != _selectedAccount) {
@@ -47,12 +63,14 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
       if (_selectedService != 'All services' && f.service != _selectedService) {
         return false;
       }
-      if (_selectedStatus != 'All statuses' && f.status.label != _selectedStatus) {
+      if (_selectedStatus != 'All statuses' &&
+          f.status.label != _selectedStatus) {
         return false;
       }
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
-        final match = f.id.toLowerCase().contains(q) ||
+        final match =
+            f.id.toLowerCase().contains(q) ||
             f.resource.toLowerCase().contains(q) ||
             f.finding.toLowerCase().contains(q);
         if (!match) return false;
@@ -61,188 +79,146 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
     }).toList();
   }
 
+  void _showFindingDetail(FindingItemModel finding) {
+    FindingDetailModal.show(
+      context,
+      finding: finding,
+      onCreateTicket: () {
+        CreateRemediationTicketDialog.show(context, finding: finding);
+      },
+    );
+  }
+
+  void _triggerScan() {
+    ToastService.show(
+      context: context,
+      message: 'Cloud posture scan initiated across AWS, GCP & Azure...',
+      type: ToastType.info,
+    );
+  }
+
+  void _exportReport() {
+    ToastService.show(
+      context: context,
+      message: 'Cloud security posture report exported successfully.',
+      type: ToastType.success,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isMobile = context.isMobile;
-    final padding = ResponsiveHelper.getPagePadding(context);
-
-    final titleSection = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Cloud Security Posture',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: isMobile ? 18.sp : 22.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const Gap(3),
-        Text(
-          'AI-powered misconfiguration detection across AWS, GCP, and Azure',
-          style: TextStyle(
-            color: const Color(0xFF94A3B8),
-            fontSize: isMobile ? 11.sp : 12.sp,
-          ),
-        ),
-      ],
-    );
-
-    final actionsSection = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildHeaderButton(
-          icon: Icons.sync_rounded,
+    if (!PermissionService.instance.can(CyberPermKeys.cloudPostureRead)) {
+      return PermissionGate(
+        permKey: CyberPermKeys.cloudPostureRead,
+        fallback: _buildPermissionDenied(),
+        child: const SizedBox.shrink(),
+      );
+    }
+    final coverage = ref.watch(cloudCoverageProvider);
+    final accounts =
+        coverage.valueOrNull?.connectors.map(_toAccount).toList() ??
+        const <CloudAccountModel>[];
+    return CyberScreenLayout(
+      title: 'Cloud Posture',
+      subtitle:
+          'Multi-cloud inventory, misconfigurations, and compliance findings',
+      actions: [
+        AppButton(
           label: 'Scan Now',
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                backgroundColor: Color(0xFF131D31),
-                content: Text(
-                  'Cloud posture scan initiated across AWS, GCP & Azure...',
-                  style: TextStyle(color: Color(0xFF00B4D8)),
-                ),
-              ),
-            );
-          },
+          type: AppButtonType.primary,
+          size: AppButtonSize.sm,
+          onPressed: _triggerScan,
         ),
-        const Gap(10),
-        _buildHeaderButton(
-          icon: Icons.download_rounded,
+        const Gap(8),
+        AppButton(
           label: 'Export',
-          onTap: () {},
+          type: AppButtonType.secondary,
+          size: AppButtonSize.sm,
+          onPressed: _exportReport,
         ),
       ],
-    );
-
-    return SingleChildScrollView(
-      padding: padding.copyWith(bottom: 24.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
-          if (isMobile) ...[
-            titleSection,
-            const Gap(12),
-            actionsSection,
-          ] else ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: titleSection),
-                actionsSection,
-              ],
-            ),
-          ],
-
-          const Gap(20),
-
-          // 4 Top Posture KPI Cards
           const CloudPostureKpiRow(),
-
-          const Gap(24),
-
-          // 4 Sub-Tabs Navigation Bar
+          const Gap(20),
           CloudPostureTabBar(
             activeIndex: _activeSubTabIndex,
             onTabChanged: (index) {
-              setState(() => _activeSubTabIndex = index);
+              setState(() {
+                _activeSubTabIndex = index;
+              });
             },
           ),
-
           const Gap(16),
-
-          // Dynamic Tab Content
           if (_activeSubTabIndex == 0) ...[
-            // Filters Bar
             CloudPostureFilters(
               searchQuery: _searchQuery,
-              onSearchChanged: (q) => setState(() => _searchQuery = q),
+              onSearchChanged: (v) => setState(() => _searchQuery = v),
               selectedSeverity: _selectedSeverity,
-              onSeverityChanged: (sev) => setState(() => _selectedSeverity = sev),
+              onSeverityChanged: (v) => setState(() => _selectedSeverity = v),
               selectedAccount: _selectedAccount,
-              onAccountChanged: (acc) => setState(() => _selectedAccount = acc),
+              onAccountChanged: (v) => setState(() => _selectedAccount = v),
               selectedService: _selectedService,
-              onServiceChanged: (srv) => setState(() => _selectedService = srv),
+              onServiceChanged: (v) => setState(() => _selectedService = v),
               selectedStatus: _selectedStatus,
-              onStatusChanged: (st) => setState(() => _selectedStatus = st),
+              onStatusChanged: (v) => setState(() => _selectedStatus = v),
             ),
             const Gap(14),
-
-            // Findings Table
             CloudPostureFindingsTable(
               findings: _filteredFindings,
-              onOpenDetail: (finding) {
-                FindingDetailModal.show(
-                  context,
-                  finding: finding,
-                  onCreateTicket: () {
-                    CreateRemediationTicketDialog.show(context, finding: finding);
-                  },
-                );
-              },
+              onOpenDetail: _showFindingDetail,
               onCreateTicket: (finding) {
                 CreateRemediationTicketDialog.show(context, finding: finding);
               },
             ),
           ] else if (_activeSubTabIndex == 1) ...[
-            CloudPostureAccountsView(
-              onFilterFindings: () {
-                setState(() => _activeSubTabIndex = 0);
-              },
-            ),
+            CloudPostureAccountsView(accounts: accounts),
           ] else if (_activeSubTabIndex == 2) ...[
-            CloudPostureComplianceView(
-              onOpenDetail: (finding) {
-                FindingDetailModal.show(
-                  context,
-                  finding: finding,
-                  onCreateTicket: () {
-                    CreateRemediationTicketDialog.show(context, finding: finding);
-                  },
-                );
-              },
-            ),
+            CloudPostureComplianceView(complianceFindings: _complianceFindings),
           ] else if (_activeSubTabIndex == 3) ...[
-            const CloudPostureScanHistoryView(),
+            CloudPostureScanHistoryView(scanHistory: _scanHistory),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildHeaderButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFF131D31),
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: const Color(0xFF1E293B)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14.sp, color: const Color(0xFFCBD5E1)),
-            const Gap(6),
-            Text(
-              label,
-              style: TextStyle(
-                color: const Color(0xFFCBD5E1),
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
+  Widget _buildPermissionDenied() {
+    return CyberScreenLayout(
+      title: 'Cloud Posture',
+      subtitle: 'You do not have permission to view cloud coverage.',
+      child: const SizedBox.shrink(),
+    );
+  }
+
+  CloudAccountModel _toAccount(CloudCoverageConnectorDto connector) {
+    final platform = switch (connector.provider.toUpperCase()) {
+      'AWS' => CloudPlatform.aws,
+      'GCP' => CloudPlatform.gcp,
+      'AZURE' => CloudPlatform.azure,
+      'OCI' => CloudPlatform.oci,
+      'OKTA' => CloudPlatform.okta,
+      _ => CloudPlatform.aws,
+    };
+    final isConnected = connector.status.toUpperCase() == 'CONNECTED';
+    return CloudAccountModel(
+      name: connector.name,
+      platform: platform,
+      accountId: connector.id,
+      region: 'Not available',
+      healthStatus: connector.status,
+      healthColor: isConnected
+          ? const Color(0xFF10B981)
+          : const Color(0xFFF59E0B),
+      riskScore: 0,
+      riskScoreColor: const Color(0xFF64748B),
+      criticalCount: 0,
+      highCount: 0,
+      mediumCount: 0,
+      lowCount: 0,
+      totalResources: connector.logCountTotal,
+      lastScan: connector.lastSyncAt?.toLocal().toString() ?? 'Never',
     );
   }
 }

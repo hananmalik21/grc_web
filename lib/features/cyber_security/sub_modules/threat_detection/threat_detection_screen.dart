@@ -1,186 +1,133 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/services/responsive_service.dart';
-import 'package:grc/features/cyber_security/sub_modules/threat_detection/dialogs/create_detection_rule_dialog.dart';
-import 'package:grc/features/cyber_security/sub_modules/threat_detection/models/threat_alert_model.dart';
+import 'package:grc/core/models/cyber_security/threat_detection/threat_alert_model.dart';
+import 'package:grc/core/permissions/permission_gate.dart';
+import 'package:grc/core/permissions/perm_keys.dart';
+import 'package:grc/core/permissions/permission_service.dart';
+import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:grc/features/cyber_security/data/models/threat_dto.dart';
+import 'package:grc/features/cyber_security/presentation/providers/threat_provider.dart';
+import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/widgets/threat_alerts_table.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/widgets/threat_detection_kpi_row.dart';
 
-class ThreatDetectionScreen extends StatefulWidget {
+class ThreatDetectionScreen extends ConsumerWidget {
   const ThreatDetectionScreen({super.key});
 
   @override
-  State<ThreatDetectionScreen> createState() => _ThreatDetectionScreenState();
-}
-
-class _ThreatDetectionScreenState extends State<ThreatDetectionScreen> {
-  final List<ThreatAlertModel> _alerts = ThreatAlertModel.getMockThreatAlerts();
-
-  void _openCreateRuleDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => const CreateDetectionRuleDialog(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!PermissionService.instance.can(CyberPermKeys.threatRead)) {
+      return PermissionGate(
+        permKey: CyberPermKeys.threatRead,
+        fallback: _permissionDenied(),
+        child: const SizedBox.shrink(),
+      );
+    }
+    final threats = ref.watch(liveThreatsProvider);
+    return threats.when(
+      loading: () => _buildLayout(context, ref, const []),
+      error: (error, stack) => _buildLayout(context, ref, const []),
+      data: (items) => _buildLayout(context, ref, items.map(_toAlert).toList()),
     );
   }
 
-  void _openFilterDialog() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Color(0xFF131D31),
-        content: Text(
-          'Filtering applied: Showing high & critical severity telemetry across all layers.',
-          style: TextStyle(color: Color(0xFF00B4D8)),
-        ),
-      ),
+  Widget _permissionDenied() => CyberScreenLayout(
+    title: 'Threat Detection',
+    subtitle: 'You do not have permission to view threat telemetry.',
+    child: const SizedBox.shrink(),
+  );
+
+  ThreatAlertModel _toAlert(ThreatDto threat) {
+    final status = switch (threat.status.toUpperCase()) {
+      'INVESTIGATING' => ThreatStatus.investigating,
+      'MITIGATED' || 'FALSE_POSITIVE' => ThreatStatus.closed,
+      _ => ThreatStatus.new_,
+    };
+    final severity = switch (threat.severity.toUpperCase()) {
+      'CRITICAL' => ThreatSeverity.critical,
+      'HIGH' => ThreatSeverity.high,
+      'MEDIUM' => ThreatSeverity.medium,
+      _ => ThreatSeverity.low,
+    };
+    final source = switch (threat.threatType.toUpperCase()) {
+      'ANOMALOUS_ACCESS' => ThreatSource.identity,
+      'PRIVILEGE_ESCALATION' => ThreatSource.iam,
+      'EXFILTRATION' => ThreatSource.data,
+      'BOLA_ATTACK' => ThreatSource.appSec,
+      _ => ThreatSource.cloud,
+    };
+    return ThreatAlertModel(
+      alertId: threat.id,
+      title: threat.title,
+      severity: severity,
+      source: source,
+      timeAgo: threat.occurredAt?.toLocal().toString() ?? 'Recently',
+      status: status,
+      mitreTechnique: threat.mitreTechniqueId ?? 'Not available',
+      description:
+          threat.aiAnalysisSummary ??
+          'Threat correlated from security telemetry.',
+      affectedResource:
+          threat.associatedActor ?? threat.associatedIp ?? 'Not available',
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isMobile = context.isMobile;
-    final padding = ResponsiveHelper.getPagePadding(context);
+  Widget _buildLayout(
+    BuildContext context,
+    WidgetRef ref,
+    List<ThreatAlertModel> alerts,
+  ) {
+    final newCount = alerts.where((a) => a.status == ThreatStatus.new_).length;
+    final investigatingCount = alerts
+        .where((a) => a.status == ThreatStatus.investigating)
+        .length;
+    final criticalCount = alerts
+        .where((a) => a.severity == ThreatSeverity.critical)
+        .length;
 
-    final newCount = _alerts.where((a) => a.status == ThreatStatus.new_).length;
-    final investigatingCount =
-        _alerts.where((a) => a.status == ThreatStatus.investigating).length;
-    final criticalCount =
-        _alerts.where((a) => a.severity == ThreatSeverity.critical).length;
-
-    final titleSection = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Threat Detection',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: isMobile ? 18.sp : 22.sp,
-            fontWeight: FontWeight.w700,
+    return CyberScreenLayout(
+      title: 'Threat Detection',
+      subtitle:
+          'Real-time telemetry, behavioral anomalies, and SIEM correlation',
+      actions: [
+        AppButton(
+          label: 'Filter',
+          type: AppButtonType.secondary,
+          size: AppButtonSize.sm,
+          onPressed: () => ToastService.show(
+            context: context,
+            message: 'Use the table filters to refine live threats.',
+            type: ToastType.info,
           ),
         ),
-        const Gap(4),
-        Text(
-          'Real-time alerts from AI detection rules across all security layers',
-          style: TextStyle(
-            color: const Color(0xFF94A3B8),
-            fontSize: isMobile ? 11.sp : 12.sp,
-          ),
-        ),
-      ],
-    );
-
-    final actionsSection = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // + New Rule Button
-        InkWell(
-          onTap: _openCreateRuleDialog,
-          borderRadius: BorderRadius.circular(6.r),
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 14.w,
-              vertical: 8.h,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFF131D31),
-              borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(color: const Color(0xFF1E293B)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.add_rounded,
-                  size: 14.sp,
-                  color: const Color(0xFFCBD5E1),
-                ),
-                const Gap(6),
-                Text(
-                  'New Rule',
-                  style: TextStyle(
-                    color: const Color(0xFFCBD5E1),
-                    fontSize: 11.5.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const Gap(10),
-
-        // Filter Button
-        InkWell(
-          onTap: _openFilterDialog,
-          borderRadius: BorderRadius.circular(6.r),
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 14.w,
-              vertical: 8.h,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFF131D31),
-              borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(color: const Color(0xFF1E293B)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.filter_alt_outlined,
-                  size: 14.sp,
-                  color: const Color(0xFFCBD5E1),
-                ),
-                const Gap(6),
-                Text(
-                  'Filter',
-                  style: TextStyle(
-                    color: const Color(0xFFCBD5E1),
-                    fontSize: 11.5.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        const Gap(8),
+        AppButton(
+          label: 'Create Rule',
+          type: AppButtonType.primary,
+          size: AppButtonSize.sm,
+          onPressed: null,
         ),
       ],
-    );
-
-    return SingleChildScrollView(
-      padding: padding.copyWith(bottom: 24.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
-          if (isMobile) ...[
-            titleSection,
-            const Gap(12),
-            actionsSection,
-          ] else ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: titleSection),
-                actionsSection,
-              ],
-            ),
-          ],
-          const Gap(20),
-
-          // 4 KPI Cards
           ThreatDetectionKpiRow(
             newAlertsCount: newCount,
             investigatingCount: investigatingCount,
             criticalTodayCount: criticalCount,
-            detectionRulesCount: 247,
+            detectionRulesCount: 0,
           ),
           const Gap(24),
-
-          // Alerts Table with Tabs
           ThreatAlertsTable(
-            alerts: _alerts,
+            alerts: alerts,
+            onInvestigate: (alert) async {
+              await ref
+                  .read(threatRepositoryProvider)
+                  .updateStatus(alert.alertId, 'INVESTIGATING');
+              ref.invalidate(liveThreatsProvider);
+            },
           ),
         ],
       ),
