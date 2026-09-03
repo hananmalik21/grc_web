@@ -108,8 +108,9 @@ class _CreateRemediationTicketDialogState
                                 vertical: 1.5.h,
                               ),
                               decoration: BoxDecoration(
-                                color: widget.finding.severity.color
-                                    .withValues(alpha: 0.15),
+                                color: widget.finding.severity.color.withValues(
+                                  alpha: 0.15,
+                                ),
                                 borderRadius: BorderRadius.circular(3.r),
                                 border: Border.all(
                                   color: widget.finding.severity.color
@@ -130,8 +131,10 @@ class _CreateRemediationTicketDialogState
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded,
-                          color: Color(0xFF94A3B8)),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Color(0xFF94A3B8),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -146,7 +149,9 @@ class _CreateRemediationTicketDialogState
                     final isSel = _ticketingSystem == sys;
                     return Expanded(
                       child: Padding(
-                        padding: EdgeInsets.only(right: sys != 'Azure DevOps' ? 8.w : 0),
+                        padding: EdgeInsets.only(
+                          right: sys != 'Azure DevOps' ? 8.w : 0,
+                        ),
                         child: InkWell(
                           onTap: () => setState(() => _ticketingSystem = sys),
                           borderRadius: BorderRadius.circular(6.r),
@@ -155,7 +160,9 @@ class _CreateRemediationTicketDialogState
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: isSel
-                                  ? const Color(0xFF00B4D8).withValues(alpha: 0.15)
+                                  ? const Color(
+                                      0xFF00B4D8,
+                                    ).withValues(alpha: 0.15)
                                   : const Color(0xFF131D31),
                               borderRadius: BorderRadius.circular(6.r),
                               border: Border.all(
@@ -167,9 +174,13 @@ class _CreateRemediationTicketDialogState
                             child: Text(
                               sys,
                               style: TextStyle(
-                                color: isSel ? const Color(0xFF00B4D8) : const Color(0xFF94A3B8),
+                                color: isSel
+                                    ? const Color(0xFF00B4D8)
+                                    : const Color(0xFF94A3B8),
                                 fontSize: 12.sp,
-                                fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
+                                fontWeight: isSel
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                               ),
                             ),
                           ),
@@ -217,7 +228,9 @@ class _CreateRemediationTicketDialogState
                               final isSel = _priority == p;
                               return Expanded(
                                 child: Padding(
-                                  padding: EdgeInsets.only(right: p != 'P4' ? 6.w : 0),
+                                  padding: EdgeInsets.only(
+                                    right: p != 'P4' ? 6.w : 0,
+                                  ),
                                   child: InkWell(
                                     onTap: () => setState(() => _priority = p),
                                     borderRadius: BorderRadius.circular(4.r),
@@ -226,9 +239,13 @@ class _CreateRemediationTicketDialogState
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: isSel
-                                            ? const Color(0xFFEF4444).withValues(alpha: 0.25)
+                                            ? const Color(
+                                                0xFFEF4444,
+                                              ).withValues(alpha: 0.25)
                                             : const Color(0xFF131D31),
-                                        borderRadius: BorderRadius.circular(4.r),
+                                        borderRadius: BorderRadius.circular(
+                                          4.r,
+                                        ),
                                         border: Border.all(
                                           color: isSel
                                               ? const Color(0xFFEF4444)
@@ -238,7 +255,9 @@ class _CreateRemediationTicketDialogState
                                       child: Text(
                                         p,
                                         style: TextStyle(
-                                          color: isSel ? const Color(0xFFEF4444) : const Color(0xFF94A3B8),
+                                          color: isSel
+                                              ? const Color(0xFFEF4444)
+                                              : const Color(0xFF94A3B8),
                                           fontSize: 11.sp,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -267,7 +286,9 @@ class _CreateRemediationTicketDialogState
                             decoration: BoxDecoration(
                               color: const Color(0xFF131D31),
                               borderRadius: BorderRadius.circular(6.r),
-                              border: Border.all(color: const Color(0xFF1E293B)),
+                              border: Border.all(
+                                color: const Color(0xFF1E293B),
+                              ),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -388,7 +409,10 @@ class _CreateRemediationTicketDialogState
                 _buildFieldLabel('ADDITIONAL NOTES'),
                 const Gap(6),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 6.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF131D31),
                     borderRadius: BorderRadius.circular(6.r),
@@ -432,7 +456,8 @@ class _CreateRemediationTicketDialogState
                         Navigator.of(context).pop();
                         ToastService.show(
                           context: context,
-                          message: 'Ticket successfully created in $_ticketingSystem!',
+                          message:
+                              'Ticket successfully created in $_ticketingSystem!',
                           type: ToastType.success,
                         );
                       },

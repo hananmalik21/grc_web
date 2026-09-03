@@ -20,7 +20,8 @@ class CloudPostureScanHistoryView extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final isDesktop = constraints.maxWidth >= 950;
-            final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 950;
+            final isTablet =
+                constraints.maxWidth >= 600 && constraints.maxWidth < 950;
 
             final cards = [
               const _ScanKpiCard(
@@ -115,7 +116,9 @@ class CloudPostureScanHistoryView extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final tableMinWidth = constraints.maxWidth > 900 ? constraints.maxWidth : 900.0;
+              final tableMinWidth = constraints.maxWidth > 900
+                  ? constraints.maxWidth
+                  : 900.0;
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: ConstrainedBox(
@@ -166,7 +169,9 @@ class CloudPostureScanHistoryView extends StatelessWidget {
                           ),
                           DataCell(
                             Text(
-                              scan.newFindings > 0 ? '+${scan.newFindings}' : '0',
+                              scan.newFindings > 0
+                                  ? '+${scan.newFindings}'
+                                  : '0',
                               style: TextStyle(
                                 color: scan.newFindings > 0
                                     ? const Color(0xFFF97316)
@@ -228,12 +233,14 @@ class CloudPostureScanHistoryView extends StatelessWidget {
                                       vertical: 2.h,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF00B4D8)
-                                          .withValues(alpha: 0.15),
+                                      color: const Color(
+                                        0xFF00B4D8,
+                                      ).withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(4.r),
                                       border: Border.all(
-                                        color: const Color(0xFF00B4D8)
-                                            .withValues(alpha: 0.4),
+                                        color: const Color(
+                                          0xFF00B4D8,
+                                        ).withValues(alpha: 0.4),
                                       ),
                                     ),
                                     child: Text(

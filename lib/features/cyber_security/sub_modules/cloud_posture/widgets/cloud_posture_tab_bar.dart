@@ -30,11 +30,7 @@ class CloudPostureTabBar extends StatelessWidget {
     );
   }
 
-  Widget _buildTab({
-    required int index,
-    required String label,
-    String? badge,
-  }) {
+  Widget _buildTab({required int index, required String label, String? badge}) {
     final isSelected = activeIndex == index;
 
     return InkWell(

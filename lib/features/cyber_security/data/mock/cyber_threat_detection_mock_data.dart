@@ -12,7 +12,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '8 min ago',
       status: ThreatStatus.new_,
       mitreTechnique: 'T1078 (Valid Accounts)',
-      description: 'User logged in from Madrid and Frankfurt within 12 minutes.',
+      description:
+          'User logged in from Madrid and Frankfurt within 12 minutes.',
       affectedResource: 'j.martinez@corp.com',
     ),
     ThreatAlertModel(
@@ -23,7 +24,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '14 min ago',
       status: ThreatStatus.new_,
       mitreTechnique: 'T1530 (Data from Cloud Storage)',
-      description: 'Unauthenticated GET request to S3 bucket containing financial dumps.',
+      description:
+          'Unauthenticated GET request to S3 bucket containing financial dumps.',
       affectedResource: 'prod-analytics-backup-2026',
     ),
     ThreatAlertModel(
@@ -34,7 +36,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '31 min ago',
       status: ThreatStatus.investigating,
       mitreTechnique: 'T1098 (Account Manipulation)',
-      description: 'New IAM admin role granted to service account outside business hours.',
+      description:
+          'New IAM admin role granted to service account outside business hours.',
       affectedResource: 'svc-cicd-runner',
     ),
     ThreatAlertModel(
@@ -45,7 +48,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '45 min ago',
       status: ThreatStatus.new_,
       mitreTechnique: 'T1005 (Data from Local System)',
-      description: 'Postgres RDS instance received 300% query spike across customer tables.',
+      description:
+          'Postgres RDS instance received 300% query spike across customer tables.',
       affectedResource: 'rds-core-postgres-01',
     ),
     ThreatAlertModel(
@@ -56,7 +60,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '1 hr ago',
       status: ThreatStatus.investigating,
       mitreTechnique: 'T1071.004 (DNS Communication)',
-      description: 'Container pod initiated egress DNS lookup to blacklisted C2 domain.',
+      description:
+          'Container pod initiated egress DNS lookup to blacklisted C2 domain.',
       affectedResource: 'k8s-pod-billing-worker-7b',
     ),
     ThreatAlertModel(
@@ -67,7 +72,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '1.5 hr ago',
       status: ThreatStatus.new_,
       mitreTechnique: 'T1499 (Endpoint Denial of Service)',
-      description: 'Public API gateway triggered rate limiting against external IP subnet.',
+      description:
+          'Public API gateway triggered rate limiting against external IP subnet.',
       affectedResource: 'api.cybershield.io/v1/auth',
     ),
     ThreatAlertModel(
@@ -78,7 +84,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '2 hr ago',
       status: ThreatStatus.closed,
       mitreTechnique: 'T1021.004 (SSH Remote Services)',
-      description: 'Verified DevOps engineer logging into staging bastion host via VPN.',
+      description:
+          'Verified DevOps engineer logging into staging bastion host via VPN.',
       affectedResource: 'bastion-eu-west-1',
     ),
     ThreatAlertModel(
@@ -89,7 +96,8 @@ class CyberThreatDetectionMockData {
       timeAgo: '3 hr ago',
       status: ThreatStatus.investigating,
       mitreTechnique: 'T1562.008 (Disable Cloud Logs)',
-      description: 'StopLogging call executed on CloudTrail trail in member AWS account.',
+      description:
+          'StopLogging call executed on CloudTrail trail in member AWS account.',
       affectedResource: 'arn:aws:cloudtrail:us-east-1:123456:trail/main',
     ),
   ];

@@ -56,7 +56,10 @@ class CloudPostureFilters extends StatelessWidget {
               Expanded(
                 child: TextField(
                   onChanged: onSearchChanged,
-                  style: TextStyle(color: AppColors.textPrimaryDark, fontSize: 11.sp),
+                  style: TextStyle(
+                    color: AppColors.textPrimaryDark,
+                    fontSize: 11.sp,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Search resource, finding type, ID...',
                     hintStyle: TextStyle(
@@ -75,7 +78,13 @@ class CloudPostureFilters extends StatelessWidget {
         _buildSeverityPills(),
         _buildDropdown(
           value: selectedAccount,
-          items: const ['All accounts', 'AWS Production', 'GCP Production', 'Azure Production', 'AWS Development'],
+          items: const [
+            'All accounts',
+            'AWS Production',
+            'GCP Production',
+            'Azure Production',
+            'AWS Development',
+          ],
           onChanged: onAccountChanged,
         ),
         _buildDropdown(
@@ -175,10 +184,7 @@ class CloudPostureFilters extends StatelessWidget {
             if (val != null) onChanged(val);
           },
           items: items.map((item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            );
+            return DropdownMenuItem<String>(value: item, child: Text(item));
           }).toList(),
         ),
       ),

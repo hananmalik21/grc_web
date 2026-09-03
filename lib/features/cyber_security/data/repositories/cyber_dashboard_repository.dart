@@ -29,8 +29,9 @@ abstract class CyberDashboardRepository {
 }
 
 class CyberDashboardRepositoryImpl implements CyberDashboardRepository {
-  const CyberDashboardRepositoryImpl({required CyberDashboardRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+  const CyberDashboardRepositoryImpl({
+    required CyberDashboardRemoteDataSource remoteDataSource,
+  }) : _remoteDataSource = remoteDataSource;
 
   final CyberDashboardRemoteDataSource _remoteDataSource;
 
@@ -42,8 +43,10 @@ class CyberDashboardRepositoryImpl implements CyberDashboardRepository {
 
   CyberDashboardData _mapDtoToData(CyberDashboardOverviewDto dto) {
     // 1. Map KPI Cards directly from backend response
-    final openFindings = dto.risksSummary.totalOpen + dto.threatsSummary.totalOpen;
-    final activeIncidents = dto.threatsSummary.critical + dto.threatsSummary.high;
+    final openFindings =
+        dto.risksSummary.totalOpen + dto.threatsSummary.totalOpen;
+    final activeIncidents =
+        dto.threatsSummary.critical + dto.threatsSummary.high;
     final postureScore = '${dto.complianceScore.round()}%';
     final cloudCount = dto.cloudCoverage.length;
 
@@ -51,7 +54,8 @@ class CyberDashboardRepositoryImpl implements CyberDashboardRepository {
       CyberKpiModel(
         title: 'OPEN FINDINGS',
         value: openFindings.toString(),
-        subtitle: '${dto.risksSummary.critical + dto.threatsSummary.critical} critical need action',
+        subtitle:
+            '${dto.risksSummary.critical + dto.threatsSummary.critical} critical need action',
         subtitleColor: AppColors.textPlaceholderDark,
         icon: Icons.warning_amber_rounded,
         accentColor: AppColors.cyberMedium,
@@ -67,8 +71,12 @@ class CyberDashboardRepositoryImpl implements CyberDashboardRepository {
       CyberKpiModel(
         title: 'POSTURE SCORE',
         value: postureScore,
-        subtitle: dto.complianceScore > 0 ? '+2% from last month' : 'Needs baseline scan',
-        subtitleColor: dto.complianceScore > 0 ? AppColors.cyberLiveGreen : AppColors.cyberMedium,
+        subtitle: dto.complianceScore > 0
+            ? '+2% from last month'
+            : 'Needs baseline scan',
+        subtitleColor: dto.complianceScore > 0
+            ? AppColors.cyberLiveGreen
+            : AppColors.cyberMedium,
         icon: Icons.shield_outlined,
         accentColor: AppColors.cyberLiveGreen,
       ),
@@ -83,9 +91,11 @@ class CyberDashboardRepositoryImpl implements CyberDashboardRepository {
     ];
 
     // 2. Map Finding Severities (Critical, High, Medium, Low)
-    final critical = (dto.risksSummary.critical + dto.threatsSummary.critical).toDouble();
+    final critical = (dto.risksSummary.critical + dto.threatsSummary.critical)
+        .toDouble();
     final high = (dto.risksSummary.high + dto.threatsSummary.high).toDouble();
-    final medium = (dto.risksSummary.medium + dto.threatsSummary.medium).toDouble();
+    final medium = (dto.risksSummary.medium + dto.threatsSummary.medium)
+        .toDouble();
     final low = (dto.risksSummary.low + dto.threatsSummary.low).toDouble();
 
     final findingSeverityValues = [critical, high, medium, low];
@@ -117,7 +127,9 @@ class CyberDashboardRepositoryImpl implements CyberDashboardRepository {
       return IncidentItem(
         severity: threat.severity,
         title: threat.title,
-        incidentId: threat.id.length > 8 ? 'INC-${threat.id.substring(0, 8).toUpperCase()}' : threat.id,
+        incidentId: threat.id.length > 8
+            ? 'INC-${threat.id.substring(0, 8).toUpperCase()}'
+            : threat.id,
         timestamp: dateStr.isNotEmpty ? dateStr : 'Recently',
         status: threat.status,
         severityColor: sevColor,

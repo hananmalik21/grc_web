@@ -89,7 +89,10 @@ class FindingDetailModal extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Color(0xFF94A3B8)),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF94A3B8),
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -111,7 +114,9 @@ class FindingDetailModal extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: const Color(0xFF131D31),
                                 borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: const Color(0xFF1E293B)),
+                                border: Border.all(
+                                  color: const Color(0xFF1E293B),
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +132,8 @@ class FindingDetailModal extends StatelessWidget {
                                   ),
                                   const Gap(6),
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
                                     textBaseline: TextBaseline.alphabetic,
                                     children: [
                                       Text(
@@ -159,7 +165,9 @@ class FindingDetailModal extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: const Color(0xFF131D31),
                                 borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: const Color(0xFF1E293B)),
+                                border: Border.all(
+                                  color: const Color(0xFF1E293B),
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,11 +185,20 @@ class FindingDetailModal extends StatelessWidget {
                                   Row(
                                     children: [
                                       Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 6.w,
+                                          vertical: 2.h,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: finding.severity.color.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(4.r),
-                                          border: Border.all(color: finding.severity.color.withValues(alpha: 0.4)),
+                                          color: finding.severity.color
+                                              .withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(
+                                            4.r,
+                                          ),
+                                          border: Border.all(
+                                            color: finding.severity.color
+                                                .withValues(alpha: 0.4),
+                                          ),
                                         ),
                                         child: Text(
                                           finding.severity.label,
@@ -230,7 +247,10 @@ class FindingDetailModal extends StatelessWidget {
                       const Gap(6),
                       Container(
                         width: double.infinity,
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 10.h,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF090E1A),
                           borderRadius: BorderRadius.circular(6.r),
@@ -291,9 +311,15 @@ class FindingDetailModal extends StatelessWidget {
                                 width: 18.r,
                                 height: 18.r,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF00B4D8).withValues(alpha: 0.15),
+                                  color: const Color(
+                                    0xFF00B4D8,
+                                  ).withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFF00B4D8).withValues(alpha: 0.4)),
+                                  border: Border.all(
+                                    color: const Color(
+                                      0xFF00B4D8,
+                                    ).withValues(alpha: 0.4),
+                                  ),
                                 ),
                                 child: Center(
                                   child: Text(
@@ -331,11 +357,16 @@ class FindingDetailModal extends StatelessWidget {
                         runSpacing: 8.h,
                         children: finding.controlMappings.entries.map((entry) {
                           return Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 6.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF131D31),
                               borderRadius: BorderRadius.circular(6.r),
-                              border: Border.all(color: const Color(0xFF1E293B)),
+                              border: Border.all(
+                                color: const Color(0xFF1E293B),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -364,40 +395,61 @@ class FindingDetailModal extends StatelessWidget {
 
                       // Similar Findings
                       if (finding.similarFindings.isNotEmpty) ...[
-                        _buildSectionTitle('SIMILAR S3 FINDINGS (${finding.similarFindings.length})'),
+                        _buildSectionTitle(
+                          'SIMILAR S3 FINDINGS (${finding.similarFindings.length})',
+                        ),
                         const Gap(8),
                         ...finding.similarFindings.map((sf) {
                           return Container(
                             margin: EdgeInsets.only(bottom: 6.h),
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 8.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF090E1A),
                               borderRadius: BorderRadius.circular(6.r),
-                              border: Border.all(color: const Color(0xFF1E293B)),
+                              border: Border.all(
+                                color: const Color(0xFF1E293B),
+                              ),
                             ),
                             child: Row(
                               children: [
                                 Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 5.w,
+                                    vertical: 1.5.h,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: sf.color.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(3.r),
                                   ),
                                   child: Text(
                                     sf.severity,
-                                    style: TextStyle(color: sf.color, fontSize: 9.sp, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      color: sf.color,
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                                 const Gap(8),
                                 Text(
                                   sf.id,
-                                  style: TextStyle(color: const Color(0xFF00B4D8), fontSize: 11.sp, fontWeight: FontWeight.w600),
+                                  style: TextStyle(
+                                    color: const Color(0xFF00B4D8),
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 const Gap(8),
                                 Expanded(
                                   child: Text(
                                     sf.title,
-                                    style: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 11.sp),
+                                    style: TextStyle(
+                                      color: const Color(0xFFCBD5E1),
+                                      fontSize: 11.sp,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -513,5 +565,7 @@ class FindingDetailModal extends StatelessWidget {
 }
 
 class RoundedRectanglePlatform {
-  static final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(6));
+  static final shape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(6),
+  );
 }

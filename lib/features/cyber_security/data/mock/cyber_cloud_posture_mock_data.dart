@@ -125,7 +125,8 @@ class CyberCloudPostureMockData {
       riskScore: 95,
       age: '4d',
       status: FindingStatus.open,
-      resourceUri: 'arn:aws:ec2:us-east-1:123456789012:security-group/sg-0a1b2c3d4e5f6g7h8',
+      resourceUri:
+          'arn:aws:ec2:us-east-1:123456789012:security-group/sg-0a1b2c3d4e5f6g7h8',
       aiRiskExplanation:
           'Inbound security group rule allows unrestricted RDP access from any IP address. Exposes Windows bastion host to brute-force credential stuffing and ransomware attacks.',
       remediationSteps: [
@@ -167,26 +168,27 @@ class CyberCloudPostureMockData {
     ),
   ];
 
-  static List<ComplianceFindingMappingModel> getMockComplianceFindings() => const [
-    ComplianceFindingMappingModel(
-      id: 'F-2401',
-      type: 'Public Storage Bucket',
-      severity: FindingSeverity.critical,
-      nistCsf: 'PR.DS-1',
-      cisControls: '3.4',
-      iso27001: 'A.13.1.1',
-      soc2: 'CC6.1',
-    ),
-    ComplianceFindingMappingModel(
-      id: 'F-2402',
-      type: 'RDP Exposed to 0.0.0.0/0',
-      severity: FindingSeverity.critical,
-      nistCsf: 'PR.AC-5',
-      cisControls: '3.3',
-      iso27001: 'A.13.1.3',
-      soc2: 'CC6.6',
-    ),
-  ];
+  static List<ComplianceFindingMappingModel> getMockComplianceFindings() =>
+      const [
+        ComplianceFindingMappingModel(
+          id: 'F-2401',
+          type: 'Public Storage Bucket',
+          severity: FindingSeverity.critical,
+          nistCsf: 'PR.DS-1',
+          cisControls: '3.4',
+          iso27001: 'A.13.1.1',
+          soc2: 'CC6.1',
+        ),
+        ComplianceFindingMappingModel(
+          id: 'F-2402',
+          type: 'RDP Exposed to 0.0.0.0/0',
+          severity: FindingSeverity.critical,
+          nistCsf: 'PR.AC-5',
+          cisControls: '3.3',
+          iso27001: 'A.13.1.3',
+          soc2: 'CC6.6',
+        ),
+      ];
 
   static List<ScanHistoryModel> getMockScanHistory() => const [
     ScanHistoryModel(

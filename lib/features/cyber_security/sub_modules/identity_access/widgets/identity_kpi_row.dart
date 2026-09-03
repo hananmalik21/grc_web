@@ -4,7 +4,18 @@ import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 
 class IdentityKpiRow extends StatelessWidget {
-  const IdentityKpiRow({super.key});
+  const IdentityKpiRow({
+    super.key,
+    this.totalUsers = 0,
+    this.privilegedUsers = 0,
+    this.noMfa = 0,
+    this.highRiskUsers = 0,
+  });
+
+  final int totalUsers;
+  final int privilegedUsers;
+  final int noMfa;
+  final int highRiskUsers;
 
   @override
   Widget build(BuildContext context) {
@@ -13,30 +24,30 @@ class IdentityKpiRow extends StatelessWidget {
         final isDesktop = constraints.maxWidth >= 950;
 
         final cards = [
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'TOTAL USERS',
-            value: '847',
+            value: '$totalUsers',
             subtitle: 'across all systems',
             icon: Icons.people_outline_rounded,
             accentColor: AppColors.cyberLow,
           ),
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'PRIVILEGED USERS',
-            value: '24',
+            value: '$privilegedUsers',
             subtitle: 'Admin / elevated access',
             icon: Icons.vpn_key_outlined,
             accentColor: AppColors.cyberMedium,
           ),
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'NO MFA',
-            value: '127',
+            value: '$noMfa',
             subtitle: 'require immediate action',
             icon: Icons.warning_amber_rounded,
             accentColor: AppColors.cyberCritical,
           ),
-          const _IdentityKpiCard(
+          _IdentityKpiCard(
             title: 'HIGH-RISK USERS',
-            value: '8',
+            value: '$highRiskUsers',
             subtitle: 'Risk score above 65',
             icon: Icons.info_outline_rounded,
             accentColor: AppColors.cyberHigh,

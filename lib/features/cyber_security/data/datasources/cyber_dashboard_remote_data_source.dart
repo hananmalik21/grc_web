@@ -7,8 +7,10 @@ abstract class CyberDashboardRemoteDataSource {
   Future<CyberDashboardOverviewDto> getOverview();
 }
 
-class DioCyberDashboardRemoteDataSource implements CyberDashboardRemoteDataSource {
-  const DioCyberDashboardRemoteDataSource({required ApiClient apiClient}) : _apiClient = apiClient;
+class DioCyberDashboardRemoteDataSource
+    implements CyberDashboardRemoteDataSource {
+  const DioCyberDashboardRemoteDataSource({required ApiClient apiClient})
+    : _apiClient = apiClient;
 
   final ApiClient _apiClient;
 
@@ -20,7 +22,10 @@ class DioCyberDashboardRemoteDataSource implements CyberDashboardRemoteDataSourc
     } on AppException {
       rethrow;
     } catch (e) {
-      throw UnknownException('Failed to fetch dashboard overview: ${e.toString()}', originalError: e);
+      throw UnknownException(
+        'Failed to fetch dashboard overview: ${e.toString()}',
+        originalError: e,
+      );
     }
   }
 }

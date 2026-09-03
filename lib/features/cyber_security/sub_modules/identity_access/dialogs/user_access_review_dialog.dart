@@ -74,7 +74,10 @@ class UserAccessReviewDialog extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Color(0xFF94A3B8)),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Color(0xFF94A3B8),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -97,12 +100,19 @@ class UserAccessReviewDialog extends StatelessWidget {
                         children: [
                           Text(
                             'DEPARTMENT / ROLE',
-                            style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           const Gap(2),
                           Text(
                             '${user.department} · ${user.role}',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -111,12 +121,19 @@ class UserAccessReviewDialog extends StatelessWidget {
                         children: [
                           Text(
                             'RISK SCORE',
-                            style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           const Gap(2),
                           Text(
                             '${user.riskScore} / 100',
-                            style: TextStyle(color: user.riskScoreColor, fontWeight: FontWeight.w800),
+                            style: TextStyle(
+                              color: user.riskScoreColor,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ],
                       ),
@@ -136,11 +153,29 @@ class UserAccessReviewDialog extends StatelessWidget {
                   ),
                 ),
                 const Gap(8),
-                _buildEntitlementRow('Multi-Factor Authentication (MFA)', user.hasMfa ? 'Enforced' : 'Missing', user.hasMfa ? const Color(0xFF10B981) : const Color(0xFFEF4444)),
+                _buildEntitlementRow(
+                  'Multi-Factor Authentication (MFA)',
+                  user.hasMfa ? 'Enforced' : 'Missing',
+                  user.hasMfa
+                      ? const Color(0xFF10B981)
+                      : const Color(0xFFEF4444),
+                ),
                 const Gap(6),
-                _buildEntitlementRow('Privileged IAM Administrator Roles', user.isPrivileged ? 'Assigned' : 'Standard User', user.isPrivileged ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8)),
+                _buildEntitlementRow(
+                  'Privileged IAM Administrator Roles',
+                  user.isPrivileged ? 'Assigned' : 'Standard User',
+                  user.isPrivileged
+                      ? const Color(0xFFF59E0B)
+                      : const Color(0xFF94A3B8),
+                ),
                 const Gap(6),
-                _buildEntitlementRow('Active Security Alerts', '${user.alertsCount} Alerts Flagged', user.alertsCount > 0 ? const Color(0xFFF97316) : const Color(0xFF10B981)),
+                _buildEntitlementRow(
+                  'Active Security Alerts',
+                  '${user.alertsCount} Alerts Flagged',
+                  user.alertsCount > 0
+                      ? const Color(0xFFF97316)
+                      : const Color(0xFF10B981),
+                ),
                 const Gap(20),
 
                 // Action Buttons
@@ -149,7 +184,10 @@ class UserAccessReviewDialog extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Color(0xFF94A3B8)),
+                      ),
                     ),
                     const Gap(10),
                     if (!user.hasMfa) ...[
@@ -158,14 +196,17 @@ class UserAccessReviewDialog extends StatelessWidget {
                           Navigator.of(context).pop();
                           ToastService.show(
                             context: context,
-                            message: 'MFA enforcement notice sent to ${user.username}',
+                            message:
+                                'MFA enforcement notice sent to ${user.username}',
                             type: ToastType.warning,
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEF4444),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
                         ),
                         child: const Text('Enforce MFA'),
                       ),
@@ -176,14 +217,17 @@ class UserAccessReviewDialog extends StatelessWidget {
                         Navigator.of(context).pop();
                         ToastService.show(
                           context: context,
-                          message: 'Access permissions certified for ${user.username}',
+                          message:
+                              'Access permissions certified for ${user.username}',
                           type: ToastType.success,
                         );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00B4D8),
                         foregroundColor: const Color(0xFF090E1A),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
                       ),
                       child: const Text('Certify Access'),
                     ),
@@ -209,7 +253,10 @@ class UserAccessReviewDialog extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: Color(0xFFCBD5E1))),
-          Text(value, style: TextStyle(color: color, fontWeight: FontWeight.w700)),
+          Text(
+            value,
+            style: TextStyle(color: color, fontWeight: FontWeight.w700),
+          ),
         ],
       ),
     );

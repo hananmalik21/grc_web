@@ -20,7 +20,10 @@ class SeveritySummaryDto {
       high: (json['high'] as num?)?.toInt() ?? 0,
       medium: (json['medium'] as num?)?.toInt() ?? 0,
       low: (json['low'] as num?)?.toInt() ?? 0,
-      totalOpen: (json['totalOpen'] as num?)?.toInt() ?? (json['total_open'] as num?)?.toInt() ?? 0,
+      totalOpen:
+          (json['totalOpen'] as num?)?.toInt() ??
+          (json['total_open'] as num?)?.toInt() ??
+          0,
     );
   }
 }
@@ -42,8 +45,14 @@ class AtRiskPersonDto {
     return AtRiskPersonDto(
       email: json['email']?.toString() ?? '',
       fullName: json['fullName']?.toString() ?? json['full_name']?.toString(),
-      riskScore: (json['riskScore'] as num?)?.toInt() ?? (json['risk_score'] as num?)?.toInt() ?? 0,
-      riskTier: json['riskTier']?.toString() ?? json['risk_tier']?.toString() ?? 'LOW',
+      riskScore:
+          (json['riskScore'] as num?)?.toInt() ??
+          (json['risk_score'] as num?)?.toInt() ??
+          0,
+      riskTier:
+          json['riskTier']?.toString() ??
+          json['risk_tier']?.toString() ??
+          'LOW',
     );
   }
 }
@@ -62,9 +71,16 @@ class PeopleRiskSummaryDto {
   factory PeopleRiskSummaryDto.fromJson(Map<String, dynamic>? json) {
     if (json == null) return const PeopleRiskSummaryDto();
     return PeopleRiskSummaryDto(
-      highRiskCount: (json['highRiskCount'] as num?)?.toInt() ?? (json['high_risk_count'] as num?)?.toInt() ?? 0,
-      criticalRiskCount: (json['criticalRiskCount'] as num?)?.toInt() ?? (json['critical_risk_count'] as num?)?.toInt() ?? 0,
-      topAtRisk: (json['topAtRisk'] as List<dynamic>?)
+      highRiskCount:
+          (json['highRiskCount'] as num?)?.toInt() ??
+          (json['high_risk_count'] as num?)?.toInt() ??
+          0,
+      criticalRiskCount:
+          (json['criticalRiskCount'] as num?)?.toInt() ??
+          (json['critical_risk_count'] as num?)?.toInt() ??
+          0,
+      topAtRisk:
+          (json['topAtRisk'] as List<dynamic>?)
               ?.map((e) => AtRiskPersonDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -90,7 +106,8 @@ class CloudConnectorDto {
       provider: json['provider']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
-      lastSyncAt: json['lastSyncAt']?.toString() ?? json['last_sync_at']?.toString(),
+      lastSyncAt:
+          json['lastSyncAt']?.toString() ?? json['last_sync_at']?.toString(),
     );
   }
 }
@@ -120,12 +137,19 @@ class DetectedThreatDto {
     return DetectedThreatDto(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
-      threatType: json['threatType']?.toString() ?? json['threat_type']?.toString() ?? '',
+      threatType:
+          json['threatType']?.toString() ??
+          json['threat_type']?.toString() ??
+          '',
       severity: json['severity']?.toString() ?? 'LOW',
       status: json['status']?.toString() ?? 'OPEN',
-      associatedActor: json['associatedActor']?.toString() ?? json['associated_actor']?.toString(),
-      associatedIp: json['associatedIp']?.toString() ?? json['associated_ip']?.toString(),
-      occurredAt: json['occurredAt']?.toString() ?? json['occurred_at']?.toString(),
+      associatedActor:
+          json['associatedActor']?.toString() ??
+          json['associated_actor']?.toString(),
+      associatedIp:
+          json['associatedIp']?.toString() ?? json['associated_ip']?.toString(),
+      occurredAt:
+          json['occurredAt']?.toString() ?? json['occurred_at']?.toString(),
     );
   }
 }
@@ -148,19 +172,33 @@ class CyberDashboardOverviewDto {
   });
 
   factory CyberDashboardOverviewDto.fromJson(Map<String, dynamic> json) {
-    final data = (json['data'] is Map<String, dynamic>) ? json['data'] as Map<String, dynamic> : json;
+    final data = (json['data'] is Map<String, dynamic>)
+        ? json['data'] as Map<String, dynamic>
+        : json;
 
     return CyberDashboardOverviewDto(
       complianceScore: (data['complianceScore'] as num?)?.toDouble() ?? 0.0,
-      threatsSummary: SeveritySummaryDto.fromJson(data['threatsSummary'] as Map<String, dynamic>?),
-      risksSummary: SeveritySummaryDto.fromJson(data['risksSummary'] as Map<String, dynamic>?),
-      peopleRiskSummary: PeopleRiskSummaryDto.fromJson(data['peopleRiskSummary'] as Map<String, dynamic>?),
-      cloudCoverage: (data['cloudCoverage'] as List<dynamic>?)
-              ?.map((e) => CloudConnectorDto.fromJson(e as Map<String, dynamic>))
+      threatsSummary: SeveritySummaryDto.fromJson(
+        data['threatsSummary'] as Map<String, dynamic>?,
+      ),
+      risksSummary: SeveritySummaryDto.fromJson(
+        data['risksSummary'] as Map<String, dynamic>?,
+      ),
+      peopleRiskSummary: PeopleRiskSummaryDto.fromJson(
+        data['peopleRiskSummary'] as Map<String, dynamic>?,
+      ),
+      cloudCoverage:
+          (data['cloudCoverage'] as List<dynamic>?)
+              ?.map(
+                (e) => CloudConnectorDto.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      recentThreats: (data['recentThreats'] as List<dynamic>?)
-              ?.map((e) => DetectedThreatDto.fromJson(e as Map<String, dynamic>))
+      recentThreats:
+          (data['recentThreats'] as List<dynamic>?)
+              ?.map(
+                (e) => DetectedThreatDto.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );

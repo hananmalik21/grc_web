@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/features/cyber_security/data/models/compliance_dto.dart';
 
 class CyberComplianceBars extends StatefulWidget {
-  const CyberComplianceBars({super.key});
+  const CyberComplianceBars({super.key, required this.frameworks});
+
+  final List<FrameworkComplianceItem> frameworks;
 
   @override
   State<CyberComplianceBars> createState() => _CyberComplianceBarsState();
@@ -21,14 +24,6 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
 
   @override
   Widget build(BuildContext context) {
-    final frameworks = [
-      {'label': 'NIST CSF', 'pct': 0.72, 'color': AppColors.dashCyberSecurity, 'desc': 'National Institute of Standards and Technology Framework'},
-      {'label': 'CIS v8', 'pct': 0.80, 'color': AppColors.primaryLight, 'desc': 'Center for Internet Security Controls v8'},
-      {'label': 'ISO 27001', 'pct': 0.68, 'color': AppColors.barPurple, 'desc': 'Information Security Management Standard'},
-      {'label': 'SOC 2', 'pct': 0.85, 'color': AppColors.cyberLiveGreen, 'desc': 'Trust Services Criteria (Security, Availability)'},
-      {'label': 'CSA CCM', 'pct': 0.62, 'color': AppColors.cyberMedium, 'desc': 'Cloud Security Alliance Cloud Controls Matrix'},
-    ];
-
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
@@ -57,9 +52,9 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                   ),
                   if (hoveredIndex != null)
                     Text(
-                      '${frameworks[hoveredIndex]['label']}: ${((frameworks[hoveredIndex]['pct'] as double) * 100).toInt()}% Compliant',
+                      '${widget.frameworks[hoveredIndex].name}: ${widget.frameworks[hoveredIndex].score.toInt()}% Compliant',
                       style: TextStyle(
-                        color: frameworks[hoveredIndex]['color'] as Color,
+                        color: _colorFor(widget.frameworks[hoveredIndex].code),
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -69,16 +64,27 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
             },
           ),
           const Gap(10),
-          for (int i = 0; i < frameworks.length; i++) ...[
-            _buildFrameworkRow(
-              index: i,
-              label: frameworks[i]['label'] as String,
-              percentage: frameworks[i]['pct'] as double,
-              barColor: frameworks[i]['color'] as Color,
-              tooltip: frameworks[i]['desc'] as String,
-            ),
-            if (i < frameworks.length - 1) const Gap(6),
-          ],
+          if (widget.frameworks.isEmpty)
+            Text(
+              'No framework assessments available',
+              style: TextStyle(
+                color: AppColors.textPlaceholderDark,
+                fontSize: 11.sp,
+              ),
+            )
+          else
+            for (int i = 0; i < widget.frameworks.length; i++) ...[
+              _buildFrameworkRow(
+                index: i,
+                label: widget.frameworks[i].name,
+                percentage: (widget.frameworks[i].score / 100)
+                    .clamp(0, 1)
+                    .toDouble(),
+                barColor: _colorFor(widget.frameworks[i].code),
+                tooltip: widget.frameworks[i].name,
+              ),
+              if (i < widget.frameworks.length - 1) const Gap(6),
+            ],
           const Gap(8),
           Row(
             children: [
@@ -102,6 +108,15 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
         ],
       ),
     );
+  }
+
+  Color _colorFor(String code) {
+    final normalized = code.toUpperCase();
+    if (normalized.contains('NIST')) return AppColors.dashCyberSecurity;
+    if (normalized.contains('CIS')) return AppColors.primaryLight;
+    if (normalized.contains('ISO')) return AppColors.barPurple;
+    if (normalized.contains('SOC')) return AppColors.cyberLiveGreen;
+    return AppColors.cyberMedium;
   }
 
   Widget _buildAxisLabel(String text) {
@@ -153,7 +168,9 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
               duration: const Duration(milliseconds: 150),
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 3.h),
               decoration: BoxDecoration(
-                color: isHovered ? barColor.withValues(alpha: 0.08) : Colors.transparent,
+                color: isHovered
+                    ? barColor.withValues(alpha: 0.08)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(4.r),
               ),
               child: Row(
@@ -163,9 +180,13 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                     child: Text(
                       label,
                       style: TextStyle(
-                        color: isHovered ? AppColors.textPrimaryDark : AppColors.textTertiaryDark,
+                        color: isHovered
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textTertiaryDark,
                         fontSize: 10.sp,
-                        fontWeight: isHovered ? FontWeight.w700 : FontWeight.w600,
+                        fontWeight: isHovered
+                            ? FontWeight.w700
+                            : FontWeight.w600,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -184,7 +205,9 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             decoration: BoxDecoration(
-                              color: isHovered ? barColor.withValues(alpha: 0.95) : barColor,
+                              color: isHovered
+                                  ? barColor.withValues(alpha: 0.95)
+                                  : barColor,
                               borderRadius: BorderRadius.circular(3.r),
                               boxShadow: isHovered
                                   ? [
@@ -192,7 +215,7 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                                         color: barColor.withValues(alpha: 0.4),
                                         blurRadius: 6,
                                         spreadRadius: 1,
-                                      )
+                                      ),
                                     ]
                                   : null,
                             ),

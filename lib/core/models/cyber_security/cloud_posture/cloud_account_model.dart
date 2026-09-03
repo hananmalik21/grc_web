@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 enum CloudPlatform {
   aws('AWS', Color(0xFFFF9900)),
   gcp('GCP', Color(0xFF4285F4)),
-  azure('Azure', Color(0xFF0078D4));
+  azure('Azure', Color(0xFF0078D4)),
+  oci('OCI', Color(0xFFF04E23)),
+  okta('OKTA', Color(0xFF007DC1));
 
   final String label;
   final Color color;

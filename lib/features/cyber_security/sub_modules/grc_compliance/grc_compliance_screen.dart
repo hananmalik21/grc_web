@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/grc_compliance/compliance_framework_model.dart';
+import 'package:grc/core/permissions/permission_gate.dart';
+import 'package:grc/core/permissions/perm_keys.dart';
+import 'package:grc/core/permissions/permission_service.dart';
 import 'package:grc/core/services/toast_service.dart';
 import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
+import 'package:grc/features/cyber_security/presentation/providers/compliance_provider.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/dialogs/generate_policy_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/widgets/compliance_controls_table.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/widgets/framework_cards_row.dart';
 
-class GrcComplianceScreen extends StatefulWidget {
+class GrcComplianceScreen extends ConsumerStatefulWidget {
   const GrcComplianceScreen({super.key});
 
   @override
-  State<GrcComplianceScreen> createState() => _GrcComplianceScreenState();
+  ConsumerState<GrcComplianceScreen> createState() =>
+      _GrcComplianceScreenState();
 }
 
-class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
+class _GrcComplianceScreenState extends ConsumerState<GrcComplianceScreen> {
   final List<ComplianceFrameworkModel> _frameworks = [
     const ComplianceFrameworkModel(
       id: 'nist',
@@ -33,8 +39,10 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
           status: ControlStatus.pass,
           score: 100,
           frameworkId: 'nist',
-          description: 'Physical devices and systems within the organization are inventoried.',
-          automatedEvidence: 'Agent discovery synced 14,820 assets with MDM and CMDB inventory.',
+          description:
+              'Physical devices and systems within the organization are inventoried.',
+          automatedEvidence:
+              'Agent discovery synced 14,820 assets with MDM and CMDB inventory.',
         ),
         ControlItemModel(
           controlId: 'CSF-ID.AM-2',
@@ -42,8 +50,10 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
           status: ControlStatus.pass,
           score: 100,
           frameworkId: 'nist',
-          description: 'Software platforms and applications within the organization are inventoried.',
-          automatedEvidence: 'Continuous CI/CD package provenance and image catalog scanner active.',
+          description:
+              'Software platforms and applications within the organization are inventoried.',
+          automatedEvidence:
+              'Continuous CI/CD package provenance and image catalog scanner active.',
         ),
         ControlItemModel(
           controlId: 'CSF-PR.AC-1',
@@ -51,8 +61,10 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
           status: ControlStatus.partial,
           score: 65,
           frameworkId: 'nist',
-          description: 'Identities and credentials are managed for authorized devices and users.',
-          automatedEvidence: '18 overprivileged roles and 7 inactive credentials (>90d) flagged for rotation.',
+          description:
+              'Identities and credentials are managed for authorized devices and users.',
+          automatedEvidence:
+              '18 overprivileged roles and 7 inactive credentials (>90d) flagged for rotation.',
         ),
         ControlItemModel(
           controlId: 'CSF-PR.AC-7',
@@ -60,8 +72,10 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
           status: ControlStatus.fail,
           score: 30,
           frameworkId: 'nist',
-          description: 'Users, devices, and other assets are authenticated commensurate with the risk.',
-          automatedEvidence: 'MFA missing on 2 legacy AWS member staging accounts.',
+          description:
+              'Users, devices, and other assets are authenticated commensurate with the risk.',
+          automatedEvidence:
+              'MFA missing on 2 legacy AWS member staging accounts.',
         ),
         ControlItemModel(
           controlId: 'CSF-PR.DS-1',
@@ -69,8 +83,10 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
           status: ControlStatus.pass,
           score: 88,
           frameworkId: 'nist',
-          description: 'Data-at-rest is protected using cryptographic mechanisms.',
-          automatedEvidence: '100% of discovered datastores encrypted with AWS KMS / AES-256.',
+          description:
+              'Data-at-rest is protected using cryptographic mechanisms.',
+          automatedEvidence:
+              '100% of discovered datastores encrypted with AWS KMS / AES-256.',
         ),
       ],
     ),
@@ -120,14 +136,6 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
     ),
   ];
 
-  late ComplianceFrameworkModel _selectedFramework;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedFramework = _frameworks.first;
-  }
-
   void _openGeneratePolicyDialog() {
     showDialog(
       context: context,
@@ -138,16 +146,55 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
   void _exportAuditReport() {
     ToastService.show(
       context: context,
-      message: 'SOC 2 & NIST CSF continuous audit report compiled and exported to PDF/ZIP.',
+      message:
+          'SOC 2 & NIST CSF continuous audit report compiled and exported to PDF/ZIP.',
       type: ToastType.success,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!PermissionService.instance.can(CyberPermKeys.complianceRead)) {
+      return PermissionGate(
+        permKey: CyberPermKeys.complianceRead,
+        fallback: CyberScreenLayout(
+          title: 'GRC & Compliance',
+          subtitle: 'You do not have permission to view compliance data.',
+          child: const SizedBox.shrink(),
+        ),
+        child: const SizedBox.shrink(),
+      );
+    }
+    final complianceState = ref.watch(complianceProvider);
+    final frameworks = complianceState.frameworks.isNotEmpty
+        ? complianceState.frameworks
+        : _frameworks
+              .map(
+                (framework) => ComplianceFrameworkModel(
+                  id: framework.id,
+                  name: framework.name,
+                  readinessScore: 0,
+                  progressColor: framework.progressColor,
+                  passingCount: 0,
+                  failingCount: 0,
+                  partialCount: 0,
+                  totalControls: 0,
+                  controls: const [],
+                ),
+              )
+              .toList();
+    final selected =
+        frameworks
+            .where(
+              (framework) =>
+                  framework.id == complianceState.selectedFrameworkId,
+            )
+            .firstOrNull ??
+        frameworks.first;
     return CyberScreenLayout(
       title: 'GRC & Compliance',
-      subtitle: 'Continuous controls validation, audit readiness, and policy enforcement',
+      subtitle:
+          'Continuous controls validation, audit readiness, and policy enforcement',
       actions: [
         AppButton(
           label: 'Export Audit Bundle',
@@ -160,23 +207,26 @@ class _GrcComplianceScreenState extends State<GrcComplianceScreen> {
           label: 'Generate Policy',
           type: AppButtonType.primary,
           size: AppButtonSize.sm,
-          onPressed: _openGeneratePolicyDialog,
+          onPressed:
+              PermissionService.instance.can(CyberPermKeys.complianceCreate)
+              ? _openGeneratePolicyDialog
+              : null,
         ),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FrameworkCardsRow(
-            frameworks: _frameworks,
-            selectedFrameworkId: _selectedFramework.id,
+            frameworks: frameworks,
+            selectedFrameworkId: selected.id,
             onSelectFramework: (framework) {
-              setState(() {
-                _selectedFramework = framework;
-              });
+              ref
+                  .read(complianceProvider.notifier)
+                  .selectFramework(framework.id);
             },
           ),
           const Gap(24),
-          ComplianceControlsTable(framework: _selectedFramework),
+          ComplianceControlsTable(framework: selected),
         ],
       ),
     );

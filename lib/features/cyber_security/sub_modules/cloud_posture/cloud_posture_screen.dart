@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/cloud_account_model.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/compliance_mapping_model.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/scan_history_model.dart';
+import 'package:grc/core/permissions/permission_gate.dart';
+import 'package:grc/core/permissions/perm_keys.dart';
+import 'package:grc/core/permissions/permission_service.dart';
 import 'package:grc/core/services/toast_service.dart';
 import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
+import 'package:grc/features/cyber_security/data/models/cloud_posture_dto.dart';
+import 'package:grc/features/cyber_security/presentation/providers/cloud_posture_provider.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/create_remediation_ticket_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/finding_detail_modal.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_accounts_view.dart';
@@ -18,14 +24,14 @@ import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cl
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_scan_history_view.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/widgets/cloud_posture_tab_bar.dart';
 
-class CloudPostureScreen extends StatefulWidget {
+class CloudPostureScreen extends ConsumerStatefulWidget {
   const CloudPostureScreen({super.key});
 
   @override
-  State<CloudPostureScreen> createState() => _CloudPostureScreenState();
+  ConsumerState<CloudPostureScreen> createState() => _CloudPostureScreenState();
 }
 
-class _CloudPostureScreenState extends State<CloudPostureScreen> {
+class _CloudPostureScreenState extends ConsumerState<CloudPostureScreen> {
   int _activeSubTabIndex = 0;
   String _searchQuery = '';
   String _selectedSeverity = 'ALL';
@@ -34,7 +40,6 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
   String _selectedStatus = 'All statuses';
 
   late List<FindingItemModel> _allFindings;
-  late List<CloudAccountModel> _accounts;
   late List<ComplianceFindingMappingModel> _complianceFindings;
   late List<ScanHistoryModel> _scanHistory;
 
@@ -42,14 +47,14 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
   void initState() {
     super.initState();
     _allFindings = CyberCloudPostureMockData.getMockFindings();
-    _accounts = CyberCloudPostureMockData.getMockAccounts();
     _complianceFindings = CyberCloudPostureMockData.getMockComplianceFindings();
     _scanHistory = CyberCloudPostureMockData.getMockScanHistory();
   }
 
   List<FindingItemModel> get _filteredFindings {
     return _allFindings.where((f) {
-      if (_selectedSeverity != 'ALL' && f.severity.name.toUpperCase() != _selectedSeverity) {
+      if (_selectedSeverity != 'ALL' &&
+          f.severity.name.toUpperCase() != _selectedSeverity) {
         return false;
       }
       if (_selectedAccount != 'All accounts' && f.account != _selectedAccount) {
@@ -58,12 +63,14 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
       if (_selectedService != 'All services' && f.service != _selectedService) {
         return false;
       }
-      if (_selectedStatus != 'All statuses' && f.status.label != _selectedStatus) {
+      if (_selectedStatus != 'All statuses' &&
+          f.status.label != _selectedStatus) {
         return false;
       }
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
-        final match = f.id.toLowerCase().contains(q) ||
+        final match =
+            f.id.toLowerCase().contains(q) ||
             f.resource.toLowerCase().contains(q) ||
             f.finding.toLowerCase().contains(q);
         if (!match) return false;
@@ -100,9 +107,21 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!PermissionService.instance.can(CyberPermKeys.cloudPostureRead)) {
+      return PermissionGate(
+        permKey: CyberPermKeys.cloudPostureRead,
+        fallback: _buildPermissionDenied(),
+        child: const SizedBox.shrink(),
+      );
+    }
+    final coverage = ref.watch(cloudCoverageProvider);
+    final accounts =
+        coverage.valueOrNull?.connectors.map(_toAccount).toList() ??
+        const <CloudAccountModel>[];
     return CyberScreenLayout(
       title: 'Cloud Posture',
-      subtitle: 'Multi-cloud inventory, misconfigurations, and compliance findings',
+      subtitle:
+          'Multi-cloud inventory, misconfigurations, and compliance findings',
       actions: [
         AppButton(
           label: 'Scan Now',
@@ -154,7 +173,7 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
               },
             ),
           ] else if (_activeSubTabIndex == 1) ...[
-            CloudPostureAccountsView(accounts: _accounts),
+            CloudPostureAccountsView(accounts: accounts),
           ] else if (_activeSubTabIndex == 2) ...[
             CloudPostureComplianceView(complianceFindings: _complianceFindings),
           ] else if (_activeSubTabIndex == 3) ...[
@@ -162,6 +181,44 @@ class _CloudPostureScreenState extends State<CloudPostureScreen> {
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildPermissionDenied() {
+    return CyberScreenLayout(
+      title: 'Cloud Posture',
+      subtitle: 'You do not have permission to view cloud coverage.',
+      child: const SizedBox.shrink(),
+    );
+  }
+
+  CloudAccountModel _toAccount(CloudCoverageConnectorDto connector) {
+    final platform = switch (connector.provider.toUpperCase()) {
+      'AWS' => CloudPlatform.aws,
+      'GCP' => CloudPlatform.gcp,
+      'AZURE' => CloudPlatform.azure,
+      'OCI' => CloudPlatform.oci,
+      'OKTA' => CloudPlatform.okta,
+      _ => CloudPlatform.aws,
+    };
+    final isConnected = connector.status.toUpperCase() == 'CONNECTED';
+    return CloudAccountModel(
+      name: connector.name,
+      platform: platform,
+      accountId: connector.id,
+      region: 'Not available',
+      healthStatus: connector.status,
+      healthColor: isConnected
+          ? const Color(0xFF10B981)
+          : const Color(0xFFF59E0B),
+      riskScore: 0,
+      riskScoreColor: const Color(0xFF64748B),
+      criticalCount: 0,
+      highCount: 0,
+      mediumCount: 0,
+      lowCount: 0,
+      totalResources: connector.logCountTotal,
+      lastScan: connector.lastSyncAt?.toLocal().toString() ?? 'Never',
     );
   }
 }

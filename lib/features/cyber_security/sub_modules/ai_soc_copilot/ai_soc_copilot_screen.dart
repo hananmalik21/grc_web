@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/ai_soc_copilot/ai_soc_copilot_models.dart';
+import 'package:grc/core/permissions/permission_gate.dart';
+import 'package:grc/core/permissions/perm_keys.dart';
+import 'package:grc/core/permissions/permission_service.dart';
+import 'package:grc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/data/models/ai_copilot_dto.dart';
+import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/presentation/providers/ai_copilot_provider.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/ai_soc_copilot_header.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/copilot_input_bar.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/copilot_message_bubble.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/open_incidents_panel.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/quick_investigations_panel.dart';
 
-class AiSocCopilotScreen extends StatefulWidget {
+class AiSocCopilotScreen extends ConsumerStatefulWidget {
   const AiSocCopilotScreen({super.key});
 
   @override
-  State<AiSocCopilotScreen> createState() => _AiSocCopilotScreenState();
+  ConsumerState<AiSocCopilotScreen> createState() => _AiSocCopilotScreenState();
 }
 
-class _AiSocCopilotScreenState extends State<AiSocCopilotScreen> {
+class _AiSocCopilotScreenState extends ConsumerState<AiSocCopilotScreen> {
   final ScrollController _scrollController = ScrollController();
   late List<CopilotMessage> _messages;
-  bool _isGenerating = false;
 
   @override
   void initState() {
@@ -31,7 +37,8 @@ class _AiSocCopilotScreenState extends State<AiSocCopilotScreen> {
         sender: MessageSender.copilot,
         isIntro: true,
         timestamp: 'now',
-        content: "I'm your AI SOC Copilot. I correlate evidence across identity, cloud, network, application, and data layers to help you investigate faster.\n\nTry asking me about:\n• Suspicious login activity or brute force (e.g. \"INC-2847\")\n• Public cloud storage exposure (\"S3 bucket\" or \"F-2401\")\n• Privileged access and IAM risk\n• Compliance framework scores (\"NIST CSF\" or \"SOC 2\")\n• Malware incidents (\"INC-2842\")\n• Data exfiltration patterns (\"SharePoint download\")\n\nDescribe any security event and I'll correlate available evidence to assist your investigation.\n\n⚠ All containment actions require human approval before execution.",
+        content:
+            "I'm your AI SOC Copilot. I correlate evidence across identity, cloud, network, application, and data layers to help you investigate faster.\n\nTry asking me about:\n• Suspicious login activity or brute force (e.g. \"INC-2847\")\n• Public cloud storage exposure (\"S3 bucket\" or \"F-2401\")\n• Privileged access and IAM risk\n• Compliance framework scores (\"NIST CSF\" or \"SOC 2\")\n• Malware incidents (\"INC-2842\")\n• Data exfiltration patterns (\"SharePoint download\")\n\nDescribe any security event and I'll correlate available evidence to assist your investigation.\n\n⚠ All containment actions require human approval before execution.",
       ),
       const CopilotMessage(
         id: 'msg-user-1',
@@ -62,9 +69,11 @@ class _AiSocCopilotScreenState extends State<AiSocCopilotScreen> {
           'Notify HR and Legal immediately',
           'Assess whether downloaded files contain PII (GDPR 72hr notification)',
         ],
-        source: 'Microsoft 365 audit log · DLP telemetry · MDM inventory · HR system',
+        source:
+            'Microsoft 365 audit log · DLP telemetry · MDM inventory · HR system',
       ),
     ];
+    _messages = [_messages.first];
   }
 
   @override
@@ -86,116 +95,47 @@ class _AiSocCopilotScreenState extends State<AiSocCopilotScreen> {
   }
 
   void _handleSendQuery(String query) {
-    if (query.trim().isEmpty || _isGenerating) return;
+    if (query.trim().isEmpty || ref.read(aiCopilotProvider).isSending) return;
+    ref.read(aiCopilotProvider.notifier).sendMessage(query);
+  }
 
-    final now = TimeOfDay.now();
-    final minuteStr = now.minute.toString().padLeft(2, '0');
-    final period = now.period == DayPeriod.am ? 'AM' : 'PM';
-    final hour = now.hourOfPeriod == 0 ? 12 : now.hourOfPeriod;
-    final timeString = '$hour:$minuteStr $period';
-
-    setState(() {
-      _messages.add(
-        CopilotMessage(
-          id: 'msg-user-${DateTime.now().millisecondsSinceEpoch}',
-          sender: MessageSender.user,
-          timestamp: timeString,
-          content: query,
-        ),
-      );
-      _isGenerating = true;
-    });
-    _scrollToBottom();
-
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (!mounted) return;
-
-      final lower = query.toLowerCase();
-      CopilotMessage response;
-
-      if (lower.contains('s3') || lower.contains('f-2401')) {
-        response = CopilotMessage(
-          id: 'msg-ai-${DateTime.now().millisecondsSinceEpoch}',
-          sender: MessageSender.copilot,
-          timestamp: timeString,
-          incidentId: 'FINDING-2401',
-          content: 'Cloud Storage Exposure Analysis — F-2401 (S3 Bucket)',
-          confidence: 'VERY HIGH',
-          mitreMapping: 'MITRE ATT&CK T1530: Data from Cloud Storage',
-          riskLevel: '🔴 CRITICAL — Public Object Read & Write Permission',
-          riskColor: AppColors.cyberCritical,
-          evidence: [
-            'Bucket Name: prod-analytics-backup-2026 (AWS us-east-1)',
-            'Access Control: Principal "*" granted s3:GetObject, s3:PutObject in bucket policy',
-            'Discovered Content: 1.2 TB of unmasked transactional database dumps',
-            'Access Logs: 4 external unauthenticated GET requests detected from foreign IP ranges in past 2 hours',
-          ],
-          recommendedActions: [
-            'Enable S3 Public Access Block at AWS Account and Bucket level',
-            'Revoke overly permissive bucket policy and enforce IAM role authentication',
-            'Rotate API credentials embedded in recent dump files',
-            'Initiate digital forensics timeline on external IPs',
-          ],
-          source: 'AWS GuardDuty · Macie Data Classification · CloudTrail Access Log',
-        );
-      } else if (lower.contains('tor') || lower.contains('2847')) {
-        response = CopilotMessage(
-          id: 'msg-ai-${DateTime.now().millisecondsSinceEpoch}',
-          sender: MessageSender.copilot,
-          timestamp: timeString,
-          incidentId: 'INC-2847',
-          content: 'Tor Exit Node Correlation & Lateral Movement Analysis',
-          confidence: 'HIGH',
-          mitreMapping: 'MITRE ATT&CK T1078: Valid Accounts · T1090.003: Multi-hop Proxy',
-          riskLevel: '🟠 HIGH — Authenticated Session from Known Tor Exit Node',
-          riskColor: AppColors.cyberHigh,
-          evidence: [
-            'Source IP: 185.220.101.5 (Tor Exit Relay — Frankfurt, DE)',
-            'Target Identity: svc-analytics-prod@digify.internal',
-            'MFA Status: MFA challenged and approved via push notification',
-            'Post-Auth Actions: 12 API calls to IAM DescribeRoles and KMS ListKeys in 30s',
-          ],
-          recommendedActions: [
-            'Immediately revoke active OAuth refresh tokens and session for svc-analytics-prod',
-            'Enforce Conditional Access policy blocking known Tor/Anonymizer exit IPs',
-            'Rotate KMS master key KMS-KEY-9883',
-            'Quarantine the originating EC2/lambda session',
-          ],
-          source: 'Okta System Log · AWS CloudTrail · CrowdStrike Threat Graph',
-        );
-      } else {
-        response = CopilotMessage(
-          id: 'msg-ai-${DateTime.now().millisecondsSinceEpoch}',
-          sender: MessageSender.copilot,
-          timestamp: timeString,
-          content: 'Security Telemetry Correlation Report',
-          confidence: 'CONFIRMED',
-          mitreMapping: 'MITRE ATT&CK Enterprise Matrix',
-          riskLevel: '🔵 MEDIUM — Contextual Analysis Available',
-          riskColor: AppColors.primaryLight,
-          evidence: [
-            'Cross-layer security telemetry analyzed for: "$query"',
-            'Correlated 14 cloud telemetry logs, 3 active identity sessions, and 2 firewall rule sets',
-            'All critical perimeter boundaries remain actively defended',
-          ],
-          recommendedActions: [
-            'Review corresponding sub-module findings for remediation details',
-            'Run automated posture scan to update threat baseline',
-          ],
-          source: 'Unified SIEM & AI Security Graph',
-        );
-      }
-
-      setState(() {
-        _messages.add(response);
-        _isGenerating = false;
-      });
-      _scrollToBottom();
-    });
+  CopilotMessage _toCopilotMessage(AiMessageDto message) {
+    final createdAt = message.createdAt?.toLocal();
+    final timestamp = createdAt == null
+        ? 'now'
+        : '${createdAt.hour}:${createdAt.minute.toString().padLeft(2, '0')}';
+    return CopilotMessage(
+      id: message.id,
+      sender: message.role == 'USER'
+          ? MessageSender.user
+          : MessageSender.copilot,
+      timestamp: timestamp,
+      content: message.content,
+      evidence: message.citations
+          .map((citation) => '${citation.sourceType}: ${citation.sourceId}')
+          .toList(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(authProvider);
+    if (!PermissionService.instance.can(CyberPermKeys.aiCopilotQuery)) {
+      return PermissionGate(
+        permKey: CyberPermKeys.aiCopilotQuery,
+        fallback: _buildPermissionDenied(),
+        child: const SizedBox.shrink(),
+      );
+    }
+    final copilotState = ref.watch(aiCopilotProvider);
+    ref.listen<AiCopilotState>(aiCopilotProvider, (_, next) {
+      if (!next.isSending) _scrollToBottom();
+    });
+    final messages = [
+      ..._messages,
+      ...copilotState.messages.map(_toCopilotMessage),
+    ];
+
     final isDesktop = context.isDesktop;
     final padding = ResponsiveHelper.getPagePadding(context);
 
@@ -207,27 +147,34 @@ class _AiSocCopilotScreenState extends State<AiSocCopilotScreen> {
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildChatColumn(),
-                ),
+                Expanded(child: _buildChatColumn(messages, copilotState)),
                 const Gap(20),
-                SizedBox(
-                  width: 290.w,
-                  child: _buildRightSidePane(),
-                ),
+                SizedBox(width: 290.w, child: _buildRightSidePane()),
               ],
             )
           : Column(
               children: [
-                Expanded(
-                  child: _buildChatColumn(),
-                ),
+                Expanded(child: _buildChatColumn(messages, copilotState)),
               ],
             ),
     );
   }
 
-  Widget _buildChatColumn() {
+  Widget _buildPermissionDenied() {
+    return Container(
+      color: AppColors.cyberDarkBg,
+      alignment: Alignment.center,
+      child: const Text(
+        'You do not have permission to use AI SOC Copilot.',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildChatColumn(
+    List<CopilotMessage> messages,
+    AiCopilotState copilotState,
+  ) {
     return Column(
       children: [
         const AiSocCopilotHeader(),
@@ -236,18 +183,16 @@ class _AiSocCopilotScreenState extends State<AiSocCopilotScreen> {
           child: ListView.builder(
             controller: _scrollController,
             padding: EdgeInsets.zero,
-            itemCount: _messages.length,
+            itemCount: messages.length,
             itemBuilder: (context, index) {
-              return CopilotMessageBubble(
-                message: _messages[index],
-              );
+              return CopilotMessageBubble(message: messages[index]);
             },
           ),
         ),
         const Gap(12),
         CopilotInputBar(
           onSend: _handleSendQuery,
-          isGenerating: _isGenerating,
+          isGenerating: copilotState.isSending,
         ),
       ],
     );
@@ -258,13 +203,9 @@ class _AiSocCopilotScreenState extends State<AiSocCopilotScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          QuickInvestigationsPanel(
-            onSelectPrompt: _handleSendQuery,
-          ),
+          QuickInvestigationsPanel(onSelectPrompt: _handleSendQuery),
           const Gap(20),
-          OpenIncidentsPanel(
-            onSelectIncident: _handleSendQuery,
-          ),
+          OpenIncidentsPanel(onSelectIncident: _handleSendQuery),
         ],
       ),
     );

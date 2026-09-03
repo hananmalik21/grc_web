@@ -12,7 +12,8 @@ class CyberIncidentsMockData {
       owner: 'P. Nair',
       createdDate: '28 Jun 14:23',
       mitreCode: 'T1078',
-      description: '47 failed logins followed by successful auth from Frankfurt Tor node for Finance Analyst account.',
+      description:
+          '47 failed logins followed by successful auth from Frankfurt Tor node for Finance Analyst account.',
       evidence: [
         'User: j.martinez@corp.com',
         'Source IP: 185.220.101.47 (Tor Exit Node)',
@@ -32,7 +33,8 @@ class CyberIncidentsMockData {
       owner: 'Unassigned',
       createdDate: '28 Jun 13:51',
       mitreCode: 'T1048',
-      description: '4.7 GB downloaded across 2,847 files in 23 minutes by departing employee.',
+      description:
+          '4.7 GB downloaded across 2,847 files in 23 minutes by departing employee.',
       evidence: [
         'User: a.thompson@corp.com (Last day: 2026-06-30)',
         'Volume: 4.7 GB (Excel 47%, PDF 31%, Word 22%)',
@@ -52,7 +54,8 @@ class CyberIncidentsMockData {
       owner: 'A. Wong',
       createdDate: '27 Jun 22:14',
       mitreCode: 'T1021',
-      description: 'Compromised staging container attempted rapid SSH sweeps across internal RFC 1918 subnets.',
+      description:
+          'Compromised staging container attempted rapid SSH sweeps across internal RFC 1918 subnets.',
       evidence: [
         'Host: k8s-node-staging-04',
         'Port Scanned: TCP 22, 445',
@@ -71,7 +74,8 @@ class CyberIncidentsMockData {
       owner: 'C. Rodriguez',
       createdDate: '27 Jun 09:33',
       mitreCode: 'T1552',
-      description: 'AWS secret key committed in public open-source repository by contractor.',
+      description:
+          'AWS secret key committed in public open-source repository by contractor.',
       evidence: [
         'Repository: github.com/external-dev/frontend-demo',
         'Detected in: 4 minutes via secret scanner',
@@ -89,7 +93,8 @@ class CyberIncidentsMockData {
       owner: 'Unassigned',
       createdDate: '26 Jun 18:07',
       mitreCode: 'T1548',
-      description: 'Service account granted roles/owner without an approved change management request.',
+      description:
+          'Service account granted roles/owner without an approved change management request.',
       evidence: [
         'Principal: svc-cicd-runner@grc-cloud.iam',
         'Role: roles/owner (Project Level)',
@@ -108,15 +113,14 @@ class CyberIncidentsMockData {
       owner: 'P. Nair',
       createdDate: '25 Jun 11:22',
       mitreCode: 'T1059',
-      description: 'Ransomware executable blocked and quarantined by endpoint detection agent.',
+      description:
+          'Ransomware executable blocked and quarantined by endpoint detection agent.',
       evidence: [
         'Host: DESKTOP-ENG-4491',
         'Hash: sha256:4b9a102...',
         'Block Time: 120ms',
       ],
-      containmentSteps: [
-        'Host isolated and re-imaged with clean golden image',
-      ],
+      containmentSteps: ['Host isolated and re-imaged with clean golden image'],
     ),
   ];
 }

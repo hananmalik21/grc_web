@@ -40,7 +40,14 @@ class CyberDashboardMockData {
     ),
   ];
 
-  static const List<String> alertVolumeXLabels = ['6/1', '6/6', '6/11', '6/16', '6/21', '6/26'];
+  static const List<String> alertVolumeXLabels = [
+    '6/1',
+    '6/6',
+    '6/11',
+    '6/16',
+    '6/21',
+    '6/26',
+  ];
   static const List<int> alertVolumeYLabels = [0, 30, 60, 90, 120];
 
   static const List<List<double>> alertVolumeSeriesData = [

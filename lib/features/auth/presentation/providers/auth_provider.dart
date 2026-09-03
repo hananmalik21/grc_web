@@ -26,6 +26,7 @@ class AuthState {
   final String? error;
   final LoginFeedback? pendingLoginFeedback;
   final int? enterpriseId;
+  final List<String> permissions;
 
   AuthState({
     required this.isAuthenticated,
@@ -34,6 +35,7 @@ class AuthState {
     this.error,
     this.pendingLoginFeedback,
     this.enterpriseId,
+    this.permissions = const [],
   });
 
   AuthState copyWith({
@@ -43,6 +45,7 @@ class AuthState {
     String? error,
     Object? pendingLoginFeedback = _undefined,
     Object? enterpriseId = _undefined,
+    List<String>? permissions,
   }) {
     return AuthState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
@@ -55,6 +58,7 @@ class AuthState {
       enterpriseId: identical(enterpriseId, _undefined)
           ? this.enterpriseId
           : enterpriseId as int?,
+      permissions: permissions ?? this.permissions,
     );
   }
 }
@@ -75,10 +79,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final token = await _storage.getToken();
       if (token != null && token.isNotEmpty && looksLikeJwt(token)) {
         final enterpriseId = await _storage.getEnterpriseId();
+        final permissions = await _storage.getPermissions();
         state = state.copyWith(
           isAuthenticated: true,
           isRestoring: false,
           enterpriseId: enterpriseId,
+          permissions: permissions,
         );
         return;
       }
@@ -121,7 +127,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           return;
         }
         await _storage.saveToken(access);
-        if (response.refreshToken != null && response.refreshToken!.isNotEmpty) {
+        if (response.refreshToken != null &&
+            response.refreshToken!.isNotEmpty) {
           await _storage.saveRefreshToken(response.refreshToken!);
         }
         await _storage.saveUserGuid(response.data.userGuid);
@@ -134,6 +141,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isAuthenticated: true,
           isLoading: false,
           enterpriseId: response.data.enterpriseId,
+          permissions: response.data.permissions,
           pendingLoginFeedback: const LoginFeedback(success: true),
         );
       } else {
@@ -211,10 +219,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         industry: industry?.trim(),
       );
 
-      if (response.success && response.accessToken != null && response.accessToken!.isNotEmpty) {
+      if (response.success &&
+          response.accessToken != null &&
+          response.accessToken!.isNotEmpty) {
         final access = response.accessToken!;
         await _storage.saveToken(access);
-        if (response.refreshToken != null && response.refreshToken!.isNotEmpty) {
+        if (response.refreshToken != null &&
+            response.refreshToken!.isNotEmpty) {
           await _storage.saveRefreshToken(response.refreshToken!);
         }
         await _storage.saveUserGuid(response.data.userGuid);
@@ -226,6 +237,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isAuthenticated: true,
           isLoading: false,
           enterpriseId: response.data.enterpriseId,
+          permissions: response.data.permissions,
           pendingLoginFeedback: const LoginFeedback(success: true),
         );
       } else {
