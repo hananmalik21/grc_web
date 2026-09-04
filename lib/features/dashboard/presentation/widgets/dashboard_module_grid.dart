@@ -40,14 +40,12 @@ class _DashboardModuleGridState extends ConsumerState<DashboardModuleGrid> {
     final double spacing = 16.r;
 
     int columns = 5;
-    if (maxW < 540) {
+    if (maxW < 450) {
       columns = 1;
-    } else if (maxW < 780) {
+    } else if (maxW < 600) {
       columns = 2;
-    } else if (maxW < 960) {
+    } else if (maxW < 800) {
       columns = 3;
-    } else if (maxW < 1000) {
-      columns = 4;
     } else {
       columns = 5;
     }
@@ -70,11 +68,28 @@ class _DashboardModuleGridState extends ConsumerState<DashboardModuleGrid> {
         final maxW = constraints.maxWidth;
         final spec = _gridSpecForWidth(maxW);
 
-        return ReorderableWrap(
-          spacing: spec.spacing,
-          runSpacing: 16.h,
-          alignment: WrapAlignment.start,
-          needsLongPressDraggable: spec.needsLongPress,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(bottom: 16.h),
+              child: Text(
+                'Modules',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : const Color(0xFF1E293B),
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+            ReorderableWrap(
+              spacing: spec.spacing,
+              runSpacing: 16.h,
+              alignment: WrapAlignment.start,
+              needsLongPressDraggable: spec.needsLongPress,
           buildDraggableFeedback: (context, boxConstraints, child) {
             return Material(
               type: MaterialType.transparency,
@@ -105,8 +120,10 @@ class _DashboardModuleGridState extends ConsumerState<DashboardModuleGrid> {
               ),
             );
           }),
-        );
-      },
-    );
-  }
+        ),
+        ],
+      );
+    },
+  );
+}
 }

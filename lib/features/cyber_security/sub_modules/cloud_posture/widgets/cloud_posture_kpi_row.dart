@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CloudPostureKpiRow extends StatelessWidget {
   const CloudPostureKpiRow({super.key});
@@ -99,12 +100,21 @@ class _PostureKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     return Container(
-      padding: EdgeInsets.all(14.r),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,30 +125,30 @@ class _PostureKpiCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: AppColors.textTertiaryDark,
-                  fontSize: 10.sp,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
                 ),
               ),
-              Icon(icon, size: 15.sp, color: accentColor),
+              Icon(icon, size: 18.sp, color: accentColor),
             ],
           ),
-          Gap(8.h),
+          Gap(12.h),
           Text(
             count,
             style: TextStyle(
-              color: AppColors.textPrimaryDark,
-              fontSize: 22.sp,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: 20.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
-          Gap(4.h),
+          Gap(6.h),
           Text(
             subtitle,
             style: TextStyle(
-              color: AppColors.textPlaceholderDark,
-              fontSize: 10.5.sp,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              fontSize: 11.sp,
               fontWeight: FontWeight.w400,
             ),
             maxLines: 1,

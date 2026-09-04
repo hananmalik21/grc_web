@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CyberScreenLayout extends StatelessWidget {
   final String title;
@@ -26,6 +27,7 @@ class CyberScreenLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = context.isMobile;
+    final isDark = context.isDark;
     final defaultPadding = ResponsiveHelper.getPagePadding(context);
     final effectivePadding = customPadding ?? defaultPadding;
 
@@ -38,9 +40,9 @@ class CyberScreenLayout extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                color: const Color(0xFF0F172A), // Dark slate title
-                fontSize: isMobile ? 20.sp : 24.sp,
-                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontSize: isMobile ? 18.sp : 20.sp,
+                fontWeight: FontWeight.w700,
                 letterSpacing: -0.5,
               ),
             ),
@@ -49,8 +51,8 @@ class CyberScreenLayout extends StatelessWidget {
               Text(
                 subtitle!,
                 style: TextStyle(
-                  color: const Color(0xFF64748B), // Muted grey subtitle
-                  fontSize: isMobile ? 11.5.sp : 13.sp,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  fontSize: isMobile ? 10.sp : 11.5.sp,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -62,7 +64,7 @@ class CyberScreenLayout extends StatelessWidget {
           return titleSection;
         }
 
-        if (isMobile) {
+        if (constraints.maxWidth < 550) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -96,7 +98,7 @@ class CyberScreenLayout extends StatelessWidget {
     );
 
     return ColoredBox(
-      color: const Color(0xFFF8FAFC), // Solid light mode background
+      color: isDark ? const Color(0xFF141414) : const Color(0xFFF3F6FA),
       child: isScrollable
           ? SingleChildScrollView(
               padding: effectivePadding.add(EdgeInsets.only(bottom: 24.h)),

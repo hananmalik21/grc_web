@@ -33,12 +33,12 @@ class DashboardDesktopLayout extends StatelessWidget {
               Text(
                 'MODULES',
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFF94A3B8) // slate-400
-                      : const Color(0xFF64748B), // slate-500
-                  letterSpacing: 1.2,
+                      ? Colors.white
+                      : const Color(0xFF1E293B),
+                  letterSpacing: -0.2,
                 ),
               ),
               Text(
@@ -60,7 +60,20 @@ class DashboardDesktopLayout extends StatelessWidget {
           onButtonTap: onButtonTap,
           isLoading: isLoadingModules,
         ),
-        SizedBox(height: 32.h), // Space below cards
+        SizedBox(height: 50.h),
+        Padding(
+          padding: EdgeInsets.only(bottom: 16.h),
+          child: Text(
+            'Task Management & HR',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : const Color(0xFF1E293B),
+            ),
+          ),
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

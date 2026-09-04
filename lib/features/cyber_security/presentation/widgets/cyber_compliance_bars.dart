@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/cyber_security/data/models/compliance_dto.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CyberComplianceBars extends StatefulWidget {
   const CyberComplianceBars({super.key, required this.frameworks});
@@ -27,20 +31,22 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final isDark = context.isDark;
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 12.r : 18.r),
       decoration: BoxDecoration(
-        color: Colors.white, // Solid white card
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +64,7 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                   Text(
                     'FRAMEWORK COMPLIANCE',
                     style: TextStyle(
-                      color: const Color(0xFF0F172A),
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                       fontSize: isMobile ? 13.sp : 14.sp,
                       fontWeight: FontWeight.w700,
                     ),
@@ -81,7 +87,7 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
             Text(
               'No framework assessments available',
               style: TextStyle(
-                color: const Color(0xFF64748B),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 fontSize: 12.sp,
               ),
             )
@@ -137,7 +143,9 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
     return Text(
       text,
       style: TextStyle(
-        color: const Color(0xFF64748B),
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF94A3B8) 
+            : const Color(0xFF64748B),
         fontSize: 9.sp,
         fontWeight: FontWeight.w500,
       ),
@@ -195,8 +203,8 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                       label,
                       style: TextStyle(
                         color: isHovered
-                            ? const Color(0xFF0F172A)
-                            : const Color(0xFF334155),
+                            ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF0F172A))
+                            : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF334155)),
                         fontSize: isMobile ? 10.sp : 11.sp,
                         fontWeight: isHovered
                             ? FontWeight.w700
@@ -212,7 +220,9 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                       borderRadius: BorderRadius.circular(4.r),
                       child: Container(
                         height: 12.h,
-                        color: const Color(0xFFF1F5F9),
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? const Color(0xFF334155) 
+                            : const Color(0xFFF1F5F9),
                         child: FractionallySizedBox(
                           alignment: Alignment.centerLeft,
                           widthFactor: percentage,
@@ -236,7 +246,7 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                       '$pctInt%',
                       textAlign: TextAlign.end,
                       style: TextStyle(
-                        color: isHovered ? barColor : const Color(0xFF0F172A),
+                        color: isHovered ? barColor : (Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF0F172A)),
                         fontSize: isMobile ? 10.sp : 11.sp,
                         fontWeight: FontWeight.w700,
                       ),

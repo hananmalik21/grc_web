@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CloudPostureTabBar extends StatelessWidget {
   final int activeIndex;
@@ -18,20 +19,21 @@ class CloudPostureTabBar extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildTab(index: 0, label: 'Findings', badge: '20'),
+          _buildTab(context, index: 0, label: 'Findings', badge: '20'),
           const Gap(24),
-          _buildTab(index: 1, label: 'Cloud Accounts', badge: '4'),
+          _buildTab(context, index: 1, label: 'Cloud Accounts', badge: '4'),
           const Gap(24),
-          _buildTab(index: 2, label: 'Compliance Mapping'),
+          _buildTab(context, index: 2, label: 'Compliance Mapping'),
           const Gap(24),
-          _buildTab(index: 3, label: 'Scan History', badge: '7'),
+          _buildTab(context, index: 3, label: 'Scan History', badge: '7'),
         ],
       ),
     );
   }
 
-  Widget _buildTab({required int index, required String label, String? badge}) {
+  Widget _buildTab(BuildContext context, {required int index, required String label, String? badge}) {
     final isSelected = activeIndex == index;
+    final isDark = context.isDark;
 
     return InkWell(
       onTap: () => onTabChanged(index),
@@ -52,7 +54,9 @@ class CloudPostureTabBar extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                color: isSelected 
+                  ? (isDark ? Colors.white : const Color(0xFF0F172A)) 
+                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                 fontSize: 13.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
@@ -64,7 +68,7 @@ class CloudPostureTabBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? const Color(0xFF00B4D8).withValues(alpha: 0.2)
-                      : const Color(0xFF1E293B),
+                      : (isDark ? const Color(0xFF2D2D2F) : const Color(0xFFE2E8F0)),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
@@ -72,7 +76,7 @@ class CloudPostureTabBar extends StatelessWidget {
                   style: TextStyle(
                     color: isSelected
                         ? const Color(0xFF00B4D8)
-                        : const Color(0xFF64748B),
+                        : (isDark ? const Color(0xFF64748B) : const Color(0xFF64748B)),
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w700,
                   ),

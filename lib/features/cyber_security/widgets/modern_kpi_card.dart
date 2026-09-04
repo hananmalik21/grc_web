@@ -41,27 +41,20 @@ class _ModernKpiCardState extends State<ModernKpiCard> {
         transform: _isHovered
             ? (Matrix4.identity()..translate(0, -2, 0))
             : Matrix4.identity(),
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h), // Slightly tighter padding
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: _isHovered
-                ? const Color(0xFF0284C7)
-                : isDark
-                    ? const Color(0xFF334155)
-                    : const Color(0xFFE2E8F0),
-            width: _isHovered ? 1.4 : 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: _isHovered
-                  ? const Color(0xFF0284C7).withValues(alpha: 0.12)
-                  : const Color(0xFF0F172A).withValues(alpha: 0.04),
-              blurRadius: _isHovered ? 16 : 10,
-              offset: Offset(0, _isHovered ? 6 : 2),
-            ),
-          ],
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: BorderRadius.circular(24.r), // Soft large radius
+          // No border for soft UI
+          boxShadow: isDark
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04), // Subtler flat shadow
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,12 +115,10 @@ class _ModernKpiCardState extends State<ModernKpiCard> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B),
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.6,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    fontSize: 11.sp, // Match subtitle size
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
                   ),
                 ),
                 Gap(4.h),
@@ -137,7 +128,7 @@ class _ModernKpiCardState extends State<ModernKpiCard> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF0F172A),
-                    fontSize: 22.sp,
+                    fontSize: 18.sp, // Reduced from 22.sp for min width support
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
                   ),

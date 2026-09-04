@@ -61,7 +61,7 @@ class CyberSecurityScreen extends ConsumerWidget {
     final tabIndex = ref.watch(cyberSecurityTabStateProvider).currentTabIndex;
 
     return ColoredBox(
-      color: const Color(0xFFF8FAFC), // Solid light mode background
+      color: const Color(0xFFF3F6FA), // Match reference image background
       child: _buildActiveScreen(tabIndex),
     );
   }

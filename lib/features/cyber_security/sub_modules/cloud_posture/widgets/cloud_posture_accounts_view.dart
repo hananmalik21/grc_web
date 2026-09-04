@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/cloud_account_model.dart';
 import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CloudPostureAccountsView extends StatelessWidget {
   final List<CloudAccountModel>? accounts;
@@ -18,6 +19,7 @@ class CloudPostureAccountsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveAccounts =
         accounts ?? CyberCloudPostureMockData.getMockAccounts();
+    final isDark = context.isDark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +38,7 @@ class CloudPostureAccountsView extends StatelessWidget {
                       (acc) => Expanded(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 5.w),
-                          child: _buildAccountCard(acc),
+                          child: _buildAccountCard(context, acc, isDark),
                         ),
                       ),
                     )
@@ -49,17 +51,17 @@ class CloudPostureAccountsView extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildAccountCard(effectiveAccounts[0])),
+                      Expanded(child: _buildAccountCard(context, effectiveAccounts[0], isDark)),
                       const Gap(10),
-                      Expanded(child: _buildAccountCard(effectiveAccounts[1])),
+                      Expanded(child: _buildAccountCard(context, effectiveAccounts[1], isDark)),
                     ],
                   ),
                   const Gap(10),
                   Row(
                     children: [
-                      Expanded(child: _buildAccountCard(effectiveAccounts[2])),
+                      Expanded(child: _buildAccountCard(context, effectiveAccounts[2], isDark)),
                       const Gap(10),
-                      Expanded(child: _buildAccountCard(effectiveAccounts[3])),
+                      Expanded(child: _buildAccountCard(context, effectiveAccounts[3], isDark)),
                     ],
                   ),
                 ],
@@ -71,7 +73,7 @@ class CloudPostureAccountsView extends StatelessWidget {
                   .map(
                     (acc) => Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
-                      child: _buildAccountCard(acc),
+                      child: _buildAccountCard(context, acc, isDark),
                     ),
                   )
                   .toList(),
@@ -85,27 +87,97 @@ class CloudPostureAccountsView extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFF070C18),
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: const Color(0xFF131E30)),
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(28.r),
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Table Header (Matches requested design)
               Padding(
-                padding: EdgeInsets.all(16.r),
-                child: Text(
-                  'ACCOUNT FINDINGS BREAKDOWN',
-                  style: TextStyle(
-                    color: const Color(0xFF5E738E),
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                  ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Account Breakdown',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Gap(4),
+                        Row(
+                          children: [
+                            Text(
+                              'Showing ${effectiveAccounts.length} records ',
+                              style: TextStyle(
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                            Text(
+                              '(filtered)',
+                              style: TextStyle(
+                                color: const Color(0xFF10B981),
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'TOTAL ACCOUNTS',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const Gap(2),
+                        Text(
+                          '${effectiveAccounts.length}',
+                          style: TextStyle(
+                            color: const Color(0xFF10B981),
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const Divider(color: Color(0xFF131E30), height: 1),
-              LayoutBuilder(
+              Divider(
+                height: 1,
+                color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
+              ),
+
+              // Scrollable Table Body
+              SizedBox(
+                height: 400.h,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: LayoutBuilder(
                 builder: (context, constraints) {
                   final tableMinWidth = constraints.maxWidth > 900
                       ? constraints.maxWidth
@@ -121,7 +193,7 @@ class CloudPostureAccountsView extends StatelessWidget {
                         horizontalMargin: 16.w,
                         columnSpacing: 16.w,
                         headingRowColor: WidgetStateProperty.all(
-                          const Color(0xFF080E1C),
+                          isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF8FAFC),
                         ),
                         columns: const [
                           DataColumn(label: _HeaderCell('ACCOUNT')),
@@ -142,8 +214,8 @@ class CloudPostureAccountsView extends StatelessWidget {
                               DataCell(
                                 Text(
                                   acc.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -178,8 +250,8 @@ class CloudPostureAccountsView extends StatelessWidget {
                               DataCell(
                                 Text(
                                   acc.accountId,
-                                  style: const TextStyle(
-                                    color: Color(0xFF94A3B8),
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                     fontFamily: 'monospace',
                                   ),
                                 ),
@@ -187,8 +259,8 @@ class CloudPostureAccountsView extends StatelessWidget {
                               DataCell(
                                 Text(
                                   acc.region,
-                                  style: const TextStyle(
-                                    color: Color(0xFF94A3B8),
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                   ),
                                 ),
                               ),
@@ -244,16 +316,16 @@ class CloudPostureAccountsView extends StatelessWidget {
                               DataCell(
                                 Text(
                                   acc.lastScan,
-                                  style: const TextStyle(
-                                    color: Color(0xFF64748B),
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                                   ),
                                 ),
                               ),
                               DataCell(
                                 Text(
                                   '${acc.totalResources}',
-                                  style: const TextStyle(
-                                    color: Color(0xFFCBD5E1),
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                                   ),
                                 ),
                               ),
@@ -265,20 +337,30 @@ class CloudPostureAccountsView extends StatelessWidget {
                   );
                 },
               ),
-            ],
+            ),
+          ),
+        ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildAccountCard(CloudAccountModel acc) {
+  Widget _buildAccountCard(BuildContext context, CloudAccountModel acc, bool isDark) {
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
-        color: const Color(0xFF131D31),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,16 +417,16 @@ class CloudPostureAccountsView extends StatelessWidget {
           Text(
             acc.name,
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const Gap(2),
           Text(
             acc.accountId,
             style: TextStyle(
-              color: const Color(0xFF64748B),
+              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
               fontSize: 11.sp,
               fontFamily: 'monospace',
             ),
@@ -374,10 +456,10 @@ class CloudPostureAccountsView extends StatelessWidget {
           ),
           const Gap(4),
           Container(
-            height: 3.h,
+            height: 4.h,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
+              color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(2.r),
             ),
             child: LayoutBuilder(
@@ -479,7 +561,9 @@ class _HeaderCell extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: const Color(0xFF5E738E),
+        color: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF94A3B8) 
+          : const Color(0xFF64748B),
         fontSize: 10.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,

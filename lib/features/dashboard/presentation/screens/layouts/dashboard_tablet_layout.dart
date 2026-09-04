@@ -27,7 +27,21 @@ class DashboardTabletLayout extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DashboardModuleGrid(buttons: buttons, onButtonTap: onButtonTap, isLoading: isLoadingModules),
-        Gap(14.h),
+        Gap(24.h),
+        Padding(
+          padding: EdgeInsets.only(bottom: 16.h),
+          child: Text(
+            'Task Management & HR',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : const Color(0xFF1E293B),
+              letterSpacing: -0.2,
+            ),
+          ),
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

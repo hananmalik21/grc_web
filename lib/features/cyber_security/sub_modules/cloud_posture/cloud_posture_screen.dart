@@ -9,7 +9,7 @@ import 'package:grc/core/permissions/permission_gate.dart';
 import 'package:grc/core/permissions/perm_keys.dart';
 import 'package:grc/core/permissions/permission_service.dart';
 import 'package:grc/core/services/toast_service.dart';
-import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/data/models/cloud_posture_dto.dart';
@@ -123,18 +123,45 @@ class _CloudPostureScreenState extends ConsumerState<CloudPostureScreen> {
       subtitle:
           'Multi-cloud inventory, misconfigurations, and compliance findings',
       actions: [
-        AppButton(
-          label: 'Scan Now',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed: _triggerScan,
+        InkWell(
+          onTap: _triggerScan,
+          borderRadius: BorderRadius.circular(8.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00B4D8),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              'Scan Now',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
         const Gap(8),
-        AppButton(
-          label: 'Export',
-          type: AppButtonType.secondary,
-          size: AppButtonSize.sm,
-          onPressed: _exportReport,
+        InkWell(
+          onTap: _exportReport,
+          borderRadius: BorderRadius.circular(8.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border.all(color: const Color(0xFF00B4D8)),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              'Export',
+              style: TextStyle(
+                color: const Color(0xFF00B4D8),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ],
       child: Column(

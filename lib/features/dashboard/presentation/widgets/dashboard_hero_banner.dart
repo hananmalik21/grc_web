@@ -199,7 +199,7 @@ class DashboardHeroBanner extends ConsumerWidget {
                 text: '$greeting\n',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: isMobile ? 24.sp : 32.sp,
+                  fontSize: isMobile ? 18.sp : 24.sp,
                   fontWeight: FontWeight.w800,
                   height: 1.15,
                   letterSpacing: -0.5,
@@ -209,7 +209,7 @@ class DashboardHeroBanner extends ConsumerWidget {
                 text: userName,
                 style: TextStyle(
                   color: const Color(0xFFE0F2FE), // Very light sky tint
-                  fontSize: isMobile ? 24.sp : 32.sp,
+                  fontSize: isMobile ? 18.sp : 24.sp,
                   fontWeight: FontWeight.w800,
                   height: 1.15,
                   letterSpacing: -0.5,
@@ -227,7 +227,7 @@ class DashboardHeroBanner extends ConsumerWidget {
             'Manage governance, risks, compliance, and telemetry from a connected workspace with real-time cyber security intelligence.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.88),
-              fontSize: isMobile ? 12.5.sp : 14.sp,
+              fontSize: isMobile ? 11.sp : 12.sp,
               height: 1.45,
             ),
           ),

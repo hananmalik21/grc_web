@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/compliance_mapping_model.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
 import 'package:grc/features/cyber_security/data/mock/cyber_cloud_posture_mock_data.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/create_remediation_ticket_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/cloud_posture/dialogs/finding_detail_modal.dart';
 
@@ -22,6 +23,7 @@ class CloudPostureComplianceView extends StatelessWidget {
     final findings =
         complianceFindings ??
         CyberCloudPostureMockData.getMockComplianceFindings();
+    final isDark = context.isDark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,8 +32,8 @@ class CloudPostureComplianceView extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F1E36),
-            borderRadius: BorderRadius.circular(8.r),
+            color: isDark ? const Color(0xFF0F1E36) : const Color(0xFFE0F2FE),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: const Color(0xFF00B4D8).withValues(alpha: 0.3),
               width: 1,
@@ -50,7 +52,7 @@ class CloudPostureComplianceView extends StatelessWidget {
                 child: Text(
                   'Each finding is automatically mapped to its relevant control IDs across NIST CSF, CIS Controls, ISO 27001, and SOC 2. Click a finding row to view AI-generated remediation guidance.',
                   style: TextStyle(
-                    color: const Color(0xFF94A3B8),
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     fontSize: 11.5.sp,
                     height: 1.4,
                   ),
@@ -66,13 +68,99 @@ class CloudPostureComplianceView extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFF070C18),
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: const Color(0xFF131E30)),
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(28.r),
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final tableMinWidth = constraints.maxWidth > 950
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Table Header (Matches requested design)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Compliance Findings',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Gap(4),
+                        Row(
+                          children: [
+                            Text(
+                              'Showing ${findings.length} records ',
+                              style: TextStyle(
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                            Text(
+                              '(filtered)',
+                              style: TextStyle(
+                                color: const Color(0xFF10B981),
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'TOTAL FINDINGS',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const Gap(2),
+                        Text(
+                          '${findings.length}',
+                          style: TextStyle(
+                            color: const Color(0xFF10B981),
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
+              ),
+
+              // Scrollable Table Body
+              SizedBox(
+                height: 400.h,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final tableMinWidth = constraints.maxWidth > 950
                   ? constraints.maxWidth
                   : 950.0;
               return SingleChildScrollView(
@@ -86,7 +174,7 @@ class CloudPostureComplianceView extends StatelessWidget {
                     horizontalMargin: 16.w,
                     columnSpacing: 18.w,
                     headingRowColor: WidgetStateProperty.all(
-                      const Color(0xFF080E1C),
+                      isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF8FAFC),
                     ),
                     columns: const [
                       DataColumn(label: _ComplianceHeaderCell('FINDING ID')),
@@ -109,7 +197,7 @@ class CloudPostureComplianceView extends StatelessWidget {
                                 f.id,
                                 style: TextStyle(
                                   color: const Color(0xFF00B4D8),
-                                  fontSize: 12.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -121,8 +209,8 @@ class CloudPostureComplianceView extends StatelessWidget {
                             Text(
                               f.type,
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                fontSize: 11.sp,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -172,7 +260,7 @@ class CloudPostureComplianceView extends StatelessWidget {
                             Text(
                               f.cisControls,
                               style: TextStyle(
-                                color: const Color(0xFFCBD5E1),
+                                color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                                 fontSize: 11.5.sp,
                               ),
                             ),
@@ -183,7 +271,7 @@ class CloudPostureComplianceView extends StatelessWidget {
                             Text(
                               f.iso27001,
                               style: TextStyle(
-                                color: const Color(0xFF94A3B8),
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 fontSize: 11.5.sp,
                               ),
                             ),
@@ -229,6 +317,10 @@ class CloudPostureComplianceView extends StatelessWidget {
             },
           ),
         ),
+      ),
+    ],
+  ),
+),
       ],
     );
   }
@@ -295,7 +387,9 @@ class _ComplianceHeaderCell extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: const Color(0xFF5E738E),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF94A3B8)
+            : const Color(0xFF64748B),
         fontSize: 10.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
