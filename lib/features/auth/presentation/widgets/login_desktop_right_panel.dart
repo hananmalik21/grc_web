@@ -5,10 +5,12 @@ import 'package:grc/features/auth/presentation/widgets/login_desktop_card.dart';
 class LoginDesktopRightPanel extends StatelessWidget {
   const LoginDesktopRightPanel({
     super.key,
-    required this.emailController,
+    required this.usernameController,
     required this.passwordController,
-    required this.emailFocusNode,
+    required this.enterpriseIdController,
+    required this.usernameFocusNode,
     required this.passwordFocusNode,
+    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
@@ -16,10 +18,12 @@ class LoginDesktopRightPanel extends StatelessWidget {
     this.onSsoTap,
   });
 
-  final TextEditingController emailController;
+  final TextEditingController usernameController;
   final TextEditingController passwordController;
-  final FocusNode emailFocusNode;
+  final TextEditingController enterpriseIdController;
+  final FocusNode usernameFocusNode;
   final FocusNode passwordFocusNode;
+  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -38,10 +42,12 @@ class LoginDesktopRightPanel extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: _formMaxWidth.w),
             child: LoginDesktopCard(
-              emailController: emailController,
+              usernameController: usernameController,
               passwordController: passwordController,
-              emailFocusNode: emailFocusNode,
+              enterpriseIdController: enterpriseIdController,
+              usernameFocusNode: usernameFocusNode,
               passwordFocusNode: passwordFocusNode,
+              enterpriseIdFocusNode: enterpriseIdFocusNode,
               rememberMe: rememberMe,
               onRememberMeChanged: onRememberMeChanged,
               onLogin: onLogin,
