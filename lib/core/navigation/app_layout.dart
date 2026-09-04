@@ -3,7 +3,6 @@ import 'package:grc/core/navigation/sidebar/sidebar.dart';
 import 'package:grc/core/navigation/sidebar/sidebar_provider.dart';
 import 'package:grc/core/permissions/permission_service.dart';
 import 'package:grc/core/services/initialization/providers/initialization_providers.dart';
-import 'package:grc/core/services/responsive_service.dart';
 import 'package:grc/core/widgets/common/keyboard_scroll_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,9 +17,9 @@ class AppLayout extends ConsumerWidget {
     ref.watch(enterpriseBootstrapProvider);
     ref.read(appInitializationAfterAuthProvider);
     ref.watch(permissionsBootstrapProvider);
-    final isDesktop = ref.screenLayout.isDesktop;
+    final width = MediaQuery.sizeOf(context).width;
     final isSidebarExpanded = ref.watch(sidebarProvider);
-    final useDrawer = !isDesktop;
+    final useDrawer = width < 900;
 
     return Scaffold(
       onDrawerChanged: useDrawer

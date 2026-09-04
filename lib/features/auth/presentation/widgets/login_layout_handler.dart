@@ -1,4 +1,3 @@
-import 'package:grc/core/services/responsive_service.dart';
 import 'package:grc/features/auth/presentation/widgets/login_compact_layout.dart';
 import 'package:grc/features/auth/presentation/widgets/login_desktop_layout.dart';
 import 'package:flutter/material.dart';
@@ -30,9 +29,10 @@ class LoginLayoutHandler extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return LayoutBreaker(
-      builder: (context, layout, _) {
-        if (layout.isDesktop) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Show side-by-side (left hero panel + right sign-in card) on laptops and desktops (>= 960px)
+        if (constraints.maxWidth >= 960) {
           return LoginDesktopLayout(
             emailController: emailController,
             passwordController: passwordController,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/features/cyber_security/widgets/modern_kpi_card.dart';
 
 class NetworkKpiRow extends StatelessWidget {
   const NetworkKpiRow({super.key});
@@ -99,53 +100,13 @@ class _NetworkKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.r),
-      decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: AppColors.textTertiaryDark,
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              Icon(icon, size: 15.sp, color: accentColor),
-            ],
-          ),
-          Gap(8.h),
-          Text(
-            value,
-            style: TextStyle(
-              color: AppColors.textPrimaryDark,
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Gap(4.h),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: AppColors.textPlaceholderDark,
-              fontSize: 10.5.sp,
-              fontWeight: FontWeight.w400,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+    return ModernKpiCard(
+      label: title,
+      value: value,
+      icon: icon,
+      iconColor: accentColor,
+      trend: subtitle,
+      isPositiveTrend: true,
     );
   }
 }

@@ -68,6 +68,7 @@ mixin PermissionVisibilityMixin {
 
   bool canAccessDashboardButtonId(String buttonId) {
     if (PermissionService.instance.isBypassAllPermissions) return true;
+    if (buttonId.startsWith('dash-')) return true;
     if (buttonId == NavItemIds.cyberSecurityButton ||
         buttonId == NavItemIds.cyberSecurity) {
       return _canAccessCyberSecurity();
