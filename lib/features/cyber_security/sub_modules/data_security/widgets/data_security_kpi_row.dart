@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class DataSecurityKpiRow extends StatelessWidget {
   const DataSecurityKpiRow({super.key});
@@ -10,32 +12,31 @@ class DataSecurityKpiRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= 950;
-        final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 950;
 
         final cards = [
           const _DataKpiCard(
             title: 'DATA SOURCES',
             value: '68',
             icon: Icons.storage_rounded,
-            accentColor: Color(0xFF00BCD4),
+            accentColor: AppColors.cyberLow,
           ),
           const _DataKpiCard(
             title: 'RESTRICTED DATA',
             value: '12',
             icon: Icons.lock_outline_rounded,
-            accentColor: Color(0xFFEF4444),
+            accentColor: AppColors.cyberCritical,
           ),
           const _DataKpiCard(
             title: 'UNENCRYPTED',
             value: '4',
             icon: Icons.warning_amber_rounded,
-            accentColor: Color(0xFFF97316),
+            accentColor: AppColors.cyberHigh,
           ),
           const _DataKpiCard(
             title: 'PRIVACY RISKS',
             value: '9',
             icon: Icons.info_outline_rounded,
-            accentColor: Color(0xFFF59E0B),
+            accentColor: AppColors.cyberMedium,
           ),
         ];
 
@@ -54,37 +55,24 @@ class DataSecurityKpiRow extends StatelessWidget {
           );
         }
 
-        if (isTablet) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(child: cards[0]),
-                  const Gap(10),
-                  Expanded(child: cards[1]),
-                ],
-              ),
-              const Gap(10),
-              Row(
-                children: [
-                  Expanded(child: cards[2]),
-                  const Gap(10),
-                  Expanded(child: cards[3]),
-                ],
-              ),
-            ],
-          );
-        }
-
         return Column(
-          children: cards
-              .map(
-                (c) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: c,
-                ),
-              )
-              .toList(),
+          children: [
+            Row(
+              children: [
+                Expanded(child: cards[0]),
+                Gap(10.w),
+                Expanded(child: cards[1]),
+              ],
+            ),
+            Gap(10.h),
+            Row(
+              children: [
+                Expanded(child: cards[2]),
+                Gap(10.w),
+                Expanded(child: cards[3]),
+              ],
+            ),
+          ],
         );
       },
     );
@@ -106,12 +94,22 @@ class _DataKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
-        color: const Color(0xFF09101F),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0xFF142036)),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,8 +120,8 @@ class _DataKpiCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: const Color(0xFF5E738E),
-                  fontSize: 10.sp,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
                 ),
@@ -131,12 +129,12 @@ class _DataKpiCard extends StatelessWidget {
               Icon(icon, size: 15.sp, color: accentColor),
             ],
           ),
-          const Gap(10),
+          Gap(10.h),
           Text(
             value,
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 26.sp,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: 20.sp,
               fontWeight: FontWeight.w800,
             ),
           ),

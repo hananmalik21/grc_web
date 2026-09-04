@@ -6,7 +6,8 @@ import 'package:grc/core/permissions/permission_gate.dart';
 import 'package:grc/core/permissions/perm_keys.dart';
 import 'package:grc/core/permissions/permission_service.dart';
 import 'package:grc/core/services/toast_service.dart';
-import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/identity_access/dialogs/user_access_review_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/identity_access/widgets/identity_kpi_row.dart';
@@ -76,28 +77,59 @@ class IdentityAccessScreen extends ConsumerWidget {
       title: 'Identity & Access Security',
       subtitle: 'User risk scores, privilege analysis, and access anomalies',
       actions: [
-        AppButton(
-          label: 'Start Review',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed: () {
+        InkWell(
+          onTap: () {
             if (users.isNotEmpty) {
               UserAccessReviewDialog.show(context, user: users.first);
             }
           },
+          borderRadius: BorderRadius.circular(20.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00B4D8),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'Start Review',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
         const Gap(8),
-        AppButton(
-          label: 'Export Report',
-          type: AppButtonType.secondary,
-          size: AppButtonSize.sm,
-          onPressed: () {
+        InkWell(
+          onTap: () {
             ToastService.show(
               context: context,
               message: 'Identity risk & privilege report exported.',
               type: ToastType.success,
             );
           },
+          borderRadius: BorderRadius.circular(20.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(
+                color: context.isDark ? const Color(0xFF333333) : const Color(0xFFE2E8F0),
+              ),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'Export Report',
+              style: TextStyle(
+                color: context.isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ],
       child: Column(

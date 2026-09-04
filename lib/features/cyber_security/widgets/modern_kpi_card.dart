@@ -41,7 +41,7 @@ class _ModernKpiCardState extends State<ModernKpiCard> {
         transform: _isHovered
             ? (Matrix4.identity()..translate(0, -2, 0))
             : Matrix4.identity(),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h), // Slightly tighter padding
+        padding: EdgeInsets.all(14.r),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           borderRadius: BorderRadius.circular(24.r), // Soft large radius
@@ -81,29 +81,9 @@ class _ModernKpiCardState extends State<ModernKpiCard> {
                     color: widget.iconColor,
                   ),
                 ),
-                if (widget.trend != null)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                    decoration: BoxDecoration(
-                      color: widget.isPositiveTrend
-                          ? const Color(0xFFDCFCE7)
-                          : const Color(0xFFFEE2E2),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Text(
-                      widget.trend!,
-                      style: TextStyle(
-                        color: widget.isPositiveTrend
-                            ? const Color(0xFF15803D)
-                            : const Color(0xFFB91C1C),
-                        fontSize: 10.5.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
               ],
             ),
-            const Gap(14),
+            const Gap(8),
 
             // Content
             Column(
@@ -128,11 +108,24 @@ class _ModernKpiCardState extends State<ModernKpiCard> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF0F172A),
-                    fontSize: 18.sp, // Reduced from 22.sp for min width support
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
                   ),
                 ),
+                if (widget.trend != null) ...[
+                  Gap(4.h),
+                  Text(
+                    widget.trend!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],

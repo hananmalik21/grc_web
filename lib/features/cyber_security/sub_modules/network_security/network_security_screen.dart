@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
 import 'package:grc/core/models/cyber_security/network_security/firewall_rule_model.dart';
 import 'package:grc/core/services/toast_service.dart';
-import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/network_security/dialogs/ai_rule_analysis_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/network_security/widgets/firewall_rules_table.dart';
@@ -86,11 +86,8 @@ class _NetworkSecurityScreenState extends State<NetworkSecurityScreen> {
       title: 'Network Security',
       subtitle: 'Firewall rules, exposure scoring, and attack path analysis',
       actions: [
-        AppButton(
-          label: 'Scan Boundary',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed: () {
+        InkWell(
+          onTap: () {
             ToastService.show(
               context: context,
               message:
@@ -98,6 +95,23 @@ class _NetworkSecurityScreenState extends State<NetworkSecurityScreen> {
               type: ToastType.info,
             );
           },
+          borderRadius: BorderRadius.circular(20.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00B4D8),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'Scan Boundary',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ],
       child: Column(
