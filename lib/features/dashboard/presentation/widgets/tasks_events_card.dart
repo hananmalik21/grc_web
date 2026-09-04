@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class TasksEventsCard extends ConsumerWidget {
   final AppLocalizations localizations;
@@ -23,6 +24,7 @@ class TasksEventsCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = context.isDark;
     final tasks = ref.watch(tasksProvider);
     final events = ref.watch(eventsProvider);
     final isMinimized = ref.watch(tasksMinimizedProvider);
@@ -41,9 +43,17 @@ class TasksEventsCard extends ConsumerWidget {
     return Container(
       padding: EdgeInsetsDirectional.all(cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(10.r),
-        boxShadow: AppShadows.primaryShadow,
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +71,7 @@ class TasksEventsCard extends ConsumerWidget {
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF2B7FFF), Color(0xFF615FFF)],
+                          colors: [Color(0xFF38BDF8), Color(0xFF0EA5E9)], // Sky blue color requested
                         ),
                         borderRadius: BorderRadius.circular(7.r),
                         boxShadow: [
@@ -89,8 +99,10 @@ class TasksEventsCard extends ConsumerWidget {
                       child: Text(
                         localizations.tasksEvents,
                         style: context.labelMedium.copyWith(
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
-                          color: context.themeTextPrimary,
+                          color: isDark ? Colors.white : const Color(0xFF101828),
+                          letterSpacing: -0.3,
                         ),
                         softWrap: true,
                       ),
@@ -183,14 +195,18 @@ class TasksEventsCard extends ConsumerWidget {
 
   Widget _buildTaskItem(BuildContext context, WidgetRef ref, DashboardTask task) {
     final isDark = context.isDark;
-    final completedColor = AppColors.primary;
-    final borderColor = context.themeBorderGrey;
+    final completedColor = const Color(0xFF0EA5E9); // Sky blue
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
 
-    final textColor = task.isCompleted ? context.themeTextPlaceholder : context.themeTextPrimary;
+    final textColor = task.isCompleted 
+        ? (isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8)) 
+        : (isDark ? Colors.white : const Color(0xFF1E293B));
 
-    final subtitleColor = task.isCompleted ? context.themeTextPlaceholder : context.themeTextTertiary;
+    final subtitleColor = task.isCompleted 
+        ? (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)) 
+        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B));
 
-    final checkboxBg = task.isCompleted ? completedColor : (isDark ? AppColors.cardBackgroundDark : Colors.white);
+    final checkboxBg = task.isCompleted ? completedColor : (isDark ? const Color(0xFF1C1C1E) : Colors.white);
 
     return InkWell(
       onTap: () => ref.read(tasksProvider.notifier).toggleTask(task.id),
@@ -198,15 +214,15 @@ class TasksEventsCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 12.25.w,
-            height: 12.25.h,
-            margin: EdgeInsetsDirectional.only(top: 1.75.h),
+            width: 16.r, // Increased size to fix clipping
+            height: 16.r,
+            margin: EdgeInsetsDirectional.only(top: 2.h),
             decoration: BoxDecoration(
               color: checkboxBg,
-              border: Border.all(color: task.isCompleted ? completedColor : borderColor, width: 1),
-              borderRadius: BorderRadius.circular(2.5.r),
+              border: Border.all(color: task.isCompleted ? completedColor : borderColor, width: 1.5),
+              borderRadius: BorderRadius.circular(4.r),
             ),
-            child: task.isCompleted ? Icon(Icons.check, size: 10.sp, color: Colors.white) : null,
+            child: task.isCompleted ? Icon(Icons.check, size: 12.r, color: Colors.white) : null,
           ),
           const Gap(7),
           Expanded(

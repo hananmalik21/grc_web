@@ -146,7 +146,7 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.fastOutSlowIn,
-            width: isExpanded ? 218.w : 64.w,
+            width: isExpanded ? 260.0 : 72.0, // Increased width to fit long text
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border(right: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8))),
@@ -172,7 +172,7 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
                         Text(
                           'Menus',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF64748B),
                           ),
@@ -204,32 +204,32 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
 
           // Floating Edge Collapse / Expand Arrow Button (Image 4 & 5)
           Positioned(
-            right: -13,
-            top: 20,
+            right: -14, // Half outside
+            top: 30, // Slightly lower for better visibility
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: () => ref.read(sidebarProvider.notifier).toggle(),
                 child: Container(
-                  width: 26,
-                  height: 26,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.10),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
                   child: Center(
                     child: Icon(
                       isExpanded ? Icons.chevron_left : Icons.chevron_right,
-                      size: 16,
-                      color: const Color(0xFF64748B),
+                      size: 20,
+                      color: const Color(0xFF334155),
                     ),
                   ),
                 ),

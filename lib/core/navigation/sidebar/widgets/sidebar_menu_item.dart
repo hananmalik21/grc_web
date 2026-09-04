@@ -108,7 +108,7 @@ class SidebarMenuItem extends StatelessWidget {
                   child: Text(
                     SidebarConfig.getLocalizedLabel(item.labelKey, localizations),
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 11.5.sp,
                       fontWeight: isPillActive ? FontWeight.w700 : FontWeight.w500,
                       color: isPillActive
                           ? Colors.white
@@ -198,7 +198,7 @@ class SidebarMenuItem extends StatelessWidget {
                         child: Text(
                           SidebarConfig.getLocalizedLabel(child.labelKey, localizations),
                           style: context.textTheme.labelSmall?.copyWith(
-                            fontSize: 12.sp,
+                            fontSize: 10.5.sp,
                             color: isChildActive ? AppColors.sidebarActiveText : AppColors.sidebarChildItemText,
                           ),
                         ),

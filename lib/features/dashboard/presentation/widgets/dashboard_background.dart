@@ -25,72 +25,7 @@ class DashboardBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: const [0.0, 0.5, 1.0],
-          colors: isDark
-              ? [AppColors.cardBackgroundGreyDark, AppColors.infoBgDark, AppColors.cardBackgroundGreyDark]
-              : [
-                  AppColors.dashboardBgGradientStart,
-                  AppColors.dashboardBgGradientMid,
-                  AppColors.dashboardBgGradientEnd,
-                ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            top: 0,
-            child: _circle(
-              width: 336.w,
-              height: 336.h,
-              colors: [
-                AppColors.dashboardCircleBlue.withValues(alpha: 0.3),
-                AppColors.dashboardCirclePurple.withValues(alpha: 0.3),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: _circle(
-              width: 336.w,
-              height: 336.h,
-              colors: [
-                AppColors.dashboardCirclePink.withValues(alpha: 0.3),
-                AppColors.dashboardCircleOrange.withValues(alpha: 0.3),
-              ],
-            ),
-          ),
-          Positioned.fill(
-            child: Center(
-              child: _circle(
-                width: 336.w,
-                height: 336.h,
-                colors: [
-                  AppColors.dashboardCircleGreen.withValues(alpha: 0.3),
-                  AppColors.dashboardCircleCyan.withValues(alpha: 0.3),
-                ],
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                child: Container(
-                  color: (isDark ? AppColors.cardBackgroundDark : AppColors.cardBackground).withValues(
-                    alpha: isDark ? 0.3 : 0.5,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      color: isDark ? const Color(0xFF141414) : const Color(0xFFF3F6FA),
     );
   }
 }

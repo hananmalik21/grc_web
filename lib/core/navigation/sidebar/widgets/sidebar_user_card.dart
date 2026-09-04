@@ -40,7 +40,7 @@ class SidebarUserCard extends ConsumerWidget {
                 initial,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 14.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -67,7 +67,7 @@ class SidebarUserCard extends ConsumerWidget {
               initial,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 13.sp,
+                fontSize: 11.5.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -84,7 +84,7 @@ class SidebarUserCard extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: const Color(0xFF0F172A),
-                    fontSize: 13.sp,
+                    fontSize: 11.5.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -95,7 +95,7 @@ class SidebarUserCard extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: const Color(0xFF64748B),
-                    fontSize: 10.5.sp,
+                    fontSize: 9.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

@@ -86,23 +86,44 @@ class _ModernModuleCardState extends State<ModernModuleCard> {
               : Matrix4.identity(),
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E293B) : Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
-              width: 1.0,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF0F172A).withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(28.r),
+            // No borders
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
           ),
-          child: Stack(
-            children: [
-              // Main Card Content
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28.r),
+            child: Stack(
+              children: [
+                // Smooth full-card sky blue fill on hover
+                Positioned.fill(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Stack(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOutCubic,
+                            width: isHover ? constraints.maxWidth : 0,
+                            height: constraints.maxHeight,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0F2FE).withValues(alpha: 0.5), // Sky blue fill
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                // Main Card Content
               Padding(
                 padding: EdgeInsets.all(18.r),
                 child: Column(
@@ -118,15 +139,10 @@ class _ModernModuleCardState extends State<ModernModuleCard> {
                           height: 42.r,
                           decoration: BoxDecoration(
                             color: isDark
-                                ? const Color(0xFF334155)
+                                ? const Color(0xFF2D2D2F)
                                 : const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(14.r),
-                            border: Border.all(
-                              color: isDark
-                                  ? const Color(0xFF475569)
-                                  : const Color(0xFFE2E8F0),
-                              width: 1,
-                            ),
+                            // No border
                           ),
                           child: Center(
                             child: button.icon.isNotEmpty
@@ -151,9 +167,9 @@ class _ModernModuleCardState extends State<ModernModuleCard> {
                           Text(
                             indexStr,
                             style: TextStyle(
-                              color: const Color(0xFF94A3B8),
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              fontSize: 10.sp, // Minimized per request
+                              fontWeight: FontWeight.w500,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -177,8 +193,8 @@ class _ModernModuleCardState extends State<ModernModuleCard> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                  fontSize: 14.5.sp,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13.sp, // Minimized per request
+                                  fontWeight: FontWeight.w600,
                                   letterSpacing: -0.2,
                                 ),
                               ),
@@ -188,8 +204,8 @@ class _ModernModuleCardState extends State<ModernModuleCard> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: const Color(0xFF94A3B8),
-                                  fontSize: 11.5.sp,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  fontSize: 10.sp,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -243,6 +259,7 @@ class _ModernModuleCardState extends State<ModernModuleCard> {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

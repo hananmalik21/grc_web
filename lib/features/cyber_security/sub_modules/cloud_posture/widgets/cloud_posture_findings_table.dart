@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/cloud_posture/models/finding_item_model.dart';
+import 'package:grc/core/models/cyber_security/cloud_posture/finding_item_model.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CloudPostureFindingsTable extends StatefulWidget {
   final List<FindingItemModel> findings;
@@ -26,61 +27,82 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF070C18),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0xFF131E30)),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         children: [
-          // Table Controls Sub-Bar
+          // Table Header (Matches requested design)
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  '${widget.findings.length} findings',
-                  style: TextStyle(
-                    color: const Color(0xFF94A3B8),
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sort: ',
+                      'Findings Details',
                       style: TextStyle(
-                        color: const Color(0xFF64748B),
-                        fontSize: 11.sp,
-                      ),
-                    ),
-                    Text(
-                      'SCORE ↓',
-                      style: TextStyle(
-                        color: const Color(0xFF00B4D8),
-                        fontSize: 11.sp,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const Gap(12),
+                    const Gap(4),
+                    Row(
+                      children: [
+                        Text(
+                          'Showing ${widget.findings.length} records ',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                        Text(
+                          '(filtered)',
+                          style: TextStyle(
+                            color: const Color(0xFF10B981),
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     Text(
-                      'SEVERITY',
+                      'TOTAL FINDINGS',
                       style: TextStyle(
-                        color: const Color(0xFF64748B),
-                        fontSize: 11.sp,
+                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
                       ),
                     ),
-                    const Gap(12),
+                    const Gap(2),
                     Text(
-                      'AGE',
+                      '${widget.findings.length}',
                       style: TextStyle(
-                        color: const Color(0xFF64748B),
-                        fontSize: 11.sp,
+                        color: const Color(0xFF10B981),
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -88,10 +110,17 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
               ],
             ),
           ),
-          const Divider(color: Color(0xFF1E293B), height: 1),
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
+          ),
 
           // Scrollable Table Body
-          LayoutBuilder(
+          SizedBox(
+            height: 400.h,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: LayoutBuilder(
             builder: (context, constraints) {
               final tableMinWidth = constraints.maxWidth > 950
                   ? constraints.maxWidth
@@ -107,14 +136,14 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                     horizontalMargin: 16.w,
                     columnSpacing: 14.w,
                     headingRowColor: WidgetStateProperty.all(
-                      const Color(0xFF080E1C),
+                      isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF8FAFC),
                     ),
                     columns: [
                       DataColumn(
                         label: Checkbox(
                           value: _selectAll,
                           activeColor: const Color(0xFF00B4D8),
-                          side: const BorderSide(color: Color(0xFF475569)),
+                          side: BorderSide(color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
                           onChanged: (val) {
                             setState(() {
                               _selectAll = val ?? false;
@@ -129,16 +158,16 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                           },
                         ),
                       ),
-                      _buildHeaderColumn('ID'),
-                      _buildHeaderColumn('RESOURCE'),
-                      _buildHeaderColumn('FINDING'),
-                      _buildHeaderColumn('SEVERITY'),
-                      _buildHeaderColumn('ACCOUNT'),
-                      _buildHeaderColumn('SERVICE'),
-                      _buildHeaderColumn('SCORE'),
-                      _buildHeaderColumn('AGE'),
-                      _buildHeaderColumn('STATUS'),
-                      _buildHeaderColumn('ACTIONS'),
+                      _buildHeaderColumn('ID', isDark),
+                      _buildHeaderColumn('RESOURCE', isDark),
+                      _buildHeaderColumn('FINDING', isDark),
+                      _buildHeaderColumn('SEVERITY', isDark),
+                      _buildHeaderColumn('ACCOUNT', isDark),
+                      _buildHeaderColumn('SERVICE', isDark),
+                      _buildHeaderColumn('SCORE', isDark),
+                      _buildHeaderColumn('AGE', isDark),
+                      _buildHeaderColumn('STATUS', isDark),
+                      _buildHeaderColumn('ACTIONS', isDark),
                     ],
                     rows: widget.findings.map((f) {
                       final isChecked = _selectedIds.contains(f.id);
@@ -150,7 +179,7 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                             Checkbox(
                               value: isChecked,
                               activeColor: const Color(0xFF00B4D8),
-                              side: const BorderSide(color: Color(0xFF475569)),
+                              side: BorderSide(color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
                               onChanged: (val) {
                                 setState(() {
                                   if (val == true) {
@@ -170,7 +199,7 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                                 f.id,
                                 style: TextStyle(
                                   color: const Color(0xFF00B4D8),
-                                  fontSize: 12.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -181,8 +210,8 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                             Text(
                               f.resource,
                               style: TextStyle(
-                                color: const Color(0xFFCBD5E1),
-                                fontSize: 12.sp,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                fontSize: 11.sp,
                                 fontFamily: 'monospace',
                               ),
                             ),
@@ -192,9 +221,9 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                             Text(
                               f.finding,
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -218,7 +247,7 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                                 f.severity.label,
                                 style: TextStyle(
                                   color: f.severity.color,
-                                  fontSize: 9.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -252,7 +281,7 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                                 color: f.riskScore >= 90
                                     ? const Color(0xFFEF4444)
                                     : const Color(0xFFF97316),
-                                fontSize: 13.sp,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -262,7 +291,7 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                             Text(
                               f.age,
                               style: TextStyle(
-                                color: const Color(0xFF64748B),
+                                color: const Color(0xFF10B981),
                                 fontSize: 11.sp,
                               ),
                             ),
@@ -336,16 +365,16 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
                                       vertical: 4.h,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF1E293B),
+                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                                       borderRadius: BorderRadius.circular(4.r),
                                       border: Border.all(
-                                        color: const Color(0xFF334155),
+                                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                                       ),
                                     ),
                                     child: Text(
                                       'Detail',
                                       style: TextStyle(
-                                        color: const Color(0xFFCBD5E1),
+                                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                                         fontSize: 10.sp,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -363,17 +392,19 @@ class _CloudPostureFindingsTableState extends State<CloudPostureFindingsTable> {
               );
             },
           ),
-        ],
+        ),
+      ),
+    ],
       ),
     );
   }
 
-  DataColumn _buildHeaderColumn(String label) {
+  DataColumn _buildHeaderColumn(String label, bool isDark) {
     return DataColumn(
       label: Text(
         label,
         style: TextStyle(
-          color: const Color(0xFF5E738E),
+          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
           fontSize: 10.sp,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.8,

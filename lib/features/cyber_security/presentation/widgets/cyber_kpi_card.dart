@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CyberKpiCard extends StatelessWidget {
   final String title;
@@ -30,6 +31,7 @@ class CyberKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     final dotColor = accentColor ?? skyBlue;
     final isMobile = MediaQuery.of(context).size.width < 600;
 
@@ -39,19 +41,18 @@ class CyberKpiCard extends StatelessWidget {
         vertical: isMobile ? 10.h : 14.h,
       ),
       decoration: BoxDecoration(
-        color: Colors.white, // Solid white card
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isSelected ? skyBlue : const Color(0xFFE2E8F0),
-          width: isSelected ? 1.8 : 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24.r), // Soft aesthetic
+        // No borders!
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,10 +78,10 @@ class CyberKpiCard extends StatelessWidget {
                       child: Text(
                         title,
                         style: TextStyle(
-                          color: const Color(0xFF334155),
-                          fontSize: isMobile ? 11.sp : 12.sp,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF334155),
+                          fontSize: isMobile ? 9.sp : 10.sp,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -97,13 +98,13 @@ class CyberKpiCard extends StatelessWidget {
                   vertical: 2.h,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Text(
                   badgeValue ?? value,
                   style: TextStyle(
-                    color: const Color(0xFF64748B),
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     fontSize: isMobile ? 10.sp : 11.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -117,8 +118,8 @@ class CyberKpiCard extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              color: const Color(0xFF0F172A),
-              fontSize: isMobile ? 20.sp : 24.sp,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: isMobile ? 16.sp : 18.sp,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
             ),

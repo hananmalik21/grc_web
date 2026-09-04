@@ -98,8 +98,13 @@ class CyberSecurityDashboardView extends ConsumerWidget {
         const Gap(4),
         AppButton(
           label: 'Export',
-          type: AppButtonType.secondary,
+          type: AppButtonType.primary,
           size: AppButtonSize.sm,
+          backgroundColor: skyBlue,
+          borderColor: skyBlue,
+          height: 40.h,
+          fontSize: 12.sp,
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
           onPressed: () {
             ToastService.show(
               context: context,
@@ -245,12 +250,14 @@ class CyberSecurityDashboardView extends ConsumerWidget {
   }
 
   Widget _buildKpiGrid(double width, List<CyberKpiModel> kpis) {
-    final isDesktop = width >= 1100;
+    // Changed threshold to 600 so it ALWAYS stays in one row on desktop/tablet,
+    // even when the sidebar opens and reduces available width.
+    final isDesktopOrTablet = width >= 600;
 
     final badgeValues = ['7', '4', '73%', '2.8k'];
 
-    if (isDesktop) {
-      // 4 cards in one row on Desktop
+    if (isDesktopOrTablet) {
+      // All cards dynamically shrink to fit one single row
       return Row(
         children: List.generate(kpis.length, (index) {
           final card = kpis[index];
@@ -264,8 +271,8 @@ class CyberSecurityDashboardView extends ConsumerWidget {
                 icon: card.icon,
                 accentColor: index == 0 ? skyBlue : card.accentColor,
                 subtitleColor: card.subtitleColor,
-                isSelected: index == 0,
-                badgeValue: badgeValues[index],
+                isSelected: false, // Flat design requested
+                badgeValue: badgeValues.length > index ? badgeValues[index] : card.value,
               ),
             ),
           );
@@ -273,66 +280,58 @@ class CyberSecurityDashboardView extends ConsumerWidget {
       );
     }
 
-    // Tablet and Mobile (2x2 grid)
-    return Column(
-      children: [
+    // Mobile layout (2xN grid)
+    final rows = <Widget>[];
+    for (int i = 0; i < kpis.length; i += 2) {
+      final card1 = kpis[i];
+      final badge1 = badgeValues.length > i ? badgeValues[i] : card1.value;
+      
+      Widget? card2Widget;
+      if (i + 1 < kpis.length) {
+        final card2 = kpis[i + 1];
+        final badge2 = badgeValues.length > i + 1 ? badgeValues[i + 1] : card2.value;
+        card2Widget = Expanded(
+          child: CyberKpiCard(
+            title: card2.title,
+            value: card2.value,
+            subtitle: card2.subtitle,
+            icon: card2.icon,
+            accentColor: card2.accentColor,
+            subtitleColor: card2.subtitleColor,
+            isSelected: false,
+            badgeValue: badge2,
+          ),
+        );
+      } else {
+        card2Widget = const Expanded(child: SizedBox()); // Spacer
+      }
+
+      rows.add(
         Row(
           children: [
             Expanded(
               child: CyberKpiCard(
-                title: kpis[0].title,
-                value: kpis[0].value,
-                subtitle: kpis[0].subtitle,
-                icon: kpis[0].icon,
-                accentColor: skyBlue,
-                subtitleColor: kpis[0].subtitleColor,
-                isSelected: true,
-                badgeValue: badgeValues[0],
+                title: card1.title,
+                value: card1.value,
+                subtitle: card1.subtitle,
+                icon: card1.icon,
+                accentColor: i == 0 ? skyBlue : card1.accentColor,
+                subtitleColor: card1.subtitleColor,
+                isSelected: false,
+                badgeValue: badge1,
               ),
             ),
             Gap(10.w),
-            Expanded(
-              child: CyberKpiCard(
-                title: kpis[1].title,
-                value: kpis[1].value,
-                subtitle: kpis[1].subtitle,
-                icon: kpis[1].icon,
-                accentColor: kpis[1].accentColor,
-                subtitleColor: kpis[1].subtitleColor,
-                badgeValue: badgeValues[1],
-              ),
-            ),
+            card2Widget,
           ],
         ),
-        Gap(10.h),
-        Row(
-          children: [
-            Expanded(
-              child: CyberKpiCard(
-                title: kpis[2].title,
-                value: kpis[2].value,
-                subtitle: kpis[2].subtitle,
-                icon: kpis[2].icon,
-                accentColor: kpis[2].accentColor,
-                subtitleColor: kpis[2].subtitleColor,
-                badgeValue: badgeValues[2],
-              ),
-            ),
-            Gap(10.w),
-            Expanded(
-              child: CyberKpiCard(
-                title: kpis[3].title,
-                value: kpis[3].value,
-                subtitle: kpis[3].subtitle,
-                icon: kpis[3].icon,
-                accentColor: kpis[3].accentColor,
-                subtitleColor: kpis[3].subtitleColor,
-                badgeValue: badgeValues[3],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+      );
+
+      if (i + 2 < kpis.length) {
+        rows.add(Gap(10.h));
+      }
+    }
+
+    return Column(children: rows);
   }
 }

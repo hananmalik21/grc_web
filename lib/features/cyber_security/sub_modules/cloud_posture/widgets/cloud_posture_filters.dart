@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CloudPostureFilters extends StatelessWidget {
   final String searchQuery;
@@ -31,6 +32,8 @@ class CloudPostureFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    
     return Wrap(
       spacing: 12.w,
       runSpacing: 10.h,
@@ -38,33 +41,35 @@ class CloudPostureFilters extends StatelessWidget {
       children: [
         Container(
           width: 250.w,
-          height: 34.h,
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
           decoration: BoxDecoration(
-            color: AppColors.cyberCardBg,
-            borderRadius: BorderRadius.circular(6.r),
-            border: Border.all(color: AppColors.cyberCardBorder),
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: isDark ? const Color(0xFF333333) : const Color(0xFFE2E8F0),
+            ),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 Icons.search_rounded,
-                size: 15.sp,
-                color: AppColors.textPlaceholderDark,
+                size: 16.sp,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
               const Gap(8),
               Expanded(
                 child: TextField(
                   onChanged: onSearchChanged,
                   style: TextStyle(
-                    color: AppColors.textPrimaryDark,
-                    fontSize: 11.sp,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontSize: 12.sp,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Search resource, finding type, ID...',
                     hintStyle: TextStyle(
-                      color: AppColors.textPlaceholderDark,
-                      fontSize: 11.sp,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      fontSize: 12.sp,
                     ),
                     border: InputBorder.none,
                     isDense: true,
@@ -75,7 +80,12 @@ class CloudPostureFilters extends StatelessWidget {
             ],
           ),
         ),
-        _buildSeverityPills(),
+        _buildDropdown(
+          value: selectedSeverity,
+          items: const ['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'],
+          onChanged: onSeverityChanged,
+          isDark: isDark,
+        ),
         _buildDropdown(
           value: selectedAccount,
           items: const [
@@ -86,70 +96,21 @@ class CloudPostureFilters extends StatelessWidget {
             'AWS Development',
           ],
           onChanged: onAccountChanged,
+          isDark: isDark,
         ),
         _buildDropdown(
           value: selectedService,
           items: const ['All services', 'S3', 'EC2', 'IAM', 'RDS', 'GKE'],
           onChanged: onServiceChanged,
+          isDark: isDark,
         ),
         _buildDropdown(
           value: selectedStatus,
           items: const ['All statuses', 'Open', 'Remediating', 'Resolved'],
           onChanged: onStatusChanged,
+          isDark: isDark,
         ),
       ],
-    );
-  }
-
-  Widget _buildSeverityPills() {
-    final pills = [
-      {'key': 'ALL', 'label': 'ALL SEV'},
-      {'key': 'CRITICAL', 'label': 'CRITICAL (4)'},
-      {'key': 'HIGH', 'label': 'HIGH (5)'},
-      {'key': 'MEDIUM', 'label': 'MEDIUM (6)'},
-      {'key': 'LOW', 'label': 'LOW (5)'},
-    ];
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: pills.map((p) {
-          final isSelected = selectedSeverity == p['key'];
-          return Padding(
-            padding: EdgeInsets.only(right: 6.w),
-            child: InkWell(
-              onTap: () => onSeverityChanged(p['key']!),
-              borderRadius: BorderRadius.circular(4.r),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.dashCyberSecurity.withValues(alpha: 0.15)
-                      : AppColors.cyberCardBg,
-                  borderRadius: BorderRadius.circular(4.r),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.dashCyberSecurity
-                        : AppColors.cyberCardBorder,
-                  ),
-                ),
-                child: Text(
-                  p['label']!,
-                  style: TextStyle(
-                    color: isSelected
-                        ? AppColors.dashCyberSecurity
-                        : AppColors.textTertiaryDark,
-                    fontSize: 10.sp,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
     );
   }
 
@@ -157,27 +118,30 @@ class CloudPostureFilters extends StatelessWidget {
     required String value,
     required List<String> items,
     required ValueChanged<String> onChanged,
+    required bool isDark,
   }) {
     return Container(
-      height: 34.h,
-      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(6.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF333333) : const Color(0xFFE2E8F0),
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: items.contains(value) ? value : items.first,
-          dropdownColor: AppColors.cyberCardBg,
+          isDense: true,
+          dropdownColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 16.sp,
-            color: AppColors.textPlaceholderDark,
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
           ),
           style: TextStyle(
-            color: AppColors.textSecondaryDark,
-            fontSize: 11.sp,
+            color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A),
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
           onChanged: (val) {

@@ -323,7 +323,7 @@ class _CreateRemediationTicketDialogState
                   padding: EdgeInsets.symmetric(horizontal: 10.w),
                   decoration: BoxDecoration(
                     color: const Color(0xFF131D31),
-                    borderRadius: BorderRadius.circular(6.r),
+                    borderRadius: BorderRadius.circular(20.r),
                     border: Border.all(color: const Color(0xFF1E293B)),
                   ),
                   child: DropdownButtonHideUnderline(

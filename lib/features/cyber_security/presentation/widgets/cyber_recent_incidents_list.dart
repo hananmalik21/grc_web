@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/dashboard/cyber_dashboard_models.dart';
 import 'package:grc/core/widgets/common/digify_status_capsule.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CyberRecentIncidentsList extends StatefulWidget {
   final List<IncidentItem>? incidents;
@@ -29,20 +33,22 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
   Widget build(BuildContext context) {
     final incidents = widget.incidents ?? const <IncidentItem>[];
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final isDark = context.isDark;
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 12.r : 18.r),
       decoration: BoxDecoration(
-        color: Colors.white, // Solid white card
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +60,7 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
               Text(
                 'RECENT INCIDENTS',
                 style: TextStyle(
-                  color: const Color(0xFF0F172A),
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   fontSize: isMobile ? 13.sp : 14.sp,
                   fontWeight: FontWeight.w700,
                 ),
@@ -92,7 +98,7 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
                         Text(
                           'No Active Security Incidents',
                           style: TextStyle(
-                            color: const Color(0xFF0F172A),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                             fontSize: isMobile ? 12.sp : 13.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -101,7 +107,7 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
                         Text(
                           'All cloud systems and identity perimeters normal',
                           style: TextStyle(
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             fontSize: isMobile ? 10.5.sp : 11.5.sp,
                           ),
                         ),
@@ -111,12 +117,12 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
                 : ListView.separated(
                     padding: EdgeInsets.zero,
                     itemCount: incidents.length,
-                    separatorBuilder: (context, index) => const Divider(
-                      color: Color(0xFFF1F5F9),
+                    separatorBuilder: (context, index) => Divider(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                       height: 8,
                     ),
                     itemBuilder: (context, index) {
-                      return _buildIncidentRow(incidents[index], index, isMobile);
+                      return _buildIncidentRow(context, incidents[index], index, isMobile);
                     },
                   ),
           ),
@@ -125,7 +131,8 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
     );
   }
 
-  Widget _buildIncidentRow(IncidentItem incident, int index, bool isMobile) {
+  Widget _buildIncidentRow(BuildContext context, IncidentItem incident, int index, bool isMobile) {
+    final isDark = context.isDark;
     return Tooltip(
       message:
           '${incident.incidentId}: ${incident.title}\nStatus: ${incident.status} | Severity: ${incident.severity}',
@@ -185,7 +192,7 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: const Color(0xFF0F172A),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                             fontSize: isMobile ? 11.sp : 12.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -193,7 +200,7 @@ class _CyberRecentIncidentsListState extends State<CyberRecentIncidentsList> {
                         Text(
                           '${incident.incidentId} • ${incident.timestamp}',
                           style: TextStyle(
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             fontSize: isMobile ? 9.5.sp : 10.5.sp,
                           ),
                         ),

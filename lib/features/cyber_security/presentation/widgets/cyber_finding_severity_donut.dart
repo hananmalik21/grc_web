@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/cyber_security/data/mock/cyber_dashboard_mock_data.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 import 'dart:math' as math;
 
@@ -43,21 +47,23 @@ class _CyberFindingSeverityDonutState extends State<CyberFindingSeverityDonut> {
     final labels = ['Critical', 'High', 'Medium', 'Low'];
     final total = values.fold<double>(0, (sum, val) => sum + val).toInt();
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final isDark = context.isDark;
     final donutSize = isMobile ? 110.r : 140.r;
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 12.r : 18.r),
       decoration: BoxDecoration(
-        color: Colors.white, // Solid white card
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +71,7 @@ class _CyberFindingSeverityDonutState extends State<CyberFindingSeverityDonut> {
           Text(
             'FINDING SEVERITY',
             style: TextStyle(
-              color: const Color(0xFF0F172A),
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
               fontSize: isMobile ? 13.sp : 14.sp,
               fontWeight: FontWeight.w700,
             ),
@@ -144,7 +150,7 @@ class _CyberFindingSeverityDonutState extends State<CyberFindingSeverityDonut> {
                           : '$total';
                       final hoveredColor = isValidIndex
                           ? colors[hoveredIndex]
-                          : const Color(0xFF0F172A);
+                          : (isDark ? Colors.white : const Color(0xFF0F172A));
 
                       return Stack(
                         alignment: Alignment.center,
@@ -175,7 +181,7 @@ class _CyberFindingSeverityDonutState extends State<CyberFindingSeverityDonut> {
                                 style: TextStyle(
                                   color: hoveredIndex != null
                                       ? hoveredColor
-                                      : const Color(0xFF64748B),
+                                      : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                   fontSize: isMobile ? 8.sp : 8.5.sp,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.8,
@@ -369,8 +375,8 @@ class _SeverityLegendItem extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: isSelected
-                          ? const Color(0xFF0F172A)
-                          : const Color(0xFF475569),
+                          ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF0F172A))
+                          : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                       fontSize: 10.sp,
                       fontWeight: isSelected
                           ? FontWeight.w700
@@ -383,7 +389,7 @@ class _SeverityLegendItem extends StatelessWidget {
               Text(
                 count,
                 style: TextStyle(
-                  color: isSelected ? color : const Color(0xFF0F172A),
+                  color: isSelected ? color : (Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF0F172A)),
                   fontSize: 11.5.sp,
                   fontWeight: FontWeight.w700,
                 ),

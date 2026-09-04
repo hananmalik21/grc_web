@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,6 +11,7 @@ import 'package:grc/features/cyber_security/data/models/cloud_posture_dto.dart';
 import 'package:grc/features/cyber_security/presentation/providers/cloud_connector_provider.dart';
 import 'package:grc/features/cyber_security/presentation/providers/iam_posture_provider.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CloudConnectorsScreen extends ConsumerStatefulWidget {
   const CloudConnectorsScreen({super.key});
@@ -30,9 +33,21 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
   bool _obscureSecret = true;
   bool _isSubmitting = false;
   String? _syncingConnectorId;
+  Timer? _syncTimer;
+
+  static const Color skyBlue = Color(0xFF00B4D8);
+
+  @override
+  void initState() {
+    super.initState();
+    _syncTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      _syncAll();
+    });
+  }
 
   @override
   void dispose() {
+    _syncTimer?.cancel();
     _nameController.dispose();
     _regionController.dispose();
     _accessKeyController.dispose();
@@ -40,6 +55,23 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
     _orgUrlController.dispose();
     _apiTokenController.dispose();
     super.dispose();
+  }
+
+  Future<void> _syncAll() async {
+    final connectors = ref.read(cloudConnectorsProvider).valueOrNull;
+    if (connectors == null || connectors.isEmpty) return;
+    
+    ToastService.show(
+      context: context,
+      message: 'Auto-syncing all connectors...',
+      type: ToastType.info,
+    );
+    
+    for (final connector in connectors) {
+      if (mounted) {
+        await _syncConnector(connector);
+      }
+    }
   }
 
   Future<void> _submit() async {
@@ -112,9 +144,96 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
     }
   }
 
+  void _openConnectorDialog(String provider, AsyncValue<List<CloudCoverageConnectorDto>> connectorsAsync) {
+    setState(() => _provider = provider);
+    
+    // Reset forms when opening
+    _nameController.clear();
+    _accessKeyController.clear();
+    _secretKeyController.clear();
+    _apiTokenController.clear();
+    _orgUrlController.clear();
+    _regionController.text = 'us-east-1';
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.3),
+      builder: (context) {
+        final isDark = context.isDark;
+        
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.all(20.w),
+            child: Container(
+              width: 500.w,
+              height: 1000.h,
+            padding: EdgeInsets.all(24.r),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: BorderRadius.circular(28.r),
+              boxShadow: isDark
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '$provider Configuration',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(Icons.close, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                      ),
+                    ],
+                  ),
+                  const Gap(24),
+                  StatefulBuilder(
+                    builder: (context, setDialogState) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildConnectorFormInner(isDark, setDialogState),
+                          const Gap(32),
+                          Divider(color: isDark ? const Color(0xFF333333) : const Color(0xFFE2E8F0)),
+                          const Gap(24),
+                          _buildConnectorListInner(connectorsAsync, provider, isDark),
+                        ],
+                      );
+                    }
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final connectors = ref.watch(cloudConnectorsProvider);
+    final isDark = context.isDark;
 
     return CyberScreenLayout(
       title: 'Cloud Connectors',
@@ -123,79 +242,143 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
         IconButton(
           tooltip: 'Refresh connectors',
           onPressed: () => ref.invalidate(cloudConnectorsProvider),
-          icon: const Icon(Icons.refresh, color: AppColors.dashCyberSecurity),
+          icon: Icon(Icons.refresh, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+        ),
+        const Gap(8),
+        AppButton(
+          label: 'Sync All',
+          type: AppButtonType.primary,
+          size: AppButtonSize.sm,
+          backgroundColor: skyBlue,
+          borderColor: skyBlue,
+          height: 34.h,
+          fontSize: 12.sp,
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          onPressed: _syncAll,
+          icon: Icons.sync,
+          iconColor: Colors.white,
         ),
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 980;
-          final form = _buildConnectorForm();
-          final list = _buildConnectorList(connectors);
-          return isWide
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: form),
-                    const Gap(20),
-                    Expanded(child: list),
-                  ],
-                )
-              : Column(children: [form, const Gap(20), list]);
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 300.w),
+                  child: _buildMainCard(
+                    'AWS', 
+                    'Amazon Web Services', 
+                    Icons.cloud_outlined, 
+                    isDark,
+                    connectors,
+                  ),
+                ),
+              ),
+              Gap(20.w),
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 300.w),
+                  child: _buildMainCard(
+                    'OKTA', 
+                    'Okta Identity Cloud', 
+                    Icons.verified_user_outlined, 
+                    isDark,
+                    connectors,
+                  ),
+                ),
+              ),
+            ],
+          );
         },
       ),
     );
   }
 
-  Widget _buildConnectorForm() {
-    return _panel(
-      child: Form(
-        key: _formKey,
+  Widget _buildMainCard(String providerId, String title, IconData icon, bool isDark, AsyncValue<List<CloudCoverageConnectorDto>> connectors) {
+    final activeCount = connectors.valueOrNull?.where((c) => c.provider == providerId).length ?? 0;
+    
+    return InkWell(
+      onTap: () => _openConnectorDialog(providerId, connectors),
+      borderRadius: BorderRadius.circular(28.r),
+      child: Container(
+        padding: EdgeInsets.all(32.r),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: BorderRadius.circular(28.r),
+          boxShadow: isDark
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _panelTitle(
-              'Add cloud connector',
-              'Credentials are encrypted at rest.',
-            ),
-            const Gap(18),
-            DropdownButtonFormField<String>(
-              value: _provider,
-              decoration: _decoration('Provider'),
-              items: const [
-                DropdownMenuItem(
-                  value: 'AWS',
-                  child: Text('Amazon Web Services'),
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12.r),
+                  decoration: BoxDecoration(
+                    color: skyBlue.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: skyBlue, size: 32.r),
                 ),
-                DropdownMenuItem(value: 'OKTA', child: Text('Okta')),
+                const Spacer(),
+                if (activeCount > 0)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.cyberLiveGreen.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6.r,
+                          height: 6.r,
+                          decoration: const BoxDecoration(
+                            color: AppColors.cyberLiveGreen,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const Gap(6),
+                        Text(
+                          '$activeCount Active',
+                          style: TextStyle(
+                            color: AppColors.cyberLiveGreen,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
-              onChanged: (value) => setState(() => _provider = value ?? 'AWS'),
             ),
-            const Gap(12),
-            _field(_nameController, 'Connection name', Icons.label_outline),
-            const Gap(12),
-            if (_provider == 'AWS') ...[
-              _field(_regionController, 'AWS region', Icons.public),
-              const Gap(12),
-              _field(_accessKeyController, 'Access key ID', Icons.key_outlined),
-              const Gap(12),
-              _secretField(_secretKeyController, 'Secret access key'),
-            ] else ...[
-              _field(
-                _orgUrlController,
-                'Okta organization URL',
-                Icons.language,
+            Gap(24.h),
+            Text(
+              title,
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
               ),
-              const Gap(12),
-              _secretField(_apiTokenController, 'Okta API token'),
-            ],
-            const Gap(18),
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                label:
-                    'Connect ${_provider == 'AWS' ? 'AWS account' : 'Okta organization'}',
-                type: AppButtonType.primary,
-                onPressed: _isSubmitting ? null : _submit,
+            ),
+            Gap(8.h),
+            Text(
+              'Manage your $title connection settings and sync identities.',
+              style: TextStyle(
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                fontSize: 13.sp,
+                height: 1.4,
               ),
             ),
           ],
@@ -204,129 +387,240 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
     );
   }
 
-  Widget _buildConnectorList(
-    AsyncValue<List<CloudCoverageConnectorDto>> connectors,
-  ) {
-    return _panel(
+  Widget _buildConnectorFormInner(bool isDark, StateSetter setDialogState) {
+    return Form(
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _panelTitle(
-            'Connected accounts',
-            'Live connections available to IAM sync.',
+          Text(
+            'Add Connection',
+            style: TextStyle(
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          const Gap(16),
-          connectors.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 28),
-              child: Center(child: CircularProgressIndicator()),
+          const Gap(4),
+          Text(
+            'Credentials are encrypted at rest.',
+            style: TextStyle(
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              fontSize: 12.sp,
             ),
-            error: (error, stack) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Text('Unable to load connectors: $error'),
+          ),
+          const Gap(24),
+          _buildHelpGuide(isDark),
+          const Gap(24),
+          if (_provider == 'AWS') ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _field(_nameController, 'Connection name', Icons.label_outline, isDark)),
+                const Gap(16),
+                Expanded(child: _field(_regionController, 'AWS region', Icons.public, isDark)),
+              ],
             ),
-            data: (items) => items.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 28),
-                    child: Center(
-                      child: Text('No cloud connectors connected yet.'),
-                    ),
-                  )
-                : Column(
-                    children: items
-                        .map(
-                          (connector) => ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: CircleAvatar(
-                              backgroundColor: AppColors.cyberLiveGreen
-                                  .withValues(alpha: 0.14),
-                              child: Icon(
-                                connector.provider.toUpperCase() == 'AWS'
-                                    ? Icons.cloud_outlined
-                                    : Icons.verified_user_outlined,
-                                color: AppColors.cyberLiveGreen,
-                              ),
-                            ),
-                            title: Text(connector.name),
-                            subtitle: Text(
-                              '${connector.provider}  •  ${connector.status}',
-                            ),
-                            trailing: TextButton.icon(
-                              onPressed: _syncingConnectorId == connector.id
-                                  ? null
-                                  : () => _syncConnector(connector),
-                              icon: _syncingConnectorId == connector.id
-                                  ? const SizedBox(
-                                      width: 14,
-                                      height: 14,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.sync, size: 16),
-                              label: const Text('Sync'),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
+            const Gap(16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _field(_accessKeyController, 'Access key ID', Icons.key_outlined, isDark)),
+                const Gap(16),
+                Expanded(child: _secretField(_secretKeyController, 'Secret access key', isDark, setDialogState)),
+              ],
+            ),
+          ] else ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _field(_nameController, 'Connection name', Icons.label_outline, isDark)),
+                const Gap(16),
+                Expanded(child: _field(
+                  _orgUrlController,
+                  'Okta organization URL',
+                  Icons.language,
+                  isDark,
+                )),
+              ],
+            ),
+            const Gap(16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _secretField(_apiTokenController, 'Okta API token', isDark, setDialogState)),
+                const Gap(16),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+          ],
+          const Gap(24),
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              label: 'Connect',
+              type: AppButtonType.primary,
+              backgroundColor: skyBlue,
+              borderColor: skyBlue,
+              onPressed: _isSubmitting ? null : () async {
+                await _submit();
+                setDialogState((){}); 
+                setState((){});
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _panel({required Widget child}) {
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackgroundDark,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cardBorderDark),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _panelTitle(String title, String subtitle) {
+  Widget _buildConnectorListInner(
+    AsyncValue<List<CloudCoverageConnectorDto>> connectorsAsync,
+    String provider,
+    bool isDark,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title,
+          'Connected Accounts',
           style: TextStyle(
-            color: Colors.white,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
         const Gap(4),
         Text(
-          subtitle,
-          style: TextStyle(color: AppColors.textTertiaryDark, fontSize: 12.sp),
+          'Live connections available to IAM sync.',
+          style: TextStyle(
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            fontSize: 12.sp,
+          ),
+        ),
+        const Gap(24),
+        connectorsAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 28),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, stack) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              'Unable to load connectors: $error',
+              style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A)),
+            ),
+          ),
+          data: (items) {
+            final providerItems = items.where((c) => c.provider == provider).toList();
+            if (providerItems.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 28),
+                child: Center(
+                  child: Text(
+                    'No $provider connections yet.',
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: providerItems.map(
+                (connector) => Container(
+                  margin: EdgeInsets.only(bottom: 12.h),
+                  padding: EdgeInsets.all(12.r),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: AppColors.cyberLiveGreen.withValues(alpha: 0.14),
+                        child: Icon(
+                          connector.provider == 'AWS'
+                              ? Icons.cloud_outlined
+                              : Icons.verified_user_outlined,
+                          color: AppColors.cyberLiveGreen,
+                        ),
+                      ),
+                      Gap(12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              connector.name,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                            Text(
+                              connector.status,
+                              style: TextStyle(
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: _syncingConnectorId == connector.id
+                            ? null
+                            : () async {
+                                await _syncConnector(connector);
+                                setState((){}); // Update parent
+                              },
+                        icon: _syncingConnectorId == connector.id
+                            ? SizedBox(
+                                width: 14.r,
+                                height: 14.r,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Icon(Icons.sync, size: 16.r, color: skyBlue),
+                        label: Text('Sync', style: TextStyle(color: skyBlue, fontWeight: FontWeight.w600)),
+                      ),
+                    ],
+                  ),
+                ),
+              ).toList(),
+            );
+          },
         ),
       ],
     );
   }
 
-  Widget _field(TextEditingController controller, String label, IconData icon) {
+  Widget _field(TextEditingController controller, String label, IconData icon, bool isDark) {
     return TextFormField(
       controller: controller,
-      decoration: _decoration(label, icon),
+      style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A)),
+      decoration: _decoration(label, icon, isDark),
       validator: (value) =>
           value == null || value.trim().isEmpty ? 'Required' : null,
     );
   }
 
-  Widget _secretField(TextEditingController controller, String label) {
+  Widget _secretField(TextEditingController controller, String label, bool isDark, StateSetter setDialogState) {
     return TextFormField(
       controller: controller,
       obscureText: _obscureSecret,
-      decoration: _decoration(label, Icons.lock_outline).copyWith(
+      style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A)),
+      decoration: _decoration(label, Icons.lock_outline, isDark).copyWith(
         suffixIcon: IconButton(
           tooltip: _obscureSecret ? 'Show value' : 'Hide value',
-          icon: Icon(_obscureSecret ? Icons.visibility : Icons.visibility_off),
-          onPressed: () => setState(() => _obscureSecret = !_obscureSecret),
+          icon: Icon(
+            _obscureSecret ? Icons.visibility : Icons.visibility_off,
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+          ),
+          onPressed: () => setDialogState(() => _obscureSecret = !_obscureSecret),
         ),
       ),
       validator: (value) =>
@@ -334,13 +628,85 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
     );
   }
 
-  InputDecoration _decoration(String label, [IconData? icon]) {
+  InputDecoration _decoration(String label, IconData icon, bool isDark) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: icon == null ? null : Icon(icon),
+      labelStyle: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+      prefixIcon: Icon(icon, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
       filled: true,
-      fillColor: const Color(0xFF111827),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6.r)),
+      fillColor: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: skyBlue, width: 1.5),
+      ),
+    );
+  }
+
+  Widget _buildHelpGuide(bool isDark) {
+    final title = _provider == 'AWS' ? 'How to get AWS Credentials' : 'How to get Okta Credentials';
+    final steps = _provider == 'AWS' 
+      ? [
+          '1. Log in to your AWS Management Console.',
+          '2. Go to IAM (Identity and Access Management).',
+          '3. Select "Users" and click "Add users".',
+          '4. Attach policies with ReadOnlyAccess (or required permissions).',
+          '5. Go to "Security credentials" tab and create an Access Key.',
+          '6. Copy the Access Key ID and Secret Access Key.'
+        ]
+      : [
+          '1. Log in to your Okta Admin Console.',
+          '2. Go to Security > API.',
+          '3. Click on the "Tokens" tab.',
+          '4. Click "Create Token", name it, and click "Create".',
+          '5. Copy the API Token (you won\'t be able to see it again).',
+          '6. Your Org URL is typically https://<your-company>.okta.com.'
+        ];
+
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.help_outline, color: skyBlue, size: 18.r),
+              const Gap(8),
+              Text(
+                title,
+                style: TextStyle(
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ],
+          ),
+          const Gap(12),
+          ...steps.map((step) => Padding(
+                padding: EdgeInsets.only(bottom: 6.h),
+                child: Text(
+                  step,
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    fontSize: 12.sp,
+                    height: 1.4,
+                  ),
+                ),
+              )),
+        ],
+      ),
     );
   }
 }

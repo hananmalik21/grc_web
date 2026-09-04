@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CyberAlertVolumeChart extends StatefulWidget {
   final List<List<double>>? seriesData;
@@ -34,6 +38,7 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     final now = DateTime.now();
     final monthName = _getMonthName(now.month);
     final year = now.year;
@@ -54,16 +59,17 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
     return Container(
       padding: EdgeInsets.all(isMobile ? 14.r : 20.r),
       decoration: BoxDecoration(
-        color: Colors.white, // Solid white card
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +86,7 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
                   Text(
                     'Performance by category',
                     style: TextStyle(
-                      color: const Color(0xFF0F172A),
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                       fontSize: isMobile ? 14.sp : 15.sp,
                       fontWeight: FontWeight.w700,
                     ),
@@ -89,7 +95,7 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
                   Text(
                     'Hover for details • ALERT VOLUME — $monthName $year',
                     style: TextStyle(
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       fontSize: isMobile ? 10.5.sp : 11.5.sp,
                       fontWeight: FontWeight.w400,
                     ),
@@ -131,7 +137,7 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
                           Text(
                             'No Security Alerts Ingested',
                             style: TextStyle(
-                              color: const Color(0xFF0F172A),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                               fontSize: isMobile ? 12.sp : 13.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -141,7 +147,7 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
                             'Connect telemetry to visualize alert ingestion frequency',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: const Color(0xFF64748B),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                               fontSize: isMobile ? 10.5.sp : 11.5.sp,
                             ),
                           ),
@@ -164,6 +170,7 @@ class _CyberAlertVolumeChartState extends State<CyberAlertVolumeChart> {
                               seriesData: seriesData,
                               xLabels: xLabels,
                               hoverPosition: hoverPos,
+                              isDark: isDark,
                             ),
                           );
                         },
@@ -208,11 +215,13 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
   final List<List<double>> seriesData;
   final List<String> xLabels;
   final Offset? hoverPosition;
+  final bool isDark;
 
   const _AlertVolumeCanvasPainter({
     required this.seriesData,
     required this.xLabels,
     this.hoverPosition,
+    this.isDark = false,
   });
 
   @override
@@ -235,11 +244,11 @@ class _AlertVolumeCanvasPainter extends CustomPainter {
     if (chartWidth <= 0 || chartHeight <= 0) return;
 
     final gridPaint = Paint()
-      ..color = const Color(0xFFF1F5F9)
+      ..color = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)
       ..strokeWidth = 1.0;
 
     final textStyle = TextStyle(
-      color: const Color(0xFF64748B),
+      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
       fontSize: 10.sp,
       fontWeight: FontWeight.w500,
     );
@@ -364,14 +373,16 @@ class _LegendItem extends StatelessWidget {
           height: 8.r,
           decoration: BoxDecoration(
             color: color,
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(28.r),
           ),
         ),
         const Gap(5),
         Text(
           label,
           style: TextStyle(
-            color: const Color(0xFF475569),
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF94A3B8) 
+                : const Color(0xFF475569),
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
