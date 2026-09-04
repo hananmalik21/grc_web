@@ -6,20 +6,24 @@ import 'login_desktop_right_panel.dart';
 class LoginDesktopLayout extends StatelessWidget {
   const LoginDesktopLayout({
     super.key,
-    required this.emailController,
+    required this.usernameController,
     required this.passwordController,
-    required this.emailFocusNode,
+    required this.enterpriseIdController,
+    required this.usernameFocusNode,
     required this.passwordFocusNode,
+    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
     this.onForgotPasswordTap,
   });
 
-  final TextEditingController emailController;
+  final TextEditingController usernameController;
   final TextEditingController passwordController;
-  final FocusNode emailFocusNode;
+  final TextEditingController enterpriseIdController;
+  final FocusNode usernameFocusNode;
   final FocusNode passwordFocusNode;
+  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -41,10 +45,12 @@ class LoginDesktopLayout extends StatelessWidget {
           Expanded(
             flex: 3,
             child: LoginDesktopRightPanel(
-              emailController: emailController,
+              usernameController: usernameController,
               passwordController: passwordController,
-              emailFocusNode: emailFocusNode,
+              enterpriseIdController: enterpriseIdController,
+              usernameFocusNode: usernameFocusNode,
               passwordFocusNode: passwordFocusNode,
+              enterpriseIdFocusNode: enterpriseIdFocusNode,
               rememberMe: rememberMe,
               onRememberMeChanged: onRememberMeChanged,
               onLogin: onLogin,

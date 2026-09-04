@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/core/constants/app_colors.dart';
 
 class CloudPostureKpiRow extends StatelessWidget {
   const CloudPostureKpiRow({super.key});
@@ -11,6 +10,7 @@ class CloudPostureKpiRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= 950;
+        final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 950;
 
         final cards = [
           const _PostureKpiCard(
@@ -18,28 +18,28 @@ class CloudPostureKpiRow extends StatelessWidget {
             count: '4',
             subtitle: 'action required',
             icon: Icons.warning_amber_rounded,
-            accentColor: AppColors.cyberCritical,
+            accentColor: Color(0xFFEF4444),
           ),
           const _PostureKpiCard(
             title: 'HIGH',
             count: '5',
             subtitle: 'within 15 days',
             icon: Icons.info_outline_rounded,
-            accentColor: AppColors.cyberHigh,
+            accentColor: Color(0xFFF97316),
           ),
           const _PostureKpiCard(
             title: 'MEDIUM',
             count: '6',
             subtitle: 'within 30 days',
             icon: Icons.info_outline_rounded,
-            accentColor: AppColors.cyberMedium,
+            accentColor: Color(0xFFFBBF24),
           ),
           const _PostureKpiCard(
             title: 'LOW',
             count: '5',
             subtitle: 'within 60 days',
             icon: Icons.check_circle_outline_rounded,
-            accentColor: AppColors.cyberLow,
+            accentColor: Color(0xFF38BDF8),
           ),
         ];
 
@@ -58,24 +58,37 @@ class CloudPostureKpiRow extends StatelessWidget {
           );
         }
 
+        if (isTablet) {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: cards[0]),
+                  const Gap(10),
+                  Expanded(child: cards[1]),
+                ],
+              ),
+              const Gap(10),
+              Row(
+                children: [
+                  Expanded(child: cards[2]),
+                  const Gap(10),
+                  Expanded(child: cards[3]),
+                ],
+              ),
+            ],
+          );
+        }
+
         return Column(
-          children: [
-            Row(
-              children: [
-                Expanded(child: cards[0]),
-                Gap(10.w),
-                Expanded(child: cards[1]),
-              ],
-            ),
-            Gap(10.h),
-            Row(
-              children: [
-                Expanded(child: cards[2]),
-                Gap(10.w),
-                Expanded(child: cards[3]),
-              ],
-            ),
-          ],
+          children: cards
+              .map(
+                (card) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: card,
+                ),
+              )
+              .toList(),
         );
       },
     );
@@ -100,11 +113,11 @@ class _PostureKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(14.r),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
+        color: const Color(0xFF09101F),
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        border: Border.all(color: const Color(0xFF142036)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +128,7 @@ class _PostureKpiCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: AppColors.textTertiaryDark,
+                  color: const Color(0xFF5E738E),
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
@@ -124,25 +137,23 @@ class _PostureKpiCard extends StatelessWidget {
               Icon(icon, size: 15.sp, color: accentColor),
             ],
           ),
-          Gap(8.h),
+          const Gap(8),
           Text(
             count,
             style: TextStyle(
-              color: AppColors.textPrimaryDark,
-              fontSize: 22.sp,
+              color: Colors.white,
+              fontSize: 26.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
-          Gap(4.h),
+          const Gap(4),
           Text(
             subtitle,
             style: TextStyle(
-              color: AppColors.textPlaceholderDark,
-              fontSize: 10.5.sp,
+              color: const Color(0xFF64748B),
+              fontSize: 11.sp,
               fontWeight: FontWeight.w400,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

@@ -7,10 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class LoginLayoutHandler extends ConsumerWidget {
   const LoginLayoutHandler({
     super.key,
-    required this.emailController,
+    required this.usernameController,
     required this.passwordController,
-    required this.emailFocusNode,
+    required this.enterpriseIdController,
+    required this.usernameFocusNode,
     required this.passwordFocusNode,
+    required this.enterpriseIdFocusNode,
     required this.rememberMe,
     required this.onRememberMeChanged,
     required this.onLogin,
@@ -18,10 +20,12 @@ class LoginLayoutHandler extends ConsumerWidget {
     this.onSsoTap,
   });
 
-  final TextEditingController emailController;
+  final TextEditingController usernameController;
   final TextEditingController passwordController;
-  final FocusNode emailFocusNode;
+  final TextEditingController enterpriseIdController;
+  final FocusNode usernameFocusNode;
   final FocusNode passwordFocusNode;
+  final FocusNode enterpriseIdFocusNode;
   final bool rememberMe;
   final ValueChanged<bool> onRememberMeChanged;
   final VoidCallback onLogin;
@@ -32,29 +36,47 @@ class LoginLayoutHandler extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBreaker(
       builder: (context, layout, _) {
-        if (layout.isDesktop) {
-          return LoginDesktopLayout(
-            emailController: emailController,
-            passwordController: passwordController,
-            emailFocusNode: emailFocusNode,
-            passwordFocusNode: passwordFocusNode,
-            rememberMe: rememberMe,
-            onRememberMeChanged: onRememberMeChanged,
-            onLogin: onLogin,
-            onForgotPasswordTap: onForgotPasswordTap,
-          );
-        }
-
-        return LoginCompactLayout(
-          emailController: emailController,
+        final shared = (
+          usernameController: usernameController,
           passwordController: passwordController,
-          emailFocusNode: emailFocusNode,
+          enterpriseIdController: enterpriseIdController,
+          usernameFocusNode: usernameFocusNode,
           passwordFocusNode: passwordFocusNode,
+          enterpriseIdFocusNode: enterpriseIdFocusNode,
           rememberMe: rememberMe,
           onRememberMeChanged: onRememberMeChanged,
           onLogin: onLogin,
           onForgotPasswordTap: onForgotPasswordTap,
           onSsoTap: onSsoTap,
+        );
+
+        if (layout.isDesktop) {
+          return LoginDesktopLayout(
+            usernameController: shared.usernameController,
+            passwordController: shared.passwordController,
+            enterpriseIdController: shared.enterpriseIdController,
+            usernameFocusNode: shared.usernameFocusNode,
+            passwordFocusNode: shared.passwordFocusNode,
+            enterpriseIdFocusNode: shared.enterpriseIdFocusNode,
+            rememberMe: shared.rememberMe,
+            onRememberMeChanged: shared.onRememberMeChanged,
+            onLogin: shared.onLogin,
+            onForgotPasswordTap: shared.onForgotPasswordTap,
+          );
+        }
+
+        return LoginCompactLayout(
+          usernameController: shared.usernameController,
+          passwordController: shared.passwordController,
+          enterpriseIdController: shared.enterpriseIdController,
+          usernameFocusNode: shared.usernameFocusNode,
+          passwordFocusNode: shared.passwordFocusNode,
+          enterpriseIdFocusNode: shared.enterpriseIdFocusNode,
+          rememberMe: shared.rememberMe,
+          onRememberMeChanged: shared.onRememberMeChanged,
+          onLogin: shared.onLogin,
+          onForgotPasswordTap: shared.onForgotPasswordTap,
+          onSsoTap: shared.onSsoTap,
         );
       },
     );
