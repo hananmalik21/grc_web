@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CopilotInputBar extends StatefulWidget {
   final ValueChanged<String> onSend;
@@ -38,12 +39,23 @@ class _CopilotInputBarState extends State<CopilotInputBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFE2E8F0)),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, -4),
+                ),
+              ],
       ),
       child: Row(
         children: [
@@ -51,16 +63,19 @@ class _CopilotInputBarState extends State<CopilotInputBar> {
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
-              style: TextStyle(color: Colors.white, fontSize: 12.5.sp),
+              style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 12.5.sp),
               decoration: InputDecoration(
                 isDense: true,
                 hintText:
                     'Ask about any alert, finding, incident, or security event...',
                 hintStyle: TextStyle(
-                  color: const Color(0xFF64748B),
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                   fontSize: 12.sp,
                 ),
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                filled: false,
                 contentPadding: EdgeInsets.symmetric(vertical: 8.h),
               ),
               onSubmitted: (_) => _submit(),
@@ -74,13 +89,13 @@ class _CopilotInputBarState extends State<CopilotInputBar> {
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
                 color: widget.isGenerating
-                    ? const Color(0xFF1E293B)
-                    : const Color(0xFF0F3E57).withValues(alpha: 0.5),
+                    ? (isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9))
+                    : const Color(0xFF38BDF8),
                 borderRadius: BorderRadius.circular(6.r),
                 border: Border.all(
                   color: widget.isGenerating
-                      ? const Color(0xFF334155)
-                      : const Color(0xFF0284C7).withValues(alpha: 0.4),
+                      ? (isDark ? const Color(0xFF3A3A3C) : const Color(0xFFCBD5E1))
+                      : const Color(0xFF38BDF8),
                 ),
               ),
               child: widget.isGenerating
@@ -95,7 +110,7 @@ class _CopilotInputBarState extends State<CopilotInputBar> {
                   : Icon(
                       Icons.send_rounded,
                       size: 16.sp,
-                      color: const Color(0xFF38BDF8),
+                      color: Colors.white,
                     ),
             ),
           ),

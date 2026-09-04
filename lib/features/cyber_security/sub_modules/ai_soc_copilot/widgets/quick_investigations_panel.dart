@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/ai_soc_copilot/ai_soc_copilot_models.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class QuickInvestigationsPanel extends StatelessWidget {
   final ValueChanged<String> onSelectPrompt;
@@ -51,7 +52,7 @@ class QuickInvestigationsPanel extends StatelessWidget {
         Text(
           'QUICK INVESTIGATIONS',
           style: TextStyle(
-            color: AppColors.textTertiaryDark,
+            color: context.isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             fontSize: 10.5.sp,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
@@ -88,6 +89,8 @@ class _QuickInvestigationCardState extends State<_QuickInvestigationCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -100,13 +103,13 @@ class _QuickInvestigationCardState extends State<_QuickInvestigationCard> {
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: _isHovered
-                ? AppColors.cardBackgroundGreyDark
-                : AppColors.cyberCardBg,
-            borderRadius: BorderRadius.circular(8.r),
+                ? (isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9))
+                : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: _isHovered
                   ? AppColors.primaryLight.withValues(alpha: 0.6)
-                  : AppColors.cyberCardBorder,
+                  : (isDark ? const Color(0xFF2D2D2F) : const Color(0xFFE2E8F0)),
             ),
           ),
           child: Row(
@@ -117,7 +120,7 @@ class _QuickInvestigationCardState extends State<_QuickInvestigationCard> {
                 size: 14.sp,
                 color: _isHovered
                     ? AppColors.primaryLight
-                    : AppColors.textPlaceholderDark,
+                    : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
               ),
               const Gap(10),
               Expanded(
@@ -125,8 +128,8 @@ class _QuickInvestigationCardState extends State<_QuickInvestigationCard> {
                   widget.item.title,
                   style: TextStyle(
                     color: _isHovered
-                        ? Colors.white
-                        : AppColors.textSecondaryDark,
+                        ? (isDark ? Colors.white : AppColors.primaryLight)
+                        : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w500,
                     height: 1.3,

@@ -11,6 +11,7 @@ import 'package:grc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:grc/core/services/responsive_service.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/data/models/ai_copilot_dto.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/presentation/providers/ai_copilot_provider.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/ai_soc_copilot_header.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/copilot_input_bar.dart';
 import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/widgets/copilot_message_bubble.dart';
@@ -139,8 +140,10 @@ class _AiSocCopilotScreenState extends ConsumerState<AiSocCopilotScreen> {
     final isDesktop = context.isDesktop;
     final padding = ResponsiveHelper.getPagePadding(context);
 
+    final isDark = context.isDark;
+    
     return Container(
-      color: AppColors.cyberDarkBg,
+      color: isDark ? const Color(0xFF141414) : const Color(0xFFF3F6FA),
       height: MediaQuery.of(context).size.height - 70.h,
       padding: padding.copyWith(bottom: 16.h),
       child: isDesktop
@@ -162,11 +165,11 @@ class _AiSocCopilotScreenState extends ConsumerState<AiSocCopilotScreen> {
 
   Widget _buildPermissionDenied() {
     return Container(
-      color: AppColors.cyberDarkBg,
+      color: context.isDark ? const Color(0xFF141414) : const Color(0xFFF3F6FA),
       alignment: Alignment.center,
-      child: const Text(
+      child: Text(
         'You do not have permission to use AI SOC Copilot.',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: context.isDark ? Colors.white : const Color(0xFF0F172A)),
       ),
     );
   }

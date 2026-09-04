@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/services/responsive_service.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class AiSocCopilotHeader extends StatelessWidget {
   const AiSocCopilotHeader({super.key});
@@ -10,32 +11,43 @@ class AiSocCopilotHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = context.isMobile;
+    final isDark = context.isDark;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: isMobile
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildLeftSection(),
+                _buildLeftSection(context),
                 const Gap(8),
                 _buildRightSection(),
               ],
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [_buildLeftSection(), _buildRightSection()],
+              children: [_buildLeftSection(context), _buildRightSection()],
             ),
     );
   }
 
-  Widget _buildLeftSection() {
+  Widget _buildLeftSection(BuildContext context) {
+    final isDark = context.isDark;
+    
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -63,7 +75,7 @@ class AiSocCopilotHeader extends StatelessWidget {
             Text(
               'AI SOC Copilot',
               style: TextStyle(
-                color: AppColors.textPrimaryDark,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
                 fontSize: 13.5.sp,
                 fontWeight: FontWeight.w600,
               ),
