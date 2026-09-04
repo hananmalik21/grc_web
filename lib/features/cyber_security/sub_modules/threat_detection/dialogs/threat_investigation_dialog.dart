@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/threat_detection/models/threat_alert_model.dart';
+import 'package:grc/core/models/cyber_security/threat_detection/threat_alert_model.dart';
+import 'package:grc/core/services/toast_service.dart';
 
 class ThreatInvestigationDialog extends StatefulWidget {
   final ThreatAlertModel alert;
@@ -54,10 +55,14 @@ class _ThreatInvestigationDialogState extends State<ThreatInvestigationDialog> {
                         vertical: 3.h,
                       ),
                       decoration: BoxDecoration(
-                        color: widget.alert.severityColor.withValues(alpha: 0.18),
+                        color: widget.alert.severityColor.withValues(
+                          alpha: 0.18,
+                        ),
                         borderRadius: BorderRadius.circular(4.r),
                         border: Border.all(
-                          color: widget.alert.severityColor.withValues(alpha: 0.4),
+                          color: widget.alert.severityColor.withValues(
+                            alpha: 0.4,
+                          ),
                         ),
                       ),
                       child: Text(
@@ -130,7 +135,10 @@ class _ThreatInvestigationDialogState extends State<ThreatInvestigationDialog> {
                   const Divider(color: Color(0xFF1E293B), height: 16),
                   _buildDetailRow('MITRE ATT&CK', widget.alert.mitreTechnique),
                   const Divider(color: Color(0xFF1E293B), height: 16),
-                  _buildDetailRow('Affected Resource', widget.alert.affectedResource),
+                  _buildDetailRow(
+                    'Affected Resource',
+                    widget.alert.affectedResource,
+                  ),
                   const Divider(color: Color(0xFF1E293B), height: 16),
                   _buildDetailRow('Detected Time', widget.alert.timeAgo),
                 ],
@@ -148,23 +156,31 @@ class _ThreatInvestigationDialogState extends State<ThreatInvestigationDialog> {
                     if (_currentStatus != ThreatStatus.investigating)
                       TextButton.icon(
                         onPressed: () {
-                          setState(() => _currentStatus = ThreatStatus.investigating);
-                          widget.onStatusChanged?.call(ThreatStatus.investigating);
+                          setState(
+                            () => _currentStatus = ThreatStatus.investigating,
+                          );
+                          widget.onStatusChanged?.call(
+                            ThreatStatus.investigating,
+                          );
                           Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: const Color(0xFF131D31),
-                              content: Text(
+                          ToastService.show(
+                            context: context,
+                            message:
                                 '${widget.alert.alertId} marked as Investigating.',
-                                style: const TextStyle(color: Color(0xFFF59E0B)),
-                              ),
-                            ),
+                            type: ToastType.warning,
                           );
                         },
-                        icon: Icon(Icons.visibility_outlined, size: 14.sp, color: const Color(0xFFF59E0B)),
+                        icon: Icon(
+                          Icons.visibility_outlined,
+                          size: 14.sp,
+                          color: const Color(0xFFF59E0B),
+                        ),
                         label: Text(
                           'Mark Investigating',
-                          style: TextStyle(color: const Color(0xFFF59E0B), fontSize: 11.5.sp),
+                          style: TextStyle(
+                            color: const Color(0xFFF59E0B),
+                            fontSize: 11.5.sp,
+                          ),
                         ),
                       ),
                     if (_currentStatus != ThreatStatus.closed)
@@ -173,20 +189,24 @@ class _ThreatInvestigationDialogState extends State<ThreatInvestigationDialog> {
                           setState(() => _currentStatus = ThreatStatus.closed);
                           widget.onStatusChanged?.call(ThreatStatus.closed);
                           Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: const Color(0xFF131D31),
-                              content: Text(
+                          ToastService.show(
+                            context: context,
+                            message:
                                 '${widget.alert.alertId} marked as Closed.',
-                                style: const TextStyle(color: Color(0xFF10B981)),
-                              ),
-                            ),
+                            type: ToastType.success,
                           );
                         },
-                        icon: Icon(Icons.check_circle_outline, size: 14.sp, color: const Color(0xFF10B981)),
+                        icon: Icon(
+                          Icons.check_circle_outline,
+                          size: 14.sp,
+                          color: const Color(0xFF10B981),
+                        ),
                         label: Text(
                           'Resolve & Close',
-                          style: TextStyle(color: const Color(0xFF10B981), fontSize: 11.5.sp),
+                          style: TextStyle(
+                            color: const Color(0xFF10B981),
+                            fontSize: 11.5.sp,
+                          ),
                         ),
                       ),
                   ],
@@ -197,7 +217,10 @@ class _ThreatInvestigationDialogState extends State<ThreatInvestigationDialog> {
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0284C7),
-                    padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 18.w,
+                      vertical: 10.h,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6.r),
                     ),

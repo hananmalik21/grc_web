@@ -9,6 +9,8 @@ class CyberComplianceBars extends StatefulWidget {
 
   final List<FrameworkComplianceItem> frameworks;
 
+  static const Color skyBlue = Color(0xFF00B4D8);
+
   @override
   State<CyberComplianceBars> createState() => _CyberComplianceBarsState();
 }
@@ -24,12 +26,21 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(isMobile ? 12.r : 18.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        color: Colors.white, // Solid white card
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,38 +49,40 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
           ValueListenableBuilder<int?>(
             valueListenable: _hoveredIndexNotifier,
             builder: (context, hoveredIndex, _) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              return Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   Text(
                     'FRAMEWORK COMPLIANCE',
                     style: TextStyle(
-                      color: AppColors.textTertiaryDark,
-                      fontSize: 11.5.sp,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.8,
+                      color: const Color(0xFF0F172A),
+                      fontSize: isMobile ? 13.sp : 14.sp,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   if (hoveredIndex != null)
                     Text(
-                      '${widget.frameworks[hoveredIndex].name}: ${widget.frameworks[hoveredIndex].score.toInt()}% Compliant',
+                      '${widget.frameworks[hoveredIndex].name}: ${widget.frameworks[hoveredIndex].score.toInt()}%',
                       style: TextStyle(
                         color: _colorFor(widget.frameworks[hoveredIndex].code),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 10.5.sp,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                 ],
               );
             },
           ),
-          const Gap(10),
+          Gap(isMobile ? 8.h : 12.h),
           if (widget.frameworks.isEmpty)
             Text(
               'No framework assessments available',
               style: TextStyle(
-                color: AppColors.textPlaceholderDark,
-                fontSize: 11.sp,
+                color: const Color(0xFF64748B),
+                fontSize: 12.sp,
               ),
             )
           else
@@ -82,13 +95,14 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                     .toDouble(),
                 barColor: _colorFor(widget.frameworks[i].code),
                 tooltip: widget.frameworks[i].name,
+                isMobile: isMobile,
               ),
-              if (i < widget.frameworks.length - 1) const Gap(6),
+              if (i < widget.frameworks.length - 1) Gap(isMobile ? 6.h : 8.h),
             ],
-          const Gap(8),
+          Gap(isMobile ? 8.h : 10.h),
           Row(
             children: [
-              SizedBox(width: 58.w),
+              SizedBox(width: isMobile ? 54.w : 64.w),
               const Gap(8),
               Expanded(
                 child: Row(
@@ -102,7 +116,7 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                   ],
                 ),
               ),
-              SizedBox(width: 38.w),
+              SizedBox(width: isMobile ? 32.w : 42.w),
             ],
           ),
         ],
@@ -112,20 +126,20 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
 
   Color _colorFor(String code) {
     final normalized = code.toUpperCase();
-    if (normalized.contains('NIST')) return AppColors.dashCyberSecurity;
-    if (normalized.contains('CIS')) return AppColors.primaryLight;
-    if (normalized.contains('ISO')) return AppColors.barPurple;
-    if (normalized.contains('SOC')) return AppColors.cyberLiveGreen;
-    return AppColors.cyberMedium;
+    if (normalized.contains('NIST')) return CyberComplianceBars.skyBlue;
+    if (normalized.contains('CIS')) return AppColors.primary;
+    if (normalized.contains('ISO')) return AppColors.purple;
+    if (normalized.contains('SOC')) return AppColors.successText;
+    return AppColors.warningText;
   }
 
   Widget _buildAxisLabel(String text) {
     return Text(
       text,
       style: TextStyle(
-        color: AppColors.textPlaceholderDark,
-        fontSize: 8.5.sp,
-        fontWeight: FontWeight.w400,
+        color: const Color(0xFF64748B),
+        fontSize: 9.sp,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -136,6 +150,7 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
     required double percentage,
     required Color barColor,
     required String tooltip,
+    required bool isMobile,
   }) {
     final pctInt = (percentage * 100).toInt();
 
@@ -143,12 +158,11 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
       message: '$label: $pctInt% compliance\n$tooltip',
       waitDuration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: AppColors.cyberDarkBg.withValues(alpha: 0.95),
+        color: const Color(0xFF0F172A),
         borderRadius: BorderRadius.circular(6.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
       ),
       textStyle: TextStyle(
-        color: AppColors.textPrimaryDark,
+        color: Colors.white,
         fontSize: 11.sp,
         fontWeight: FontWeight.w500,
       ),
@@ -176,14 +190,14 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 58.w,
+                    width: isMobile ? 54.w : 64.w,
                     child: Text(
                       label,
                       style: TextStyle(
                         color: isHovered
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textTertiaryDark,
-                        fontSize: 10.sp,
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFF334155),
+                        fontSize: isMobile ? 10.sp : 11.sp,
                         fontWeight: isHovered
                             ? FontWeight.w700
                             : FontWeight.w600,
@@ -195,10 +209,10 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                   const Gap(8),
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(3.r),
+                      borderRadius: BorderRadius.circular(4.r),
                       child: Container(
                         height: 12.h,
-                        color: AppColors.cardBackgroundGreyDark,
+                        color: const Color(0xFFF1F5F9),
                         child: FractionallySizedBox(
                           alignment: Alignment.centerLeft,
                           widthFactor: percentage,
@@ -208,16 +222,7 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                               color: isHovered
                                   ? barColor.withValues(alpha: 0.95)
                                   : barColor,
-                              borderRadius: BorderRadius.circular(3.r),
-                              boxShadow: isHovered
-                                  ? [
-                                      BoxShadow(
-                                        color: barColor.withValues(alpha: 0.4),
-                                        blurRadius: 6,
-                                        spreadRadius: 1,
-                                      ),
-                                    ]
-                                  : null,
+                              borderRadius: BorderRadius.circular(4.r),
                             ),
                           ),
                         ),
@@ -226,13 +231,13 @@ class _CyberComplianceBarsState extends State<CyberComplianceBars> {
                   ),
                   const Gap(8),
                   SizedBox(
-                    width: 30.w,
+                    width: isMobile ? 28.w : 34.w,
                     child: Text(
                       '$pctInt%',
                       textAlign: TextAlign.end,
                       style: TextStyle(
-                        color: isHovered ? barColor : AppColors.textPrimaryDark,
-                        fontSize: 10.5.sp,
+                        color: isHovered ? barColor : const Color(0xFF0F172A),
+                        fontSize: isMobile ? 10.sp : 11.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

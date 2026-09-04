@@ -101,15 +101,15 @@ class _FrameworkCardState extends State<_FrameworkCard> {
             color: widget.isSelected
                 ? const Color(0xFF0F2B3E).withValues(alpha: 0.5)
                 : _isHovered
-                    ? const Color(0xFF1E293B).withValues(alpha: 0.8)
-                    : const Color(0xFF0F172A).withValues(alpha: 0.7),
+                ? const Color(0xFF1E293B).withValues(alpha: 0.8)
+                : const Color(0xFF0F172A).withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(
               color: widget.isSelected
                   ? fw.progressColor.withValues(alpha: 0.8)
                   : _isHovered
-                      ? const Color(0xFF334155)
-                      : const Color(0xFF1E293B),
+                  ? const Color(0xFF334155)
+                  : const Color(0xFF1E293B),
               width: widget.isSelected ? 1.5 : 1,
             ),
           ),

@@ -1,37 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/ai_soc_copilot/models/open_incident_item_model.dart';
+import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/core/models/cyber_security/ai_soc_copilot/ai_soc_copilot_models.dart';
 
 class OpenIncidentsPanel extends StatelessWidget {
   final ValueChanged<String> onSelectIncident;
 
-  const OpenIncidentsPanel({
-    super.key,
-    required this.onSelectIncident,
-  });
+  const OpenIncidentsPanel({super.key, required this.onSelectIncident});
+
+  static const List<OpenIncidentItemModel> defaultIncidents = [
+    OpenIncidentItemModel(
+      id: 'inc-1',
+      incidentNumber: 'INC-2847',
+      title: 'Suspicious Login from Tor Exit Node',
+      severity: 'HIGH',
+      severityColor: AppColors.cyberHigh,
+      queryPrompt: 'Investigate INC-2847 suspicious login',
+    ),
+    OpenIncidentItemModel(
+      id: 'inc-2',
+      incidentNumber: 'INC-2846',
+      title: 'Mass File Download — SharePoint Online',
+      severity: 'CRITICAL',
+      severityColor: AppColors.cyberCritical,
+      queryPrompt: 'Investigate SharePoint data download',
+    ),
+    OpenIncidentItemModel(
+      id: 'inc-3',
+      incidentNumber: 'INC-2843',
+      title: 'Privilege Escalation — IAM Role Modification',
+      severity: 'HIGH',
+      severityColor: AppColors.cyberHigh,
+      queryPrompt:
+          'Investigate INC-2843 IAM privilege escalation and unauthorized role binding',
+    ),
+    OpenIncidentItemModel(
+      id: 'inc-4',
+      incidentNumber: 'INC-2840',
+      title: 'Unusual Database Query Volume Spike',
+      severity: 'MEDIUM',
+      severityColor: AppColors.cyberMedium,
+      queryPrompt:
+          'Investigate INC-2840 unusual database query volume spike on RDS cluster',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final incidents = OpenIncidentItemModel.getMockOpenIncidents();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
         Text(
           'OPEN INCIDENTS',
           style: TextStyle(
-            color: const Color(0xFF64748B),
+            color: AppColors.textTertiaryDark,
             fontSize: 10.5.sp,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
           ),
         ),
         const Gap(10),
-
-        // List of Incident Cards
-        ...incidents.map((incident) {
+        ...defaultIncidents.map((incident) {
           return Padding(
             padding: EdgeInsets.only(bottom: 8.h),
             child: _OpenIncidentCard(
@@ -49,10 +79,7 @@ class _OpenIncidentCard extends StatefulWidget {
   final OpenIncidentItemModel incident;
   final VoidCallback onTap;
 
-  const _OpenIncidentCard({
-    required this.incident,
-    required this.onTap,
-  });
+  const _OpenIncidentCard({required this.incident, required this.onTap});
 
   @override
   State<_OpenIncidentCard> createState() => _OpenIncidentCardState();
@@ -75,19 +102,18 @@ class _OpenIncidentCardState extends State<_OpenIncidentCard> {
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: _isHovered
-                ? const Color(0xFF1E293B).withValues(alpha: 0.9)
-                : const Color(0xFF0F172A).withValues(alpha: 0.6),
+                ? AppColors.cardBackgroundGreyDark
+                : AppColors.cyberCardBg,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
               color: _isHovered
                   ? widget.incident.severityColor.withValues(alpha: 0.6)
-                  : const Color(0xFF1E293B),
+                  : AppColors.cyberCardBorder,
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Badge & Incident ID row
               Row(
                 children: [
                   Container(
@@ -96,14 +122,18 @@ class _OpenIncidentCardState extends State<_OpenIncidentCard> {
                       vertical: 2.h,
                     ),
                     decoration: BoxDecoration(
-                      color: widget.incident.severityColor.withValues(alpha: 0.18),
+                      color: widget.incident.severityColor.withValues(
+                        alpha: 0.18,
+                      ),
                       borderRadius: BorderRadius.circular(4.r),
                       border: Border.all(
-                        color: widget.incident.severityColor.withValues(alpha: 0.4),
+                        color: widget.incident.severityColor.withValues(
+                          alpha: 0.4,
+                        ),
                       ),
                     ),
                     child: Text(
-                      widget.incident.severityLabel,
+                      widget.incident.severity,
                       style: TextStyle(
                         color: widget.incident.severityColor,
                         fontSize: 9.5.sp,
@@ -116,7 +146,7 @@ class _OpenIncidentCardState extends State<_OpenIncidentCard> {
                   Text(
                     widget.incident.incidentNumber,
                     style: TextStyle(
-                      color: const Color(0xFF64748B),
+                      color: AppColors.textPlaceholderDark,
                       fontSize: 10.5.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -124,13 +154,12 @@ class _OpenIncidentCardState extends State<_OpenIncidentCard> {
                 ],
               ),
               const Gap(6),
-              // Title
               Text(
                 widget.incident.title,
                 style: TextStyle(
                   color: _isHovered
                       ? Colors.white
-                      : const Color(0xFFCBD5E1),
+                      : AppColors.textSecondaryDark,
                   fontSize: 11.5.sp,
                   fontWeight: FontWeight.w500,
                   height: 1.35,

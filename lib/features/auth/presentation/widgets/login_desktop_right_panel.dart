@@ -1,6 +1,6 @@
-import 'package:grc/features/auth/presentation/widgets/login_desktop_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grc/features/auth/presentation/widgets/login_desktop_card.dart';
 
 class LoginDesktopRightPanel extends StatelessWidget {
   const LoginDesktopRightPanel({
@@ -30,12 +30,13 @@ class LoginDesktopRightPanel extends StatelessWidget {
   final VoidCallback? onForgotPasswordTap;
   final VoidCallback? onSsoTap;
 
-  static const double _formMaxWidth = 480;
+  static const double _formMaxWidth = 420;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(32.r),
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 32.h),
       child: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(

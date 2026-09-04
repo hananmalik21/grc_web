@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/app_api/models/api_endpoint_model.dart';
+import 'package:grc/core/models/cyber_security/app_api/api_endpoint_model.dart';
+import 'package:grc/core/services/toast_service.dart';
 
 class ApiAnalysisDialog extends StatelessWidget {
   final ApiEndpointModel endpoint;
@@ -73,7 +74,10 @@ class ApiAnalysisDialog extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Color(0xFF94A3B8)),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Color(0xFF94A3B8),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -94,25 +98,68 @@ class ApiAnalysisDialog extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('AUTHENTICATION', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'AUTHENTICATION',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(endpoint.auth, style: TextStyle(color: endpoint.isAuthMissing ? const Color(0xFFEF4444) : Colors.white, fontWeight: FontWeight.bold)),
+                          Text(
+                            endpoint.auth,
+                            style: TextStyle(
+                              color: endpoint.isAuthMissing
+                                  ? const Color(0xFFEF4444)
+                                  : Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('RATE LIMITING', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'RATE LIMITING',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(endpoint.rateLimitEnabled ? 'Enforced' : 'Disabled', style: TextStyle(color: endpoint.rateLimitEnabled ? const Color(0xFF10B981) : const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+                          Text(
+                            endpoint.rateLimitEnabled ? 'Enforced' : 'Disabled',
+                            style: TextStyle(
+                              color: endpoint.rateLimitEnabled
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('RISK SEVERITY', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'RISK SEVERITY',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(endpoint.risk.label, style: TextStyle(color: endpoint.risk.color, fontWeight: FontWeight.w800)),
+                          Text(
+                            endpoint.risk.label,
+                            style: TextStyle(
+                              color: endpoint.risk.color,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -172,9 +219,21 @@ class ApiAnalysisDialog extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('1. Enforce OAuth 2.0 / JWT Bearer gateway validator filter.', style: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 11.5.sp)),
+                      Text(
+                        '1. Enforce OAuth 2.0 / JWT Bearer gateway validator filter.',
+                        style: TextStyle(
+                          color: const Color(0xFFCBD5E1),
+                          fontSize: 11.5.sp,
+                        ),
+                      ),
                       const Gap(4),
-                      Text('2. Configure Cloud WAF Rate Limit rule: 100 requests / minute per IP.', style: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 11.5.sp)),
+                      Text(
+                        '2. Configure Cloud WAF Rate Limit rule: 100 requests / minute per IP.',
+                        style: TextStyle(
+                          color: const Color(0xFFCBD5E1),
+                          fontSize: 11.5.sp,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -186,26 +245,28 @@ class ApiAnalysisDialog extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close', style: TextStyle(color: Color(0xFF94A3B8))),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(color: Color(0xFF94A3B8)),
+                      ),
                     ),
                     const Gap(10),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: const Color(0xFF131D31),
-                            content: Text(
+                        ToastService.show(
+                          context: context,
+                          message:
                               'WAF protection rule applied for ${endpoint.endpoint}',
-                              style: const TextStyle(color: Color(0xFF00B4D8)),
-                            ),
-                          ),
+                          type: ToastType.success,
                         );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00B4D8),
                         foregroundColor: const Color(0xFF090E1A),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
                       ),
                       child: const Text('Apply WAF Rule'),
                     ),

@@ -124,6 +124,7 @@ flutter:
     - assets/icons/header/
     - assets/logo/
     - assets/icons/
+    - assets/images/
     - assets/icons/auth/
     - assets/icons/payroll/
     - assets/icons/developer_tools/

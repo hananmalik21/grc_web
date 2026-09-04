@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/network_security/models/firewall_rule_model.dart';
+import 'package:grc/core/models/cyber_security/network_security/firewall_rule_model.dart';
+import 'package:grc/core/services/toast_service.dart';
 
 class AiRuleAnalysisDialog extends StatelessWidget {
   final FirewallRuleModel rule;
@@ -54,7 +55,11 @@ class AiRuleAnalysisDialog extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.auto_awesome, color: const Color(0xFF00B4D8), size: 16.sp),
+                            Icon(
+                              Icons.auto_awesome,
+                              color: const Color(0xFF00B4D8),
+                              size: 16.sp,
+                            ),
                             const Gap(6),
                             Text(
                               'AI Attack Path Analysis',
@@ -79,7 +84,10 @@ class AiRuleAnalysisDialog extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Color(0xFF94A3B8)),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Color(0xFF94A3B8),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -100,18 +108,51 @@ class AiRuleAnalysisDialog extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('SOURCE TRAFFIC', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'SOURCE TRAFFIC',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(rule.source, style: TextStyle(color: rule.isSourceExposed ? const Color(0xFFEF4444) : Colors.white, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
+                          Text(
+                            rule.source,
+                            style: TextStyle(
+                              color: rule.isSourceExposed
+                                  ? const Color(0xFFEF4444)
+                                  : Colors.white,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
-                      const Icon(Icons.arrow_forward_rounded, color: Color(0xFF64748B)),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Color(0xFF64748B),
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('DESTINATION SUBNET', style: TextStyle(color: const Color(0xFF64748B), fontSize: 9.sp, fontWeight: FontWeight.w700)),
+                          Text(
+                            'DESTINATION SUBNET',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const Gap(2),
-                          Text(rule.destination, style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
+                          Text(
+                            rule.destination,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -171,12 +212,18 @@ class AiRuleAnalysisDialog extends StatelessWidget {
                     children: [
                       Text(
                         '1. Replace 0.0.0.0/0 with corporate VPN / Zero-Trust gateway CIDR.',
-                        style: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 11.5.sp),
+                        style: TextStyle(
+                          color: const Color(0xFFCBD5E1),
+                          fontSize: 11.5.sp,
+                        ),
                       ),
                       const Gap(4),
                       Text(
                         '2. Place workload behind a Web Application Firewall (WAF) or private bastion.',
-                        style: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 11.5.sp),
+                        style: TextStyle(
+                          color: const Color(0xFFCBD5E1),
+                          fontSize: 11.5.sp,
+                        ),
                       ),
                     ],
                   ),
@@ -189,26 +236,28 @@ class AiRuleAnalysisDialog extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close', style: TextStyle(color: Color(0xFF94A3B8))),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(color: Color(0xFF94A3B8)),
+                      ),
                     ),
                     const Gap(10),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: const Color(0xFF131D31),
-                            content: Text(
+                        ToastService.show(
+                          context: context,
+                          message:
                               'Remediation playbook queued for rule ${rule.ruleId}',
-                              style: const TextStyle(color: Color(0xFF00B4D8)),
-                            ),
-                          ),
+                          type: ToastType.info,
                         );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00B4D8),
                         foregroundColor: const Color(0xFF090E1A),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
                       ),
                       child: const Text('Queue Rule Remediation'),
                     ),

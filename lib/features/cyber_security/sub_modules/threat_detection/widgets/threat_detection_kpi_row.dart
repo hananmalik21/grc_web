@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/core/constants/app_colors.dart';
 
 class ThreatDetectionKpiRow extends StatelessWidget {
   final int newAlertsCount;
@@ -20,98 +21,68 @@ class ThreatDetectionKpiRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < 800;
+        final isDesktop = constraints.maxWidth >= 950;
 
-        if (isNarrow) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _ThreatKpiCard(
-                      label: 'NEW ALERTS',
-                      value: '$newAlertsCount',
-                      icon: Icons.sensors,
-                      iconColor: const Color(0xFF2DD4BF),
+        final cards = [
+          _ThreatKpiCard(
+            label: 'NEW ALERTS',
+            value: '$newAlertsCount',
+            icon: Icons.sensors,
+            iconColor: AppColors.teal,
+          ),
+          _ThreatKpiCard(
+            label: 'INVESTIGATING',
+            value: '$investigatingCount',
+            icon: Icons.visibility_outlined,
+            iconColor: AppColors.alertMedium,
+          ),
+          _ThreatKpiCard(
+            label: 'CRITICAL TODAY',
+            value: '$criticalTodayCount',
+            subtitle: 'needs triage',
+            icon: Icons.error_outline_rounded,
+            iconColor: AppColors.cyberCritical,
+          ),
+          _ThreatKpiCard(
+            label: 'DETECTION RULES',
+            value: '$detectionRulesCount',
+            subtitle: '218 active',
+            icon: Icons.bolt_rounded,
+            iconColor: AppColors.barPurple,
+          ),
+        ];
+
+        if (isDesktop) {
+          return Row(
+            children: cards
+                .map(
+                  (c) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      child: c,
                     ),
                   ),
-                  const Gap(12),
-                  Expanded(
-                    child: _ThreatKpiCard(
-                      label: 'INVESTIGATING',
-                      value: '$investigatingCount',
-                      icon: Icons.visibility_outlined,
-                      iconColor: const Color(0xFFF59E0B),
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ThreatKpiCard(
-                      label: 'CRITICAL TODAY',
-                      value: '$criticalTodayCount',
-                      subtitle: 'needs triage',
-                      icon: Icons.error_outline_rounded,
-                      iconColor: const Color(0xFFEF4444),
-                    ),
-                  ),
-                  const Gap(12),
-                  Expanded(
-                    child: _ThreatKpiCard(
-                      label: 'DETECTION RULES',
-                      value: '$detectionRulesCount',
-                      subtitle: '218 active',
-                      icon: Icons.bolt_rounded,
-                      iconColor: const Color(0xFFA855F7),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                )
+                .toList(),
           );
         }
 
-        return Row(
+        return Column(
           children: [
-            Expanded(
-              child: _ThreatKpiCard(
-                label: 'NEW ALERTS',
-                value: '$newAlertsCount',
-                icon: Icons.sensors,
-                iconColor: const Color(0xFF2DD4BF),
-              ),
+            Row(
+              children: [
+                Expanded(child: cards[0]),
+                Gap(10.w),
+                Expanded(child: cards[1]),
+              ],
             ),
-            const Gap(14),
-            Expanded(
-              child: _ThreatKpiCard(
-                label: 'INVESTIGATING',
-                value: '$investigatingCount',
-                icon: Icons.visibility_outlined,
-                iconColor: const Color(0xFFF59E0B),
-              ),
-            ),
-            const Gap(14),
-            Expanded(
-              child: _ThreatKpiCard(
-                label: 'CRITICAL TODAY',
-                value: '$criticalTodayCount',
-                subtitle: 'needs triage',
-                icon: Icons.error_outline_rounded,
-                iconColor: const Color(0xFFEF4444),
-              ),
-            ),
-            const Gap(14),
-            Expanded(
-              child: _ThreatKpiCard(
-                label: 'DETECTION RULES',
-                value: '$detectionRulesCount',
-                subtitle: '218 active',
-                icon: Icons.bolt_rounded,
-                iconColor: const Color(0xFFA855F7),
-              ),
+            Gap(10.h),
+            Row(
+              children: [
+                Expanded(child: cards[2]),
+                Gap(10.w),
+                Expanded(child: cards[3]),
+              ],
             ),
           ],
         );
@@ -138,69 +109,59 @@ class _ThreatKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(minHeight: 95.h),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        color: AppColors.cyberCardBg,
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColors.cyberCardBorder),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Top-right Icon
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Icon(
-              icon,
-              size: 17.sp,
-              color: iconColor,
-            ),
-          ),
-
-          // Content
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: const Color(0xFF64748B),
-                  fontSize: 10.5.sp,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: AppColors.textPlaceholderDark,
+                    fontSize: 9.5.sp,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Gap(10),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    value,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22.sp,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const Gap(8),
-                    Text(
-                      subtitle!,
-                      style: TextStyle(
-                        color: const Color(0xFF64748B),
-                        fontSize: 10.5.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+              const Gap(4),
+              Icon(icon, size: 15.sp, color: iconColor),
             ],
           ),
+          const Gap(6),
+          Text(
+            value,
+            style: TextStyle(
+              color: AppColors.textPrimaryDark,
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const Gap(3),
+            Text(
+              subtitle!,
+              style: TextStyle(
+                color: AppColors.textPlaceholderDark,
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w400,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
       ),
     );

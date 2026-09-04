@@ -154,11 +154,7 @@ class _AiKpiCard extends StatelessWidget {
           Positioned(
             top: 0,
             right: 0,
-            child: Icon(
-              icon,
-              size: 16.sp,
-              color: iconColor,
-            ),
+            child: Icon(icon, size: 16.sp, color: iconColor),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

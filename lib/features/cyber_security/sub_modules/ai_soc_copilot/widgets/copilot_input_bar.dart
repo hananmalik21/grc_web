@@ -51,13 +51,11 @@ class _CopilotInputBarState extends State<CopilotInputBar> {
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12.5.sp,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 12.5.sp),
               decoration: InputDecoration(
                 isDense: true,
-                hintText: 'Ask about any alert, finding, incident, or security event...',
+                hintText:
+                    'Ask about any alert, finding, incident, or security event...',
                 hintStyle: TextStyle(
                   color: const Color(0xFF64748B),
                   fontSize: 12.sp,

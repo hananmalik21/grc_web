@@ -23,7 +23,9 @@ class DatastoresTable extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tableMinWidth = constraints.maxWidth > 900 ? constraints.maxWidth : 900.0;
+          final tableMinWidth = constraints.maxWidth > 900
+              ? constraints.maxWidth
+              : 900.0;
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: ConstrainedBox(
@@ -77,12 +79,19 @@ class DatastoresTable extends StatelessWidget {
                       // Classification
                       DataCell(
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 2.h,
+                          ),
                           decoration: BoxDecoration(
-                            color: ds.classification.color.withValues(alpha: 0.15),
+                            color: ds.classification.color.withValues(
+                              alpha: 0.15,
+                            ),
                             borderRadius: BorderRadius.circular(4.r),
                             border: Border.all(
-                              color: ds.classification.color.withValues(alpha: 0.4),
+                              color: ds.classification.color.withValues(
+                                alpha: 0.4,
+                              ),
                             ),
                           ),
                           child: Text(
@@ -138,7 +147,10 @@ class DatastoresTable extends StatelessWidget {
                       // Risk
                       DataCell(
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 2.h,
+                          ),
                           decoration: BoxDecoration(
                             color: ds.risk.color.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(4.r),
@@ -163,12 +175,17 @@ class DatastoresTable extends StatelessWidget {
                           onTap: () => onClassify(ds),
                           borderRadius: BorderRadius.circular(4.r),
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 4.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF0F2B38),
                               borderRadius: BorderRadius.circular(4.r),
                               border: Border.all(
-                                color: const Color(0xFF00B4D8).withValues(alpha: 0.4),
+                                color: const Color(
+                                  0xFF00B4D8,
+                                ).withValues(alpha: 0.4),
                               ),
                             ),
                             child: Text(
