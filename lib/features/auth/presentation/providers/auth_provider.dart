@@ -113,7 +113,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String username,
     String password, {
     required bool rememberMe,
-    int? enterpriseId,
+    required int enterpriseId,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -143,9 +143,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
             response.refreshToken!.isNotEmpty) {
           await _storage.saveRefreshToken(response.refreshToken!);
         }
+
         await _storage.saveUserGuid(response.data.userGuid);
-        await _storage.saveOrgId(response.data.orgId);
-        await _storage.savePermissions(response.data.permissions);
         await _storage.saveEnterpriseId(response.data.enterpriseId);
         await _storage.setRememberMe(rememberMe);
         await _storage.setSavedEmail(rememberMe ? username.trim() : null);
