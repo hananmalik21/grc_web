@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/app_api/api_endpoint_model.dart';
 import 'package:grc/core/models/cyber_security/data_security/datastore_item_model.dart';
 import 'package:grc/core/services/toast_service.dart';
-import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/data_security/dialogs/data_classification_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/data_security/widgets/data_security_kpi_row.dart';
@@ -81,11 +81,8 @@ class _DataSecurityScreenState extends State<DataSecurityScreen> {
       subtitle:
           'Sensitive data discovery, classification, and protection status',
       actions: [
-        AppButton(
-          label: 'Scan Datastores',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed: () {
+        InkWell(
+          onTap: () {
             ToastService.show(
               context: context,
               message:
@@ -93,6 +90,23 @@ class _DataSecurityScreenState extends State<DataSecurityScreen> {
               type: ToastType.info,
             );
           },
+          borderRadius: BorderRadius.circular(20.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00B4D8),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'Scan Datastores',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ],
       child: Column(

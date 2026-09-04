@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/app_api/api_endpoint_model.dart';
 import 'package:grc/core/services/toast_service.dart';
-import 'package:grc/core/widgets/buttons/app_button.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/app_api/dialogs/api_analysis_dialog.dart';
 import 'package:grc/features/cyber_security/sub_modules/app_api/widgets/api_endpoints_table.dart';
@@ -75,11 +75,8 @@ class _AppApiScreenState extends State<AppApiScreen> {
       title: 'Application & API Security',
       subtitle: 'OWASP findings, API inventory, and DevSecOps pipeline',
       actions: [
-        AppButton(
-          label: 'Scan APIs',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed: () {
+        InkWell(
+          onTap: () {
             ToastService.show(
               context: context,
               message:
@@ -87,6 +84,23 @@ class _AppApiScreenState extends State<AppApiScreen> {
               type: ToastType.info,
             );
           },
+          borderRadius: BorderRadius.circular(20.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00B4D8),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'Scan APIs',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ],
       child: Column(

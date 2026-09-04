@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/identity_access/identity_user_model.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class IdentityUsersTable extends StatelessWidget {
   final List<IdentityUserModel> users;
@@ -15,19 +16,90 @@ class IdentityUsersTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF070C18),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0xFF131E30)),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final tableMinWidth = constraints.maxWidth > 900
-              ? constraints.maxWidth
-              : 900.0;
-          return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Users Details',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Gap(4),
+                    Text(
+                      'Showing ${users.length} records',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        fontSize: 11.sp,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'TOTAL USERS',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const Gap(2),
+                    Text(
+                      '${users.length}',
+                      style: TextStyle(
+                        color: const Color(0xFF10B981),
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
+          ),
+          SizedBox(
+            height: 400.h,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final tableMinWidth = constraints.maxWidth > 900
+                      ? constraints.maxWidth
+                      : 900.0;
+                  return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: ConstrainedBox(
               constraints: BoxConstraints(minWidth: tableMinWidth),
@@ -38,7 +110,7 @@ class IdentityUsersTable extends StatelessWidget {
                 horizontalMargin: 16.w,
                 columnSpacing: 16.w,
                 headingRowColor: WidgetStateProperty.all(
-                  const Color(0xFF080E1C),
+                  isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF8FAFC),
                 ),
                 columns: const [
                   DataColumn(label: _IdHeaderCell('USER')),
@@ -59,7 +131,7 @@ class IdentityUsersTable extends StatelessWidget {
                         Text(
                           u.username,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'monospace',
@@ -72,8 +144,8 @@ class IdentityUsersTable extends StatelessWidget {
                         Text(
                           u.department,
                           style: TextStyle(
-                            color: const Color(0xFF94A3B8),
-                            fontSize: 11.5.sp,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            fontSize: 11.sp,
                           ),
                         ),
                       ),
@@ -83,8 +155,8 @@ class IdentityUsersTable extends StatelessWidget {
                         Text(
                           u.role,
                           style: TextStyle(
-                            color: const Color(0xFFCBD5E1),
-                            fontSize: 11.5.sp,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                            fontSize: 11.sp,
                           ),
                         ),
                       ),
@@ -127,7 +199,7 @@ class IdentityUsersTable extends StatelessWidget {
                                 '${u.riskScore}',
                                 style: TextStyle(
                                   color: u.riskScoreColor,
-                                  fontSize: 12.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -143,8 +215,8 @@ class IdentityUsersTable extends StatelessWidget {
                           style: TextStyle(
                             color: u.alertsCount > 0
                                 ? const Color(0xFFF97316)
-                                : const Color(0xFF64748B),
-                            fontSize: 12.sp,
+                                : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -158,7 +230,7 @@ class IdentityUsersTable extends StatelessWidget {
                             color: u.hasMfa
                                 ? const Color(0xFF10B981)
                                 : const Color(0xFFEF4444),
-                            fontSize: 11.5.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -201,7 +273,7 @@ class IdentityUsersTable extends StatelessWidget {
                           u.status,
                           style: TextStyle(
                             color: u.statusColor,
-                            fontSize: 11.5.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -218,16 +290,16 @@ class IdentityUsersTable extends StatelessWidget {
                               vertical: 4.h,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(4.r),
                               border: Border.all(
-                                color: const Color(0xFF334155),
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                               ),
                             ),
                             child: Text(
                               'Review',
                               style: TextStyle(
-                                color: const Color(0xFFCBD5E1),
+                                color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -243,6 +315,10 @@ class IdentityUsersTable extends StatelessWidget {
           );
         },
       ),
+      ),
+      ),
+      ],
+      ),
     );
   }
 }
@@ -253,11 +329,12 @@ class _IdHeaderCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     return Text(
       text,
       style: TextStyle(
-        color: const Color(0xFF5E738E),
-        fontSize: 10.sp,
+        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+        fontSize: 11.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/ai_soc_copilot/ai_soc_copilot_models.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class CopilotMessageBubble extends StatelessWidget {
   final CopilotMessage message;
@@ -16,15 +17,16 @@ class CopilotMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.sender == MessageSender.user;
+    final isDark = context.isDark;
 
     if (isUser) {
-      return _buildUserBubble(context);
+      return _buildUserBubble(context, isDark);
     } else {
-      return _buildCopilotBubble(context);
+      return _buildCopilotBubble(context, isDark);
     }
   }
 
-  Widget _buildUserBubble(BuildContext context) {
+  Widget _buildUserBubble(BuildContext context, bool isDark) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
@@ -36,14 +38,14 @@ class CopilotMessageBubble extends StatelessWidget {
               constraints: BoxConstraints(maxWidth: 560.w),
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B).withValues(alpha: 0.9),
+                color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFE2E8F0),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12.r),
-                  topRight: Radius.circular(12.r),
-                  bottomLeft: Radius.circular(12.r),
+                  topLeft: Radius.circular(16.r),
+                  topRight: Radius.circular(16.r),
+                  bottomLeft: Radius.circular(16.r),
                   bottomRight: Radius.circular(4.r),
                 ),
-                border: Border.all(color: const Color(0xFF334155)),
+                border: Border.all(color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFCBD5E1)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -51,7 +53,7 @@ class CopilotMessageBubble extends StatelessWidget {
                   Text(
                     message.content,
                     style: TextStyle(
-                      color: const Color(0xFFF1F5F9),
+                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A),
                       fontSize: 12.5.sp,
                       fontWeight: FontWeight.w500,
                       height: 1.4,
@@ -61,7 +63,7 @@ class CopilotMessageBubble extends StatelessWidget {
                   Text(
                     message.timestamp,
                     style: TextStyle(
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
                       fontSize: 10.5.sp,
                       fontWeight: FontWeight.w400,
                     ),
@@ -76,15 +78,15 @@ class CopilotMessageBubble extends StatelessWidget {
             width: 28.w,
             height: 28.w,
             decoration: BoxDecoration(
-              color: const Color(0xFF334155),
+              color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFCBD5E1),
               borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(color: const Color(0xFF475569)),
+              border: Border.all(color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFF94A3B8)),
             ),
             child: Center(
               child: Icon(
                 Icons.person_rounded,
                 size: 16.sp,
-                color: const Color(0xFF94A3B8),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
               ),
             ),
           ),
@@ -93,7 +95,7 @@ class CopilotMessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildCopilotBubble(BuildContext context) {
+  Widget _buildCopilotBubble(BuildContext context, bool isDark) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
@@ -125,9 +127,18 @@ class CopilotMessageBubble extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: const Color(0xFF0B132B).withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: const Color(0xFF1E293B)),
+                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFE2E8F0)),
+                boxShadow: isDark
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +152,7 @@ class CopilotMessageBubble extends StatelessWidget {
                           child: Text(
                             message.content,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                               fontSize: 13.5.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -154,16 +165,16 @@ class CopilotMessageBubble extends StatelessWidget {
                               vertical: 2.5.h,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(4.r),
                               border: Border.all(
-                                color: const Color(0xFF334155),
+                                color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFCBD5E1),
                               ),
                             ),
                             child: Text(
                               'Confidence: ${message.confidence} | ${message.mitreMapping ?? ''}',
                               style: TextStyle(
-                                color: const Color(0xFF94A3B8),
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                                 fontSize: 10.5.sp,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -193,7 +204,7 @@ class CopilotMessageBubble extends StatelessWidget {
                     Text(
                       message.content,
                       style: TextStyle(
-                        color: const Color(0xFFCBD5E1),
+                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                         fontSize: 12.5.sp,
                         height: 1.55,
                       ),
@@ -206,7 +217,7 @@ class CopilotMessageBubble extends StatelessWidget {
                     Text(
                       'Evidence:',
                       style: TextStyle(
-                        color: const Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -230,7 +241,7 @@ class CopilotMessageBubble extends StatelessWidget {
                               child: Text(
                                 item,
                                 style: TextStyle(
-                                  color: const Color(0xFFE2E8F0),
+                                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A),
                                   fontSize: 12.sp,
                                   height: 1.45,
                                 ),
@@ -276,7 +287,7 @@ class CopilotMessageBubble extends StatelessWidget {
                     Text(
                       'Required actions (all pending human approval):',
                       style: TextStyle(
-                        color: const Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -300,7 +311,7 @@ class CopilotMessageBubble extends StatelessWidget {
                               child: Text(
                                 entry.value,
                                 style: TextStyle(
-                                  color: const Color(0xFFE2E8F0),
+                                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A),
                                   fontSize: 12.sp,
                                   height: 1.45,
                                 ),
