@@ -8,6 +8,8 @@ const String _keyUserGuid = 'user_guid';
 const String _keyRememberMe = 'remember_me';
 const String _keySavedEmail = 'saved_email';
 const String _keyEnterpriseId = 'enterprise_id';
+const String _keyUserName = 'user_name';
+const String _keyUserRole = 'user_role';
 
 class HiveAuthLocalStorage implements AuthLocalStorage {
   HiveAuthLocalStorage({Box? box}) : _box = box;
@@ -85,6 +87,32 @@ class HiveAuthLocalStorage implements AuthLocalStorage {
   Future<String?> getSavedEmail() async {
     final box = await _getBox();
     final value = box.get(_keySavedEmail);
+    return value is String ? value : null;
+  }
+
+  @override
+  Future<void> saveUserName(String name) async {
+    final box = await _getBox();
+    await box.put(_keyUserName, name);
+  }
+
+  @override
+  Future<String?> getUserName() async {
+    final box = await _getBox();
+    final value = box.get(_keyUserName);
+    return value is String ? value : null;
+  }
+
+  @override
+  Future<void> saveUserRole(String role) async {
+    final box = await _getBox();
+    await box.put(_keyUserRole, role);
+  }
+
+  @override
+  Future<String?> getUserRole() async {
+    final box = await _getBox();
+    final value = box.get(_keyUserRole);
     return value is String ? value : null;
   }
 

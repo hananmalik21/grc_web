@@ -32,6 +32,33 @@ class SidebarMenuItem extends StatelessWidget {
   final bool Function(SidebarItem) isChildActive;
   final AppLocalizations localizations;
 
+  IconData _fallbackIcon(String id) {
+    final lower = id.toLowerCase();
+    if (lower.contains('home') || lower.contains('dash')) return Icons.home_rounded;
+    if (lower.contains('enterprise') || lower.contains('structure')) return Icons.apartment_rounded;
+    if (lower.contains('security') && lower.contains('manager')) return Icons.admin_panel_settings_rounded;
+    if (lower.contains('grc') || lower.contains('compliance')) return Icons.verified_user_rounded;
+    if (lower.contains('cyber')) return Icons.shield_rounded;
+    return Icons.grid_view_rounded;
+  }
+
+  Widget _buildItemIcon(bool isCurrentActive) {
+    final iconColor = isCurrentActive ? Colors.white : const Color(0xFF64748B);
+    if (item.svgPath != null) {
+      return DigifyAsset(
+        assetPath: item.svgPath!,
+        width: 18.w,
+        height: 18.h,
+        color: iconColor,
+      );
+    }
+    return Icon(
+      item.icon ?? _fallbackIcon(item.id),
+      size: 18.sp,
+      color: iconColor,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasChildren = item.children != null && item.children!.isNotEmpty;
@@ -39,6 +66,8 @@ class SidebarMenuItem extends StatelessWidget {
     if (!isSidebarExpanded) {
       return _buildCondensedTile(context);
     }
+
+    final isPillActive = isActive && !hasChildren;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,53 +83,53 @@ class SidebarMenuItem extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-            margin: EdgeInsets.only(bottom: 2.h),
-            padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 8.75.h),
+            margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5.r),
-              color: (isActive && !hasChildren) ? AppColors.sidebarActiveBg : Colors.transparent,
-            ),
-            child: Stack(
-              children: [
-                if (isActive && !hasChildren)
-                  Positioned(
-                    left: -10.w,
-                    top: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 3.5.w,
-                      decoration: BoxDecoration(
-                        color: AppColors.sidebarActiveText,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(3.5.r),
-                          bottomRight: Radius.circular(3.5.r),
-                        ),
+              borderRadius: BorderRadius.circular(12.r),
+              color: isPillActive
+                  ? const Color(0xFF0284C7)
+                  : Colors.transparent,
+              boxShadow: isPillActive
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.28),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              children: [
+                _buildItemIcon(isPillActive),
+                Gap(10.w),
+                Expanded(
+                  child: Text(
+                    SidebarConfig.getLocalizedLabel(item.labelKey, localizations),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: isPillActive ? FontWeight.w700 : FontWeight.w500,
+                      color: isPillActive
+                          ? Colors.white
+                          : const Color(0xFF334155),
+                      height: 1.2,
                     ),
                   ),
-                Row(
-                  children: [
-                    if (hasChildren) ...[
-                      AnimatedRotation(
-                        turns: isSectionExpanded ? 0.25 : 0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOut,
-                        child: Icon(Icons.keyboard_arrow_right, size: 14.sp, color: AppColors.sidebarCategoryText),
-                      ),
-                      Gap(7.w),
-                    ],
-                    Expanded(
-                      child: Text(
-                        SidebarConfig.getLocalizedLabel(item.labelKey, localizations),
-                        style: context.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: isActive ? AppColors.sidebarActiveText : AppColors.inputLabel,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
+                if (hasChildren)
+                  AnimatedRotation(
+                    turns: isSectionExpanded ? 0.25 : 0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: Icon(
+                      Icons.keyboard_arrow_right,
+                      size: 16.sp,
+                      color: isPillActive
+                          ? Colors.white
+                          : const Color(0xFF94A3B8),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -111,36 +140,27 @@ class SidebarMenuItem extends StatelessWidget {
   }
 
   Widget _buildCondensedTile(BuildContext context) {
-    Widget content;
-
-    if (item.svgPath != null) {
-      content = DigifyAsset(
-        assetPath: item.svgPath!,
-        width: 20.w,
-        height: 20.h,
-        color: isActive ? AppColors.sidebarActiveText : AppColors.lightDark,
-      );
-    } else if (item.icon != null) {
-      content = Icon(item.icon, size: 20.sp, color: isActive ? AppColors.sidebarActiveText : AppColors.lightDark);
-    } else {
-      content = const SizedBox.shrink();
-    }
+    final label = SidebarConfig.getLocalizedLabel(item.labelKey, localizations);
+    final isPillActive = isActive;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      child: GestureDetector(
-        onTap: onRowTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          width: double.infinity,
-          height: 44.h,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.r),
-            color: isActive ? AppColors.sidebarActiveBg : Colors.transparent,
+      child: Tooltip(
+        message: label,
+        child: GestureDetector(
+          onTap: onRowTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            width: double.infinity,
+            height: 42.h,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.r),
+              color: isPillActive ? const Color(0xFF0284C7) : Colors.transparent,
+            ),
+            child: _buildItemIcon(isPillActive),
           ),
-          child: content,
         ),
       ),
     );

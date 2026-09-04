@@ -12,6 +12,12 @@ abstract class AuthLocalStorage {
 
   Future<bool> getRememberMe();
   Future<void> setRememberMe(bool value);
+  Future<void> saveUserName(String name);
+  Future<String?> getUserName();
+
+  Future<void> saveUserRole(String role);
+  Future<String?> getUserRole();
+
   Future<String?> getSavedEmail();
   Future<void> setSavedEmail(String? email);
 }

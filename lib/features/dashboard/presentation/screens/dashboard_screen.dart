@@ -14,6 +14,7 @@ import 'package:grc/features/dashboard/presentation/screens/layouts/dashboard_ta
 import 'package:grc/features/dashboard/presentation/widgets/dashboard_background.dart';
 import 'package:grc/features/dashboard/presentation/widgets/dashboard_button_model.dart';
 import 'package:grc/features/dashboard/presentation/widgets/dashboard_buttons_helper.dart';
+import 'package:grc/features/dashboard/presentation/widgets/dashboard_hero_banner.dart';
 import 'package:grc/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -109,28 +110,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1800),
-                        child: switch (layout) {
-                          ScreenLayout.desktop => DashboardDesktopLayout(
-                            buttons: buttons,
-                            localizations: localizations,
-                            onButtonTap: _handleModuleTap,
-                            isLoadingModules: isLoadingModules,
-                          ),
-                          ScreenLayout.tabletLarge ||
-                          ScreenLayout.tabletMedium => DashboardTabletLayout(
-                            buttons: buttons,
-                            localizations: localizations,
-                            onButtonTap: _handleModuleTap,
-                            isLoadingModules: isLoadingModules,
-                          ),
-                          ScreenLayout.tabletSmall ||
-                          ScreenLayout.mobile => DashboardMobileLayout(
-                            buttons: buttons,
-                            localizations: localizations,
-                            onButtonTap: _handleModuleTap,
-                            isLoadingModules: isLoadingModules,
-                          ),
-                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const DashboardHeroBanner(),
+                            switch (layout) {
+                              ScreenLayout.desktop => DashboardDesktopLayout(
+                                buttons: buttons,
+                                localizations: localizations,
+                                onButtonTap: _handleModuleTap,
+                                isLoadingModules: isLoadingModules,
+                              ),
+                              ScreenLayout.tabletLarge ||
+                              ScreenLayout.tabletMedium => DashboardTabletLayout(
+                                buttons: buttons,
+                                localizations: localizations,
+                                onButtonTap: _handleModuleTap,
+                                isLoadingModules: isLoadingModules,
+                              ),
+                              ScreenLayout.tabletSmall ||
+                              ScreenLayout.mobile => DashboardMobileLayout(
+                                buttons: buttons,
+                                localizations: localizations,
+                                onButtonTap: _handleModuleTap,
+                                isLoadingModules: isLoadingModules,
+                              ),
+                            },
+                          ],
+                        ),
                       ),
                     ),
                   ),

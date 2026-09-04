@@ -16,7 +16,8 @@ import 'package:grc/core/navigation/sidebar/widgets/sidebar_footer.dart';
 import 'package:grc/core/navigation/sidebar/widgets/sidebar_header.dart';
 import 'package:grc/core/navigation/sidebar/widgets/sidebar_menu.dart';
 import 'package:grc/core/navigation/sidebar/widgets/sidebar_menu_item.dart';
-import 'package:grc/core/navigation/sidebar/widgets/sidebar_search_section.dart';
+import 'package:gap/gap.dart';
+import 'package:grc/core/navigation/sidebar/widgets/sidebar_user_card.dart';
 import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/services/responsive_service.dart';
 import 'package:grc/features/cyber_security/presentation/providers/cyber_security_tab_state_provider.dart';
@@ -54,7 +55,7 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
         }
       }
       context.go(item.route!);
-      if (!ResponsiveHelper.isWeb(context)) {
+      if (ResponsiveHelper.isMobile(context)) {
         ref.read(sidebarProvider.notifier).collapse();
         Scaffold.maybeOf(context)?.closeDrawer();
       }
@@ -138,77 +139,104 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
     }
 
     return Material(
-      child: ClipRect(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.fastOutSlowIn,
-          width: isExpanded ? 252.w : 0,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(right: BorderSide(color: AppColors.cardBorder)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(2, 0),
-              ),
-            ],
+      color: Colors.transparent,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.fastOutSlowIn,
+            width: isExpanded ? 218.w : 64.w,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(right: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8))),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(2, 0),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                SidebarHeader(isExpanded: isExpanded),
+                SidebarUserCard(isExpanded: isExpanded),
+                if (isExpanded)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    child: Row(
+                      children: [
+                        Icon(Icons.menu, size: 14.sp, color: const Color(0xFF64748B)),
+                        Gap(8.w),
+                        Text(
+                          'Menus',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.keyboard_arrow_down, size: 16.sp, color: const Color(0xFF94A3B8)),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                  child: SidebarMenu(
+                    items: menuItems,
+                    isExpanded: isExpanded,
+                    scrollController: _menuScrollController,
+                    itemBuilder: (context, item, index) => _buildMenuItem(
+                      context,
+                      item,
+                      menuItems,
+                      isExpanded,
+                      currentRoute,
+                      localizations,
+                    ),
+                  ),
+                ),
+                if (isExpanded) const SidebarFooter(),
+              ],
+            ),
           ),
-          child: Column(
-            children: [
-              SidebarHeader(isExpanded: isExpanded),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.fastOutSlowIn,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.fastOutSlowIn,
-                    opacity: isExpanded ? 1.0 : 0.0,
-                    child: ClipRect(
-                      child: isExpanded
-                          ? const SidebarSearchSection()
-                          : const SizedBox.shrink(),
+
+          // Floating Edge Collapse / Expand Arrow Button (Image 4 & 5)
+          Positioned(
+            right: -13,
+            top: 20,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => ref.read(sidebarProvider.notifier).toggle(),
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isExpanded ? Icons.chevron_left : Icons.chevron_right,
+                      size: 16,
+                      color: const Color(0xFF64748B),
                     ),
                   ),
                 ),
               ),
-              Expanded(
-                child: SidebarMenu(
-                  items: menuItems,
-                  isExpanded: isExpanded,
-                  scrollController: _menuScrollController,
-                  itemBuilder: (context, item, index) => _buildMenuItem(
-                    context,
-                    item,
-                    menuItems,
-                    isExpanded,
-                    currentRoute,
-                    localizations,
-                  ),
-                ),
-              ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.fastOutSlowIn,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.fastOutSlowIn,
-                    opacity: isExpanded ? 1.0 : 0.0,
-                    child: ClipRect(
-                      child: isExpanded
-                          ? const SidebarFooter()
-                          : const SizedBox.shrink(),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

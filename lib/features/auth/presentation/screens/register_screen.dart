@@ -153,27 +153,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= 1000;
+          final isDesktop = constraints.maxWidth >= 960;
 
           if (isDesktop) {
+            final totalWidth = constraints.maxWidth;
+            final rightWidth = totalWidth >= 1600
+                ? (totalWidth * 0.35).clamp(480.0, 560.0)
+                : totalWidth >= 1280
+                    ? (totalWidth * 0.40).clamp(450.0, 520.0)
+                    : (totalWidth * 0.46).clamp(420.0, 480.0);
+
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 70% Left Hero Banner
+                // Left Hero Banner
                 const Expanded(
-                  flex: 7,
                   child: LoginDesktopLeftPanel(),
                 ),
-                // 30% Right Form Container
-                Expanded(
-                  flex: 3,
+                // Right Form Container
+                SizedBox(
+                  width: rightWidth,
                   child: Container(
                     color: Colors.white,
                     child: Center(
                       child: SingleChildScrollView(
-                        padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 32.h),
+                        padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 24.h),
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 440.w),
+                          constraints: const BoxConstraints(maxWidth: 460),
                           child: _buildFormCard(context, authState.isLoading, false),
                         ),
                       ),
@@ -251,7 +257,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           'Register Organization',
           style: TextStyle(
             color: const Color(0xFF101828),
-            fontSize: isMobile ? 24.sp : 32.sp,
+            fontSize: isMobile ? 22.sp : 26.sp,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
           ),

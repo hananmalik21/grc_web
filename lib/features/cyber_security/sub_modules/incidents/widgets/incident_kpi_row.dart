@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:grc/features/cyber_security/widgets/modern_kpi_card.dart';
 
 class IncidentKpiRow extends StatelessWidget {
   final int openCount;
@@ -131,51 +131,11 @@ class _IncidentKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(minHeight: 95.h),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: const Color(0xFF1E293B)),
-      ),
-      child: Stack(
-        children: [
-          // Top-right Icon
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Icon(icon, size: 17.sp, color: iconColor),
-          ),
-
-          // Content
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: const Color(0xFF64748B),
-                  fontSize: 10.5.sp,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const Gap(10),
-              Text(
-                value,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return ModernKpiCard(
+      label: label,
+      value: value,
+      icon: icon,
+      iconColor: iconColor,
     );
   }
 }

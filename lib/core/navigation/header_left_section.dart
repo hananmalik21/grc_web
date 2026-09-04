@@ -46,32 +46,35 @@ class HeaderLeftSection extends StatelessWidget {
         ? AppColors.textPrimaryDark
         : AppColors.lightDark;
 
+    final isMobile = MediaQuery.sizeOf(context).width < 900;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onMenuTap,
-          child: Container(
-            padding: EdgeInsets.all(menuPadding),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
+        if (isMobile)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onMenuTap,
+            child: Container(
+              padding: EdgeInsets.all(menuPadding),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: isSidebarExpanded
+                  ? DigifyAsset(
+                      assetPath: Assets.icons.closeIcon.path,
+                      width: iconSize.w,
+                      height: iconSize.h,
+                      color: iconColor,
+                    )
+                  : DigifyAsset(
+                      assetPath: Assets.icons.menuToggleIcon.path,
+                      height: iconSize.h,
+                      color: iconColor,
+                    ),
             ),
-            child: isSidebarExpanded
-                ? DigifyAsset(
-                    assetPath: Assets.icons.closeIcon.path,
-                    width: iconSize.w,
-                    height: iconSize.h,
-                    color: iconColor,
-                  )
-                : DigifyAsset(
-                    assetPath: Assets.icons.menuToggleIcon.path,
-                    height: iconSize.h,
-                    color: iconColor,
-                  ),
           ),
-        ),
-        if (!isSidebarExpanded) ...[
+        if (!isSidebarExpanded && isMobile) ...[
           if (onLogoTap != null)
             InkWell(
               onTap: onLogoTap,

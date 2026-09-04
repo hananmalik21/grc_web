@@ -27,6 +27,8 @@ class AuthState {
   final LoginFeedback? pendingLoginFeedback;
   final int? enterpriseId;
   final List<String> permissions;
+  final String? userFullName;
+  final String? userRole;
 
   AuthState({
     required this.isAuthenticated,
@@ -36,6 +38,8 @@ class AuthState {
     this.pendingLoginFeedback,
     this.enterpriseId,
     this.permissions = const [],
+    this.userFullName,
+    this.userRole,
   });
 
   AuthState copyWith({
@@ -46,6 +50,8 @@ class AuthState {
     Object? pendingLoginFeedback = _undefined,
     Object? enterpriseId = _undefined,
     List<String>? permissions,
+    String? userFullName,
+    String? userRole,
   }) {
     return AuthState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
@@ -59,6 +65,8 @@ class AuthState {
           ? this.enterpriseId
           : enterpriseId as int?,
       permissions: permissions ?? this.permissions,
+      userFullName: userFullName ?? this.userFullName,
+      userRole: userRole ?? this.userRole,
     );
   }
 }
@@ -80,9 +88,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (token != null && token.isNotEmpty && looksLikeJwt(token)) {
         final enterpriseId = await _storage.getEnterpriseId();
         final permissions = await _storage.getPermissions();
+        final userName = await _storage.getUserName();
+        final userRole = await _storage.getUserRole();
         state = state.copyWith(
           isAuthenticated: true,
           isRestoring: false,
+          userFullName: userName,
+          userRole: userRole,
           enterpriseId: enterpriseId,
           permissions: permissions,
         );
@@ -136,9 +148,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storage.saveEnterpriseId(response.data.enterpriseId);
         await _storage.setRememberMe(rememberMe);
         await _storage.setSavedEmail(rememberMe ? username.trim() : null);
+
+        final fullName = '${response.data.firstName} ${response.data.lastName}'.trim();
+        final role = response.data.roles.isNotEmpty ? response.data.roles.first : 'System Administrator';
+        if (fullName.isNotEmpty) await _storage.saveUserName(fullName);
+        await _storage.saveUserRole(role);
+
         state = state.copyWith(
           isAuthenticated: true,
           isLoading: false,
+          userFullName: fullName.isNotEmpty ? fullName : null,
+          userRole: role,
           enterpriseId: response.data.enterpriseId,
           permissions: response.data.permissions,
           pendingLoginFeedback: const LoginFeedback(success: true),
