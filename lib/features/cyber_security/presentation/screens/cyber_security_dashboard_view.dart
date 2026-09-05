@@ -250,88 +250,36 @@ class CyberSecurityDashboardView extends ConsumerWidget {
   }
 
   Widget _buildKpiGrid(double width, List<CyberKpiModel> kpis) {
-    // Changed threshold to 600 so it ALWAYS stays in one row on desktop/tablet,
-    // even when the sidebar opens and reduces available width.
-    final isDesktopOrTablet = width >= 600;
-
     final badgeValues = ['7', '4', '73%', '2.8k'];
 
-    if (isDesktopOrTablet) {
-      // All cards dynamically shrink to fit one single row
-      return Row(
-        children: List.generate(kpis.length, (index) {
-          final card = kpis[index];
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              child: CyberKpiCard(
-                title: card.title,
-                value: card.value,
-                subtitle: card.subtitle,
-                icon: card.icon,
-                accentColor: index == 0 ? skyBlue : card.accentColor,
-                subtitleColor: card.subtitleColor,
-                isSelected: false, // Flat design requested
-                badgeValue: badgeValues.length > index ? badgeValues[index] : card.value,
-              ),
-            ),
-          );
-        }),
-      );
-    }
+    return Wrap(
+      spacing: 8.w,
+      runSpacing: 10.h,
+      children: List.generate(kpis.length, (index) {
+        final card = kpis[index];
+        // Calculate width: fit 4 on large screens, and exactly 2 on tablet/mobile screens.
+        double cardWidth;
+        if (width >= 1100) {
+          cardWidth = (width - (3 * 8.w)) / 4;
+        } else {
+          cardWidth = (width - 8.w) / 2;
+        }
 
-    // Mobile layout (2xN grid)
-    final rows = <Widget>[];
-    for (int i = 0; i < kpis.length; i += 2) {
-      final card1 = kpis[i];
-      final badge1 = badgeValues.length > i ? badgeValues[i] : card1.value;
-      
-      Widget? card2Widget;
-      if (i + 1 < kpis.length) {
-        final card2 = kpis[i + 1];
-        final badge2 = badgeValues.length > i + 1 ? badgeValues[i + 1] : card2.value;
-        card2Widget = Expanded(
+        return SizedBox(
+          width: cardWidth,
           child: CyberKpiCard(
-            title: card2.title,
-            value: card2.value,
-            subtitle: card2.subtitle,
-            icon: card2.icon,
-            accentColor: card2.accentColor,
-            subtitleColor: card2.subtitleColor,
-            isSelected: false,
-            badgeValue: badge2,
+            title: card.title,
+            value: card.value,
+            subtitle: card.subtitle,
+            icon: card.icon,
+            accentColor: index == 0 ? skyBlue : card.accentColor,
+            subtitleColor: card.subtitleColor,
+            isSelected: false, // Flat design requested
+            badgeValue: badgeValues.length > index ? badgeValues[index] : card.value,
           ),
         );
-      } else {
-        card2Widget = const Expanded(child: SizedBox()); // Spacer
-      }
-
-      rows.add(
-        Row(
-          children: [
-            Expanded(
-              child: CyberKpiCard(
-                title: card1.title,
-                value: card1.value,
-                subtitle: card1.subtitle,
-                icon: card1.icon,
-                accentColor: i == 0 ? skyBlue : card1.accentColor,
-                subtitleColor: card1.subtitleColor,
-                isSelected: false,
-                badgeValue: badge1,
-              ),
-            ),
-            Gap(10.w),
-            card2Widget,
-          ],
-        ),
-      );
-
-      if (i + 2 < kpis.length) {
-        rows.add(Gap(10.h));
-      }
-    }
-
-    return Column(children: rows);
+      }),
+    );
   }
+
 }

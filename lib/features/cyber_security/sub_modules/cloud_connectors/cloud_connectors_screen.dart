@@ -266,7 +266,7 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
             children: [
               Flexible(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 300.w),
+                  constraints: BoxConstraints(maxWidth: 240.w),
                   child: _buildMainCard(
                     'AWS', 
                     'Amazon Web Services', 
@@ -276,10 +276,10 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
                   ),
                 ),
               ),
-              Gap(20.w),
+              Gap(14.w),
               Flexible(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 300.w),
+                  constraints: BoxConstraints(maxWidth: 240.w),
                   child: _buildMainCard(
                     'OKTA', 
                     'Okta Identity Cloud', 
@@ -301,60 +301,61 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
     
     return InkWell(
       onTap: () => _openConnectorDialog(providerId, connectors),
-      borderRadius: BorderRadius.circular(28.r),
+      borderRadius: BorderRadius.circular(16.r),
       child: Container(
-        padding: EdgeInsets.all(32.r),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-          borderRadius: BorderRadius.circular(28.r),
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: isDark
               ? []
               : [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   ),
                 ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12.r),
+                  padding: EdgeInsets.all(8.r),
                   decoration: BoxDecoration(
                     color: skyBlue.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: skyBlue, size: 32.r),
+                  child: Icon(icon, color: skyBlue, size: 20.r),
                 ),
                 const Spacer(),
                 if (activeCount > 0)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                     decoration: BoxDecoration(
                       color: AppColors.cyberLiveGreen.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(20.r),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          width: 6.r,
-                          height: 6.r,
+                          width: 5.r,
+                          height: 5.r,
                           decoration: const BoxDecoration(
                             color: AppColors.cyberLiveGreen,
                             shape: BoxShape.circle,
                           ),
                         ),
-                        const Gap(6),
+                        const Gap(4),
                         Text(
                           '$activeCount Active',
                           style: TextStyle(
                             color: AppColors.cyberLiveGreen,
-                            fontSize: 10.sp,
+                            fontSize: 9.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -363,22 +364,22 @@ class _CloudConnectorsScreenState extends ConsumerState<CloudConnectorsScreen> {
                   ),
               ],
             ),
-            Gap(24.h),
+            Gap(12.h),
             Text(
               title,
               style: TextStyle(
                 color: isDark ? Colors.white : const Color(0xFF0F172A),
-                fontSize: 18.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            Gap(8.h),
+            Gap(4.h),
             Text(
               'Manage your $title connection settings and sync identities.',
               style: TextStyle(
                 color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                fontSize: 13.sp,
-                height: 1.4,
+                fontSize: 11.sp,
+                height: 1.3,
               ),
             ),
           ],

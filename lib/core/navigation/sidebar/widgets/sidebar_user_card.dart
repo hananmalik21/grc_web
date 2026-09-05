@@ -54,6 +54,8 @@ class SidebarUserCard extends ConsumerWidget {
       });
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 100) {
@@ -63,9 +65,11 @@ class SidebarUserCard extends ConsumerWidget {
           margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
+            color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            ),
           ),
           child: Row(
             children: [
@@ -92,7 +96,7 @@ class SidebarUserCard extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: const Color(0xFF0F172A),
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                         fontSize: 11.5.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -103,7 +107,7 @@ class SidebarUserCard extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: const Color(0xFF64748B),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w500,
                       ),
@@ -111,10 +115,10 @@ class SidebarUserCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.keyboard_arrow_down,
                 size: 16,
-                color: Color(0xFF94A3B8),
+                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
               ),
             ],
           ),

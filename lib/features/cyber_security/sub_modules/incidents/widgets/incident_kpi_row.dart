@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/widgets/modern_kpi_card.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grc/features/cyber_security/presentation/widgets/cyber_kpi_card.dart';
 
 class IncidentKpiRow extends StatelessWidget {
   final int openCount;
@@ -20,122 +20,95 @@ class IncidentKpiRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < 800;
+        final width = constraints.maxWidth;
 
-        if (isNarrow) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _IncidentKpiCard(
-                      label: 'OPEN',
-                      value: '$openCount',
-                      icon: Icons.error_outline_rounded,
-                      iconColor: const Color(0xFFEF4444),
-                    ),
-                  ),
-                  const Gap(12),
-                  Expanded(
-                    child: _IncidentKpiCard(
-                      label: 'INVESTIGATING',
-                      value: '$investigatingCount',
-                      icon: Icons.visibility_outlined,
-                      iconColor: const Color(0xFFF59E0B),
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _IncidentKpiCard(
-                      label: 'CONTAINED',
-                      value: '$containedCount',
-                      icon: Icons.shield_outlined,
-                      iconColor: const Color(0xFFF97316),
-                    ),
-                  ),
-                  const Gap(12),
-                  Expanded(
-                    child: _IncidentKpiCard(
-                      label: 'RESOLVED',
-                      value: '$resolvedCount',
-                      icon: Icons.check_circle_outline_rounded,
-                      iconColor: const Color(0xFF10B981),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        }
+        final cards = [
+          _buildKpiConfig(
+            title: 'OPEN',
+            value: '$openCount',
+            icon: Icons.error_outline_rounded,
+            accentColor: const Color(0xFFEF4444),
+          ),
+          _buildKpiConfig(
+            title: 'INVESTIGATING',
+            value: '$investigatingCount',
+            icon: Icons.visibility_outlined,
+            accentColor: const Color(0xFFF59E0B),
+          ),
+          _buildKpiConfig(
+            title: 'CONTAINED',
+            value: '$containedCount',
+            icon: Icons.shield_outlined,
+            accentColor: const Color(0xFFF97316),
+          ),
+          _buildKpiConfig(
+            title: 'RESOLVED',
+            value: '$resolvedCount',
+            icon: Icons.check_circle_outline_rounded,
+            accentColor: const Color(0xFF10B981),
+          ),
+        ];
 
-        return Row(
-          children: [
-            Expanded(
-              child: _IncidentKpiCard(
-                label: 'OPEN',
-                value: '$openCount',
-                icon: Icons.error_outline_rounded,
-                iconColor: const Color(0xFFEF4444),
+        return Wrap(
+          spacing: 8.w,
+          runSpacing: 10.h,
+          children: List.generate(cards.length, (index) {
+            final card = cards[index];
+            // Calculate width: fit 4 on large screens, and exactly 2 on tablet/mobile screens.
+            double cardWidth;
+            if (width >= 1100) {
+              cardWidth = (width - (3 * 8.w)) / 4;
+            } else {
+              cardWidth = (width - 8.w) / 2;
+            }
+
+            return SizedBox(
+              width: cardWidth,
+              child: CyberKpiCard(
+                title: card.title,
+                value: card.value,
+                subtitle: card.subtitle,
+                icon: card.icon,
+                accentColor: card.accentColor,
+                isSelected: false,
+                badgeValue: card.value,
               ),
-            ),
-            const Gap(14),
-            Expanded(
-              child: _IncidentKpiCard(
-                label: 'INVESTIGATING',
-                value: '$investigatingCount',
-                icon: Icons.visibility_outlined,
-                iconColor: const Color(0xFFF59E0B),
-              ),
-            ),
-            const Gap(14),
-            Expanded(
-              child: _IncidentKpiCard(
-                label: 'CONTAINED',
-                value: '$containedCount',
-                icon: Icons.shield_outlined,
-                iconColor: const Color(0xFFF97316),
-              ),
-            ),
-            const Gap(14),
-            Expanded(
-              child: _IncidentKpiCard(
-                label: 'RESOLVED',
-                value: '$resolvedCount',
-                icon: Icons.check_circle_outline_rounded,
-                iconColor: const Color(0xFF10B981),
-              ),
-            ),
-          ],
+            );
+          }),
         );
       },
     );
   }
-}
 
-class _IncidentKpiCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color iconColor;
-
-  const _IncidentKpiCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ModernKpiCard(
-      label: label,
+  _KpiConfig _buildKpiConfig({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color accentColor,
+    String subtitle = 'Queue status',
+  }) {
+    return _KpiConfig(
+      title: title,
       value: value,
       icon: icon,
-      iconColor: iconColor,
+      accentColor: accentColor,
+      subtitle: subtitle,
     );
   }
+}
+
+class _KpiConfig {
+  final String title;
+  final String value;
+  final String subtitle;
+  final IconData icon;
+  final Color accentColor;
+
+  _KpiConfig({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.icon,
+    required this.accentColor,
+  });
 }

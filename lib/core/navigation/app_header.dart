@@ -1,4 +1,3 @@
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/localization/l10n/app_localizations.dart';
 import 'package:grc/core/localization/locale_provider.dart';
 import 'package:grc/core/navigation/sidebar/sidebar_provider.dart';
@@ -44,8 +43,13 @@ class AppHeader extends ConsumerWidget {
           child: Container(
             height: headerHeight,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.cardBackgroundDark : AppColors.cardBackground,
-              border: Border(bottom: BorderSide(color: AppColors.cardBorder)),
+              color: isDark ? const Color(0xFF141414) : Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  width: 1,
+                ),
+              ),
             ),
             child: Padding(
               padding: EdgeInsetsDirectional.symmetric(horizontal: hPadding),

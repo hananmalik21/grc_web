@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/models/cyber_security/grc_compliance/compliance_framework_model.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
+import 'package:grc/core/constants/app_colors.dart';
 
 class FrameworkCardsRow extends StatelessWidget {
   final List<ComplianceFrameworkModel> frameworks;
@@ -87,6 +89,8 @@ class _FrameworkCardState extends State<_FrameworkCard> {
   Widget build(BuildContext context) {
     final fw = widget.framework;
 
+    final isDark = context.isDark;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -99,19 +103,23 @@ class _FrameworkCardState extends State<_FrameworkCard> {
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? const Color(0xFF0F2B3E).withValues(alpha: 0.5)
+                ? (isDark ? const Color(0xFF2C2C2E) : fw.progressColor.withValues(alpha: 0.08))
                 : _isHovered
-                ? const Color(0xFF1E293B).withValues(alpha: 0.8)
-                : const Color(0xFF0F172A).withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(
-              color: widget.isSelected
-                  ? fw.progressColor.withValues(alpha: 0.8)
-                  : _isHovered
-                  ? const Color(0xFF334155)
-                  : const Color(0xFF1E293B),
-              width: widget.isSelected ? 1.5 : 1,
-            ),
+                ? (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC))
+                : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
+            borderRadius: BorderRadius.circular(24.r),
+            border: widget.isSelected
+                ? Border.all(color: fw.progressColor, width: 1.5)
+                : null,
+            boxShadow: (isDark || widget.isSelected)
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,9 +142,10 @@ class _FrameworkCardState extends State<_FrameworkCard> {
               Text(
                 '${fw.readinessScore}%',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   fontSize: 24.sp,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                   height: 1,
                 ),
               ),
@@ -146,7 +155,7 @@ class _FrameworkCardState extends State<_FrameworkCard> {
                 borderRadius: BorderRadius.circular(2.r),
                 child: LinearProgressIndicator(
                   value: fw.readinessScore / 100,
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                   valueColor: AlwaysStoppedAnimation<Color>(fw.progressColor),
                   minHeight: 3.5.h,
                 ),

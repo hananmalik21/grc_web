@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
+import 'package:grc/features/cyber_security/presentation/widgets/cyber_kpi_card.dart';
 
 class ThreatDetectionKpiRow extends StatelessWidget {
   final int newAlertsCount;
@@ -21,149 +21,97 @@ class ThreatDetectionKpiRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth >= 950;
+        final width = constraints.maxWidth;
 
         final cards = [
-          _ThreatKpiCard(
-            label: 'NEW ALERTS',
+          _buildKpiConfig(
+            title: 'NEW ALERTS',
             value: '$newAlertsCount',
             icon: Icons.sensors,
-            iconColor: AppColors.teal,
+            accentColor: AppColors.teal,
           ),
-          _ThreatKpiCard(
-            label: 'INVESTIGATING',
+          _buildKpiConfig(
+            title: 'INVESTIGATING',
             value: '$investigatingCount',
             icon: Icons.visibility_outlined,
-            iconColor: AppColors.alertMedium,
+            accentColor: AppColors.alertMedium,
           ),
-          _ThreatKpiCard(
-            label: 'CRITICAL TODAY',
+          _buildKpiConfig(
+            title: 'CRITICAL TODAY',
             value: '$criticalTodayCount',
             subtitle: 'needs triage',
             icon: Icons.error_outline_rounded,
-            iconColor: AppColors.cyberCritical,
+            accentColor: AppColors.cyberCritical,
           ),
-          _ThreatKpiCard(
-            label: 'DETECTION RULES',
+          _buildKpiConfig(
+            title: 'DETECTION RULES',
             value: '$detectionRulesCount',
             subtitle: '218 active',
             icon: Icons.bolt_rounded,
-            iconColor: AppColors.barPurple,
+            accentColor: AppColors.barPurple,
           ),
         ];
 
-        if (isDesktop) {
-          return Row(
-            children: cards
-                .map(
-                  (c) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4.w),
-                      child: c,
-                    ),
-                  ),
-                )
-                .toList(),
-          );
-        }
+        return Wrap(
+          spacing: 8.w,
+          runSpacing: 10.h,
+          children: List.generate(cards.length, (index) {
+            final card = cards[index];
+            // Calculate width: fit 4 on large screens, and exactly 2 on tablet/mobile screens.
+            double cardWidth;
+            if (width >= 1100) {
+              cardWidth = (width - (3 * 8.w)) / 4;
+            } else {
+              cardWidth = (width - 8.w) / 2;
+            }
 
-        return Column(
-          children: [
-            Row(
-              children: [
-                Expanded(child: cards[0]),
-                Gap(10.w),
-                Expanded(child: cards[1]),
-              ],
-            ),
-            Gap(10.h),
-            Row(
-              children: [
-                Expanded(child: cards[2]),
-                Gap(10.w),
-                Expanded(child: cards[3]),
-              ],
-            ),
-          ],
+            return SizedBox(
+              width: cardWidth,
+              child: CyberKpiCard(
+                title: card.title,
+                value: card.value,
+                subtitle: card.subtitle,
+                icon: card.icon,
+                accentColor: card.accentColor,
+                isSelected: false,
+                badgeValue: card.value,
+              ),
+            );
+          }),
         );
       },
     );
   }
-}
 
-class _ThreatKpiCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final String? subtitle;
-  final IconData icon;
-  final Color iconColor;
-
-  const _ThreatKpiCard({
-    required this.label,
-    required this.value,
-    this.subtitle,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: AppColors.textPlaceholderDark,
-                    fontSize: 9.5.sp,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.6,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const Gap(4),
-              Icon(icon, size: 15.sp, color: iconColor),
-            ],
-          ),
-          const Gap(6),
-          Text(
-            value,
-            style: TextStyle(
-              color: AppColors.textPrimaryDark,
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
-          ),
-          if (subtitle != null) ...[
-            const Gap(3),
-            Text(
-              subtitle!,
-              style: TextStyle(
-                color: AppColors.textPlaceholderDark,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w400,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ],
-      ),
+  _KpiConfig _buildKpiConfig({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color accentColor,
+    String subtitle = 'Active monitoring',
+  }) {
+    return _KpiConfig(
+      title: title,
+      value: value,
+      icon: icon,
+      accentColor: accentColor,
+      subtitle: subtitle,
     );
   }
+}
+
+class _KpiConfig {
+  final String title;
+  final String value;
+  final String subtitle;
+  final IconData icon;
+  final Color accentColor;
+
+  _KpiConfig({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.icon,
+    required this.accentColor,
+  });
 }

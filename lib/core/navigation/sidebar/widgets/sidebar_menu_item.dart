@@ -42,8 +42,11 @@ class SidebarMenuItem extends StatelessWidget {
     return Icons.grid_view_rounded;
   }
 
-  Widget _buildItemIcon(bool isCurrentActive) {
-    final iconColor = isCurrentActive ? Colors.white : const Color(0xFF64748B);
+  Widget _buildItemIcon(BuildContext context, bool isCurrentActive) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isCurrentActive
+        ? Colors.white
+        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B));
     if (item.svgPath != null) {
       return DigifyAsset(
         assetPath: item.svgPath!,
@@ -62,6 +65,7 @@ class SidebarMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasChildren = item.children != null && item.children!.isNotEmpty;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (!isSidebarExpanded) {
       return _buildCondensedTile(context);
@@ -102,7 +106,7 @@ class SidebarMenuItem extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _buildItemIcon(isPillActive),
+                _buildItemIcon(context, isPillActive),
                 Gap(10.w),
                 Expanded(
                   child: Text(
@@ -112,7 +116,7 @@ class SidebarMenuItem extends StatelessWidget {
                       fontWeight: isPillActive ? FontWeight.w700 : FontWeight.w500,
                       color: isPillActive
                           ? Colors.white
-                          : const Color(0xFF334155),
+                          : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155)),
                       height: 1.2,
                     ),
                   ),
@@ -127,7 +131,7 @@ class SidebarMenuItem extends StatelessWidget {
                       size: 16.sp,
                       color: isPillActive
                           ? Colors.white
-                          : const Color(0xFF94A3B8),
+                          : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                     ),
                   ),
               ],
@@ -159,7 +163,7 @@ class SidebarMenuItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(12.r),
               color: isPillActive ? const Color(0xFF0284C7) : Colors.transparent,
             ),
-            child: _buildItemIcon(isPillActive),
+            child: _buildItemIcon(context, isPillActive),
           ),
         ),
       ),
@@ -168,6 +172,7 @@ class SidebarMenuItem extends StatelessWidget {
 
   Widget _buildChildren(BuildContext context) {
     final children = item.children!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
@@ -176,7 +181,12 @@ class SidebarMenuItem extends StatelessWidget {
       child: Container(
         margin: EdgeInsetsDirectional.only(start: 12.5.w),
         decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: AppColors.cardBackgroundGrey, width: 2)),
+          border: Border(
+            left: BorderSide(
+              color: isDark ? const Color(0xFF334155) : AppColors.cardBackgroundGrey,
+              width: 2,
+            ),
+          ),
         ),
         child: Column(
           children: children.map((child) {
@@ -190,7 +200,9 @@ class SidebarMenuItem extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 10.w),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5.r),
-                    color: isChildActive ? AppColors.sidebarActiveBg : Colors.transparent,
+                    color: isChildActive
+                        ? (isDark ? const Color(0xFF0C2D48) : AppColors.sidebarActiveBg)
+                        : Colors.transparent,
                   ),
                   child: Row(
                     children: [
@@ -199,7 +211,9 @@ class SidebarMenuItem extends StatelessWidget {
                           SidebarConfig.getLocalizedLabel(child.labelKey, localizations),
                           style: context.textTheme.labelSmall?.copyWith(
                             fontSize: 10.5.sp,
-                            color: isChildActive ? AppColors.sidebarActiveText : AppColors.sidebarChildItemText,
+                            color: isChildActive
+                                ? (isDark ? const Color(0xFF38BDF8) : AppColors.sidebarActiveText)
+                                : (isDark ? const Color(0xFF94A3B8) : AppColors.sidebarChildItemText),
                           ),
                         ),
                       ),

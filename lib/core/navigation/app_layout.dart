@@ -27,17 +27,33 @@ class AppLayout extends ConsumerWidget {
               if (!isOpened) ref.read(sidebarProvider.notifier).collapse();
             }
           : null,
-      body: Row(
+      body: Stack(
         children: [
-          if (!useDrawer) const Sidebar(),
-          Expanded(
-            child: Column(
-              children: [
-                AppHeader(isSidebarExpanded: isSidebarExpanded),
-                Expanded(child: AppKeyboardScroller(child: child)),
-              ],
-            ),
+          Row(
+            children: [
+              if (!useDrawer)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.fastOutSlowIn,
+                  width: isSidebarExpanded ? 260.0 : 72.0,
+                ),
+              Expanded(
+                child: Column(
+                  children: [
+                    AppHeader(isSidebarExpanded: isSidebarExpanded),
+                    Expanded(child: AppKeyboardScroller(child: child)),
+                  ],
+                ),
+              ),
+            ],
           ),
+          if (!useDrawer)
+            const Positioned(
+              top: 0,
+              bottom: 0,
+              left: 0,
+              child: Sidebar(),
+            ),
         ],
       ),
       drawer: useDrawer ? const Sidebar() : null,

@@ -43,6 +43,7 @@ class DigifyTextField extends StatefulWidget {
   final double? fontSize;
   final EdgeInsetsGeometry? contentPadding;
   final bool isArabicField;
+  final Color? textColor;
 
   const DigifyTextField({
     super.key,
@@ -77,6 +78,7 @@ class DigifyTextField extends StatefulWidget {
     this.fontSize,
     this.contentPadding,
     this.isArabicField = false,
+    this.textColor,
   });
 
   /// Arabic text field with RTL input, right-aligned label, and trailing icon.
@@ -345,7 +347,10 @@ class _DigifyTextFieldState extends State<DigifyTextField> {
       textAlignVertical: TextAlignVertical.center,
       style: TextStyle(
         fontSize: widget.fontSize ?? 15.sp,
-        color: isDark ? context.themeTextPrimary : AppColors.textPrimary,
+        color: widget.textColor ??
+            ((effectiveFillColor != Colors.transparent && effectiveFillColor.computeLuminance() > 0.5)
+                ? AppColors.textPrimary
+                : (isDark ? context.themeTextPrimary : AppColors.textPrimary)),
       ),
       decoration: InputDecoration(
         hintText: widget.hintText,
@@ -380,7 +385,9 @@ class _DigifyTextFieldState extends State<DigifyTextField> {
         hintStyle: TextStyle(
           fontSize: widget.fontSize ?? 15.sp,
           height: 1.0,
-          color: isDark ? context.themeTextMuted : const Color(0xFF0A0A0A).withValues(alpha: 0.5),
+          color: (effectiveFillColor != Colors.transparent && effectiveFillColor.computeLuminance() > 0.5)
+              ? const Color(0xFF0A0A0A).withValues(alpha: 0.5)
+              : (isDark ? context.themeTextMuted : const Color(0xFF0A0A0A).withValues(alpha: 0.5)),
         ),
         errorStyle: TextStyle(fontSize: 12.sp, color: AppColors.error, height: 1.2),
         border: _buildBorder(10.r, effectiveBorderColor),
@@ -633,7 +640,12 @@ class _DigifyTextAreaState extends State<DigifyTextArea> {
           textAlign: widget.textDirection == TextDirection.rtl ? TextAlign.right : widget.textAlign,
           textDirection: widget.textDirection,
           inputFormatters: widget.inputFormatters,
-          style: TextStyle(fontSize: 15.sp, color: isDark ? context.themeTextPrimary : AppColors.textPrimary),
+          style: TextStyle(
+            fontSize: 15.sp,
+            color: (widget.fillColor != null && widget.fillColor != Colors.transparent && widget.fillColor!.computeLuminance() > 0.5)
+                ? AppColors.textPrimary
+                : (isDark ? context.themeTextPrimary : AppColors.textPrimary),
+          ),
           decoration: InputDecoration(
             hintText: widget.hintText,
             filled: true,
@@ -643,7 +655,9 @@ class _DigifyTextAreaState extends State<DigifyTextArea> {
             hintStyle: TextStyle(
               fontSize: 15.sp,
               height: 1.0,
-              color: isDark ? context.themeTextMuted : const Color(0xFF0A0A0A).withValues(alpha: 0.5),
+              color: (widget.fillColor != null && widget.fillColor != Colors.transparent && widget.fillColor!.computeLuminance() > 0.5)
+                  ? const Color(0xFF0A0A0A).withValues(alpha: 0.5)
+                  : (isDark ? context.themeTextMuted : const Color(0xFF0A0A0A).withValues(alpha: 0.5)),
             ),
             border: _buildBorder(isDark, AppColors.inputBorder),
             enabledBorder: _buildBorder(isDark, isDark ? AppColors.inputBorderDark : AppColors.inputBorder),

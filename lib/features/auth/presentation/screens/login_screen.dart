@@ -5,6 +5,7 @@ import 'package:grc/core/navigation/sidebar/sidebar_provider.dart';
 import 'package:grc/core/router/app_routes.dart';
 import 'package:grc/core/utils/form_validators.dart';
 import 'package:grc/core/services/toast_service.dart';
+import 'package:grc/core/theme/app_theme.dart';
 import 'package:grc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:grc/features/auth/presentation/widgets/login_layout_handler.dart';
 import 'package:flutter/foundation.dart';
@@ -170,19 +171,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.authDesktopBackground,
-      body: SizedBox.expand(
-        child: LoginLayoutHandler(
-          emailController: _emailController,
-          passwordController: _passwordController,
-          emailFocusNode: _emailFocusNode,
-          passwordFocusNode: _passwordFocusNode,
-          rememberMe: formState.rememberMe,
-          onRememberMeChanged: (value) =>
-              ref.read(loginFormStateProvider.notifier).setRememberMe(value),
-          onLogin: _handleLogin,
-          onForgotPasswordTap: _showForgotPasswordDialog,
+    return Theme(
+      data: AppTheme.lightTheme,
+      child: Scaffold(
+        backgroundColor: AppColors.authDesktopBackground,
+        body: SizedBox.expand(
+          child: LoginLayoutHandler(
+            emailController: _emailController,
+            passwordController: _passwordController,
+            emailFocusNode: _emailFocusNode,
+            passwordFocusNode: _passwordFocusNode,
+            rememberMe: formState.rememberMe,
+            onRememberMeChanged: (value) =>
+                ref.read(loginFormStateProvider.notifier).setRememberMe(value),
+            onLogin: _handleLogin,
+            onForgotPasswordTap: _showForgotPasswordDialog,
+          ),
         ),
       ),
     );

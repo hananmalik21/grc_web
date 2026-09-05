@@ -1,23 +1,37 @@
-import 'package:grc/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:grc/core/permissions/permission_service.dart';
+import 'package:grc/core/router/app_routes.dart';
+import 'package:grc/features/auth/presentation/providers/auth_provider.dart';
 
-class SidebarFooter extends StatelessWidget {
+class SidebarFooter extends ConsumerWidget {
   const SidebarFooter({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.transparent,
-        border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+        border: Border(
+          top: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+          ),
+        ),
       ),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: () {
-            // Logout logic can be added here
+          onTap: () async {
+            await ref.read(authProvider.notifier).logout();
+            PermissionService.instance.clear();
+            if (context.mounted) {
+              context.go(AppRoutes.login);
+            }
           },
           child: Row(
             children: [
