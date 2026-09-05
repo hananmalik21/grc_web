@@ -304,7 +304,7 @@ class ApiEndpoints {
   static String recApplicationResume(String applicationGuid) =>
       '$recApplications/$applicationGuid/resume';
 
-  // Security Auth endpoints
+  // Security Auth endpoints (Legacy & Identity v1)
   static const String securityAuthLogin = '$api/security/auth/login';
   static const String identityLogin = '$api/v1/identity/login';
   static const String identityRegister = '$api/v1/identity/register';

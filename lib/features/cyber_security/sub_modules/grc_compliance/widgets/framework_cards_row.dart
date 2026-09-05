@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:grc/features/cyber_security/sub_modules/grc_compliance/models/compliance_framework_model.dart';
+import 'package:grc/core/models/cyber_security/grc_compliance/compliance_framework_model.dart';
 
 class FrameworkCardsRow extends StatelessWidget {
   final List<ComplianceFrameworkModel> frameworks;
