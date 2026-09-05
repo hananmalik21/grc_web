@@ -43,16 +43,20 @@ class HeaderProfileSection extends StatelessWidget {
     final avatarSize = _avatarSize;
     final avatarIconSize = avatarSize * 0.6;
 
+    final menuBgColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final menuBorderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final itemTextColor = isDark ? AppColors.textPrimaryDark : AppColors.textDarkSlate;
+
     return Theme(
       data: Theme.of(context).copyWith(
         popupMenuTheme: PopupMenuThemeData(
-          color: AppColors.cardBackground,
-          surfaceTintColor: AppColors.cardBackground,
+          color: menuBgColor,
+          surfaceTintColor: menuBgColor,
           menuPadding: EdgeInsets.zero,
-          textStyle: context.textTheme.bodyMedium?.copyWith(color: AppColors.textDarkSlate),
+          textStyle: context.textTheme.bodyMedium?.copyWith(color: itemTextColor),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14.r),
-            side: const BorderSide(color: AppColors.cardBorder, width: 1),
+            side: BorderSide(color: menuBorderColor, width: 1),
           ),
         ),
       ),
@@ -114,7 +118,9 @@ class HeaderProfileSection extends StatelessWidget {
   }
 
   PopupMenuItem<String> _buildMenuItem(BuildContext context, ProfileMenuItem item) {
-    final labelColor = item.isDestructive ? AppColors.error : AppColors.textDarkSlate;
+    final labelColor = item.isDestructive
+        ? AppColors.error
+        : (isDark ? AppColors.textPrimaryDark : AppColors.textDarkSlate);
 
     return PopupMenuItem<String>(
       value: item.value,

@@ -10,6 +10,8 @@ import 'package:grc/features/cyber_security/data/models/threat_dto.dart';
 import 'package:grc/features/cyber_security/presentation/providers/threat_provider.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/sub_modules/incidents/dialogs/incident_ai_triage_dialog.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/cyber_security/sub_modules/incidents/widgets/incident_kpi_row.dart';
 import 'package:grc/features/cyber_security/sub_modules/incidents/widgets/incidents_table.dart';
 
@@ -94,18 +96,17 @@ class IncidentsScreen extends ConsumerWidget {
       subtitle:
           'Triage queue, automated playbooks, MTTR tracking, and evidence correlation',
       actions: [
-        AppButton(
+        _ScreenActionButton(
           label: 'Export CSV',
-          type: AppButtonType.secondary,
-          size: AppButtonSize.sm,
-          onPressed: null,
+          icon: Icons.download_rounded,
+          onTap: null, // As requested
         ),
         const Gap(8),
-        AppButton(
+        _ScreenActionButton(
           label: 'Log Incident',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed: null,
+          icon: Icons.add_rounded,
+          isPrimary: true,
+          onTap: null, // As requested
         ),
       ],
       child: Column(
@@ -137,6 +138,66 @@ class IncidentsScreen extends ConsumerWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ScreenActionButton extends StatelessWidget {
+  final IconData? icon;
+  final String label;
+  final VoidCallback? onTap;
+  final bool isPrimary;
+
+  const _ScreenActionButton({
+    this.icon,
+    required this.label,
+    this.onTap,
+    this.isPrimary = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+          decoration: BoxDecoration(
+            color: isPrimary
+                ? AppColors.dashCyberSecurity.withValues(alpha: 0.15)
+                : const Color(0xFF1E293B).withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isPrimary
+                  ? AppColors.dashCyberSecurity.withValues(alpha: 0.5)
+                  : const Color(0xFF334155),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  size: 14.sp,
+                  color: isPrimary ? AppColors.dashCyberSecurity : const Color(0xFFCBD5E1),
+                ),
+                const Gap(6),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  color: isPrimary ? AppColors.dashCyberSecurity : const Color(0xFFCBD5E1),
+                  fontSize: 12.sp,
+                  fontWeight: isPrimary ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

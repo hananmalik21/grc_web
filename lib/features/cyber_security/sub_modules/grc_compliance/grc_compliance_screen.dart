@@ -6,10 +6,11 @@ import 'package:grc/core/permissions/permission_gate.dart';
 import 'package:grc/core/permissions/perm_keys.dart';
 import 'package:grc/core/permissions/permission_service.dart';
 import 'package:grc/core/services/toast_service.dart';
-import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
 import 'package:grc/features/cyber_security/presentation/providers/compliance_provider.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/dialogs/generate_policy_dialog.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/widgets/compliance_controls_table.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/widgets/framework_cards_row.dart';
 
@@ -22,6 +23,8 @@ class GrcComplianceScreen extends ConsumerStatefulWidget {
 }
 
 class _GrcComplianceScreenState extends ConsumerState<GrcComplianceScreen> {
+  String? _localSelectedId;
+
   final List<ComplianceFrameworkModel> _frameworks = [
     const ComplianceFrameworkModel(
       id: 'nist',
@@ -187,7 +190,7 @@ class _GrcComplianceScreenState extends ConsumerState<GrcComplianceScreen> {
         frameworks
             .where(
               (framework) =>
-                  framework.id == complianceState.selectedFrameworkId,
+                  framework.id == (_localSelectedId ?? complianceState.selectedFrameworkId),
             )
             .firstOrNull ??
         frameworks.first;
@@ -196,19 +199,17 @@ class _GrcComplianceScreenState extends ConsumerState<GrcComplianceScreen> {
       subtitle:
           'Continuous controls validation, audit readiness, and policy enforcement',
       actions: [
-        AppButton(
+        _ScreenActionButton(
           label: 'Export Audit Bundle',
-          type: AppButtonType.secondary,
-          size: AppButtonSize.sm,
-          onPressed: _exportAuditReport,
+          icon: Icons.download_rounded,
+          onTap: _exportAuditReport,
         ),
         const Gap(8),
-        AppButton(
+        _ScreenActionButton(
           label: 'Generate Policy',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed:
-              PermissionService.instance.can(CyberPermKeys.complianceCreate)
+          icon: Icons.add_rounded,
+          isPrimary: true,
+          onTap: PermissionService.instance.can(CyberPermKeys.complianceCreate)
               ? _openGeneratePolicyDialog
               : null,
         ),
@@ -220,6 +221,7 @@ class _GrcComplianceScreenState extends ConsumerState<GrcComplianceScreen> {
             frameworks: frameworks,
             selectedFrameworkId: selected.id,
             onSelectFramework: (framework) {
+              setState(() => _localSelectedId = framework.id);
               ref
                   .read(complianceProvider.notifier)
                   .selectFramework(framework.id);
@@ -228,6 +230,66 @@ class _GrcComplianceScreenState extends ConsumerState<GrcComplianceScreen> {
           const Gap(24),
           ComplianceControlsTable(framework: selected),
         ],
+      ),
+    );
+  }
+}
+
+class _ScreenActionButton extends StatelessWidget {
+  final IconData? icon;
+  final String label;
+  final VoidCallback? onTap;
+  final bool isPrimary;
+
+  const _ScreenActionButton({
+    this.icon,
+    required this.label,
+    this.onTap,
+    this.isPrimary = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+          decoration: BoxDecoration(
+            color: isPrimary
+                ? AppColors.dashCyberSecurity.withValues(alpha: 0.15)
+                : const Color(0xFF1E293B).withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isPrimary
+                  ? AppColors.dashCyberSecurity.withValues(alpha: 0.5)
+                  : const Color(0xFF334155),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  size: 14.sp,
+                  color: isPrimary ? AppColors.dashCyberSecurity : const Color(0xFFCBD5E1),
+                ),
+                const Gap(6),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  color: isPrimary ? AppColors.dashCyberSecurity : const Color(0xFFCBD5E1),
+                  fontSize: 12.sp,
+                  fontWeight: isPrimary ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

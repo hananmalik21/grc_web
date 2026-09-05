@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/incidents/incident_item_model.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/features/cyber_security/sub_modules/incidents/dialogs/incident_ai_triage_dialog.dart';
 
 enum IncidentFilterTab { all, open, investigating, contained, resolved, closed }
@@ -70,6 +71,7 @@ class _IncidentsTableState extends State<IncidentsTable> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredIncidents;
+    final isDark = context.isDark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,9 +98,11 @@ class _IncidentsTableState extends State<IncidentsTable> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.cyberCardBg,
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
             borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.cyberCardBorder),
+            border: Border.all(
+              color: isDark ? AppColors.cyberCardBorder : const Color(0xFFE2E8F0),
+            ),
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -119,14 +123,14 @@ class _IncidentsTableState extends State<IncidentsTable> {
                           vertical: 12.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundDark,
+                          color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10.r),
                             topRight: Radius.circular(10.r),
                           ),
-                          border: const Border(
+                          border: Border(
                             bottom: BorderSide(
-                              color: AppColors.cyberCardBorder,
+                              color: isDark ? AppColors.cyberCardBorder : const Color(0xFFE2E8F0),
                             ),
                           ),
                         ),
@@ -193,9 +197,10 @@ class _IncidentsTableState extends State<IncidentsTable> {
                                 onTriage: () => _openTriage(incident),
                                 onTake: () =>
                                     widget.onTakeOwnership?.call(incident),
+                                isDark: isDark,
                               ),
-                              const Divider(
-                                color: AppColors.cyberCardBorder,
+                              Divider(
+                                color: isDark ? AppColors.cyberCardBorder : const Color(0xFFE2E8F0),
                                 height: 1,
                               ),
                             ],
@@ -213,10 +218,11 @@ class _IncidentsTableState extends State<IncidentsTable> {
   }
 
   Widget _buildHeaderLabel(String text) {
+    final isDark = context.isDark;
     return Text(
       text,
       style: TextStyle(
-        color: AppColors.textPlaceholderDark,
+        color: isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
         fontSize: 10.5.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
@@ -227,6 +233,8 @@ class _IncidentsTableState extends State<IncidentsTable> {
   Widget _buildTabButton(String label, IncidentFilterTab tab) {
     final isSelected = _selectedTab == tab;
 
+    final isDark = context.isDark;
+
     return InkWell(
       onTap: () => setState(() => _selectedTab = tab),
       borderRadius: BorderRadius.circular(6.r),
@@ -234,19 +242,19 @@ class _IncidentsTableState extends State<IncidentsTable> {
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.2)
+              ? AppColors.dashCyberSecurity.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6.r),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? AppColors.dashCyberSecurity.withValues(alpha: 0.6) : Colors.transparent,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected
-                ? AppColors.primaryLight
-                : AppColors.textPlaceholderDark,
+                ? AppColors.dashCyberSecurity
+                : (isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B)),
             fontSize: 11.5.sp,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
             letterSpacing: 0.6,
@@ -261,11 +269,13 @@ class _IncidentTableRow extends StatefulWidget {
   final IncidentItemModel incident;
   final VoidCallback onTriage;
   final VoidCallback onTake;
+  final bool isDark;
 
   const _IncidentTableRow({
     required this.incident,
     required this.onTriage,
     required this.onTake,
+    required this.isDark,
   });
 
   @override
@@ -288,7 +298,9 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
       onExit: (_) => setState(() => _isHovered = false),
       child: Container(
         color: _isHovered
-            ? AppColors.cardBackgroundGreyDark.withValues(alpha: 0.3)
+            ? (widget.isDark
+                ? AppColors.cardBackgroundGreyDark.withValues(alpha: 0.3)
+                : const Color(0xFFF1F5F9))
             : Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
         child: Row(
@@ -312,7 +324,7 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
               child: Text(
                 incident.title,
                 style: TextStyle(
-                  color: AppColors.textPrimaryDark,
+                  color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -387,8 +399,8 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
                 incident.owner,
                 style: TextStyle(
                   color: incident.owner == 'Unassigned'
-                      ? AppColors.textPlaceholderDark
-                      : AppColors.textSecondaryDark,
+                      ? (widget.isDark ? AppColors.textPlaceholderDark : const Color(0xFF94A3B8))
+                      : (widget.isDark ? AppColors.textSecondaryDark : AppColors.textPrimary),
                   fontSize: 11.5.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -401,7 +413,7 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
               child: Text(
                 incident.createdDate,
                 style: TextStyle(
-                  color: AppColors.textPlaceholderDark,
+                  color: widget.isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
                   fontSize: 11.sp,
                 ),
               ),
@@ -444,16 +456,16 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
                         vertical: 4.h,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.2),
+                        color: AppColors.dashCyberSecurity.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6.r),
                         border: Border.all(
-                          color: AppColors.primaryLight.withValues(alpha: 0.5),
+                          color: AppColors.dashCyberSecurity.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Text(
                         'AI Triage',
                         style: TextStyle(
-                          color: AppColors.cyberLow,
+                          color: AppColors.dashCyberSecurity,
                           fontSize: 10.5.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -471,14 +483,22 @@ class _IncidentTableRowState extends State<_IncidentTableRow> {
                           vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundGreyDark,
+                          color: widget.isDark
+                              ? AppColors.cardBackgroundGreyDark
+                              : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(6.r),
-                          border: Border.all(color: AppColors.cyberCardBorder),
+                          border: Border.all(
+                            color: widget.isDark
+                                ? AppColors.cyberCardBorder
+                                : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Text(
                           'Take',
                           style: TextStyle(
-                            color: AppColors.textTertiaryDark,
+                            color: widget.isDark
+                                ? AppColors.textTertiaryDark
+                                : const Color(0xFF475569),
                             fontSize: 10.5.sp,
                             fontWeight: FontWeight.w600,
                           ),

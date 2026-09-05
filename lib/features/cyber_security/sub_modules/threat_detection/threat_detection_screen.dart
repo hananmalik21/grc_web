@@ -10,6 +10,8 @@ import 'package:grc/core/widgets/buttons/app_button.dart';
 import 'package:grc/features/cyber_security/data/models/threat_dto.dart';
 import 'package:grc/features/cyber_security/presentation/providers/threat_provider.dart';
 import 'package:grc/features/cyber_security/presentation/widgets/cyber_screen_layout.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/widgets/threat_alerts_table.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/widgets/threat_detection_kpi_row.dart';
 
@@ -92,22 +94,21 @@ class ThreatDetectionScreen extends ConsumerWidget {
       subtitle:
           'Real-time telemetry, behavioral anomalies, and SIEM correlation',
       actions: [
-        AppButton(
+        _ScreenActionButton(
           label: 'Filter',
-          type: AppButtonType.secondary,
-          size: AppButtonSize.sm,
-          onPressed: () => ToastService.show(
+          icon: Icons.filter_list_rounded,
+          onTap: () => ToastService.show(
             context: context,
             message: 'Use the table filters to refine live threats.',
             type: ToastType.info,
           ),
         ),
         const Gap(8),
-        AppButton(
+        _ScreenActionButton(
           label: 'Create Rule',
-          type: AppButtonType.primary,
-          size: AppButtonSize.sm,
-          onPressed: null,
+          icon: Icons.add_rounded,
+          isPrimary: true,
+          onTap: null,
         ),
       ],
       child: Column(
@@ -130,6 +131,66 @@ class ThreatDetectionScreen extends ConsumerWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ScreenActionButton extends StatelessWidget {
+  final IconData? icon;
+  final String label;
+  final VoidCallback? onTap;
+  final bool isPrimary;
+
+  const _ScreenActionButton({
+    this.icon,
+    required this.label,
+    this.onTap,
+    this.isPrimary = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+          decoration: BoxDecoration(
+            color: isPrimary
+                ? AppColors.dashCyberSecurity.withValues(alpha: 0.15)
+                : const Color(0xFF1E293B).withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isPrimary
+                  ? AppColors.dashCyberSecurity.withValues(alpha: 0.5)
+                  : const Color(0xFF334155),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  size: 14.sp,
+                  color: isPrimary ? AppColors.dashCyberSecurity : const Color(0xFFCBD5E1),
+                ),
+                const Gap(6),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  color: isPrimary ? AppColors.dashCyberSecurity : const Color(0xFFCBD5E1),
+                  fontSize: 12.sp,
+                  fontWeight: isPrimary ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

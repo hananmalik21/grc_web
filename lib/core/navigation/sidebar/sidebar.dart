@@ -109,6 +109,7 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
     final localizations = AppLocalizations.of(context)!;
     final menuItems = SidebarConfig.getMenuItems();
     final currentRoute = GoRouterState.of(context).uri.path;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (_lastAutoExpandedRoute != currentRoute) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -148,15 +149,21 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
             curve: Curves.fastOutSlowIn,
             width: isExpanded ? 260.0 : 72.0, // Increased width to fit long text
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(right: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8))),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(2, 0),
+              color: isDark ? const Color(0xFF141414) : Colors.white,
+              border: Border(
+                right: BorderSide(
+                  color: isDark ? const Color(0xFF334155) : AppColors.cardBorder.withValues(alpha: 0.8),
                 ),
-              ],
+              ),
+              boxShadow: isDark
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(2, 0),
+                      ),
+                    ],
             ),
             child: Column(
               children: [
@@ -167,18 +174,26 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     child: Row(
                       children: [
-                        Icon(Icons.menu, size: 14.sp, color: const Color(0xFF64748B)),
+                        Icon(
+                          Icons.menu,
+                          size: 14.sp,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
                         Gap(8.w),
                         Text(
                           'Menus',
                           style: TextStyle(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
                         ),
                         const Spacer(),
-                        Icon(Icons.keyboard_arrow_down, size: 16.sp, color: const Color(0xFF94A3B8)),
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 16.sp,
+                          color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        ),
                       ],
                     ),
                   ),
@@ -215,11 +230,14 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
                   height: 28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white,
-                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                    color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),
@@ -229,7 +247,7 @@ class _SidebarState extends ConsumerState<Sidebar> with TabIndexMixin {
                     child: Icon(
                       isExpanded ? Icons.chevron_left : Icons.chevron_right,
                       size: 20,
-                      color: const Color(0xFF334155),
+                      color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                     ),
                   ),
                 ),

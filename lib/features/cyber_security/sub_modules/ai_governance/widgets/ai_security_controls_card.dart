@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/ai_governance/ai_governance_models.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 
 class AiSecurityControlsCard extends StatelessWidget {
   const AiSecurityControlsCard({super.key});
@@ -20,12 +21,23 @@ class AiSecurityControlsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(isMobile ? 14.r : 20.r),
       decoration: BoxDecoration(
-        color: AppColors.cyberCardBg,
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: AppColors.cyberCardBorder),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +45,7 @@ class AiSecurityControlsCard extends StatelessWidget {
           Text(
             'AI SECURITY CONTROLS',
             style: TextStyle(
-              color: AppColors.textTertiaryDark,
+              color: isDark ? AppColors.textTertiaryDark : const Color(0xFF64748B),
               fontSize: 10.5.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
@@ -58,7 +70,7 @@ class AiSecurityControlsCard extends StatelessWidget {
                     child: Text(
                       ctrl.name,
                       style: TextStyle(
-                        color: AppColors.textSecondaryDark,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textPrimary,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
                       ),

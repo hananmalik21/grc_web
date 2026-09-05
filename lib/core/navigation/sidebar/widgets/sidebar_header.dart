@@ -11,11 +11,17 @@ class SidebarHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 60),
       padding: EdgeInsets.symmetric(horizontal: isExpanded ? 12.w : 8.w, vertical: 10.h),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.7))),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF334155) : AppColors.cardBorder.withValues(alpha: 0.7),
+          ),
+        ),
       ),
       child: isExpanded
           ? Row(
@@ -45,7 +51,7 @@ class SidebarHeader extends ConsumerWidget {
                       Text(
                         'DIGIFY GRC',
                         style: TextStyle(
-                          color: const Color(0xFF0F172A),
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                           fontSize: 13.5.sp,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
@@ -54,7 +60,7 @@ class SidebarHeader extends ConsumerWidget {
                       Text(
                         'ENTERPRISE SECURITY OS',
                         style: TextStyle(
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           fontSize: 8.sp,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.7,

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/threat_detection/threat_alert_model.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/features/cyber_security/sub_modules/threat_detection/dialogs/threat_investigation_dialog.dart';
 
 enum ThreatFilterTab { all, new_, investigating, closed }
@@ -62,6 +63,7 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredAlerts;
+    final isDark = context.isDark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,13 +72,13 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildTabButton('ALL', ThreatFilterTab.all),
+              _buildTabButton('ALL', ThreatFilterTab.all, isDark),
               const Gap(8),
-              _buildTabButton('NEW', ThreatFilterTab.new_),
+              _buildTabButton('NEW', ThreatFilterTab.new_, isDark),
               const Gap(8),
-              _buildTabButton('INVESTIGATING', ThreatFilterTab.investigating),
+              _buildTabButton('INVESTIGATING', ThreatFilterTab.investigating, isDark),
               const Gap(8),
-              _buildTabButton('CLOSED', ThreatFilterTab.closed),
+              _buildTabButton('CLOSED', ThreatFilterTab.closed, isDark),
             ],
           ),
         ),
@@ -84,9 +86,17 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.cyberCardBg,
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.cyberCardBorder),
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(28.r),
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -107,14 +117,14 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
                           vertical: 12.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundDark,
+                          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                           borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.r),
-                            topRight: Radius.circular(10.r),
+                            topLeft: Radius.circular(28.r),
+                            topRight: Radius.circular(28.r),
                           ),
-                          border: const Border(
+                          border: Border(
                             bottom: BorderSide(
-                              color: AppColors.cyberCardBorder,
+                              color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                             ),
                           ),
                         ),
@@ -122,27 +132,27 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
                           children: [
                             SizedBox(
                               width: 100.w,
-                              child: _buildHeaderLabel('ALERT ID'),
+                              child: _buildHeaderLabel('ALERT ID', isDark),
                             ),
                             SizedBox(
                               width: 260.w,
-                              child: _buildHeaderLabel('TITLE'),
+                              child: _buildHeaderLabel('TITLE', isDark),
                             ),
                             SizedBox(
                               width: 100.w,
-                              child: _buildHeaderLabel('SEVERITY'),
+                              child: _buildHeaderLabel('SEVERITY', isDark),
                             ),
                             SizedBox(
                               width: 90.w,
-                              child: _buildHeaderLabel('SOURCE'),
+                              child: _buildHeaderLabel('SOURCE', isDark),
                             ),
                             SizedBox(
                               width: 90.w,
-                              child: _buildHeaderLabel('TIME'),
+                              child: _buildHeaderLabel('TIME', isDark),
                             ),
                             SizedBox(
                               width: 110.w,
-                              child: _buildHeaderLabel('STATUS'),
+                              child: _buildHeaderLabel('STATUS', isDark),
                             ),
                             SizedBox(
                               width: 100.w,
@@ -161,7 +171,7 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
                             child: Text(
                               'No threat alerts in this category.',
                               style: TextStyle(
-                                color: AppColors.textPlaceholderDark,
+                                color: isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
                                 fontSize: 12.sp,
                               ),
                             ),
@@ -176,8 +186,8 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
                                 alert: alert,
                                 onInvestigate: () => _openInvestigation(alert),
                               ),
-                              const Divider(
-                                color: AppColors.cyberCardBorder,
+                              Divider(
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                                 height: 1,
                               ),
                             ],
@@ -194,11 +204,11 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
     );
   }
 
-  Widget _buildHeaderLabel(String text) {
+  Widget _buildHeaderLabel(String text, bool isDark) {
     return Text(
       text,
       style: TextStyle(
-        color: AppColors.textPlaceholderDark,
+        color: isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
         fontSize: 10.5.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
@@ -206,7 +216,7 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
     );
   }
 
-  Widget _buildTabButton(String label, ThreatFilterTab tab) {
+  Widget _buildTabButton(String label, ThreatFilterTab tab, bool isDark) {
     final isSelected = _selectedTab == tab;
 
     return InkWell(
@@ -216,19 +226,19 @@ class _ThreatAlertsTableState extends State<ThreatAlertsTable> {
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.2)
+              ? AppColors.dashCyberSecurity.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6.r),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? AppColors.dashCyberSecurity.withValues(alpha: 0.6) : Colors.transparent,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected
-                ? AppColors.primaryLight
-                : AppColors.textPlaceholderDark,
+                ? AppColors.dashCyberSecurity
+                : (isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B)),
             fontSize: 11.5.sp,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
             letterSpacing: 0.6,
@@ -255,13 +265,14 @@ class _AlertTableRowState extends State<_AlertTableRow> {
   @override
   Widget build(BuildContext context) {
     final alert = widget.alert;
+    final isDark = context.isDark;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Container(
         color: _isHovered
-            ? AppColors.cardBackgroundGreyDark.withValues(alpha: 0.3)
+            ? (isDark ? const Color(0xFF2D2D2F) : const Color(0xFFF8FAFC))
             : Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
         child: Row(
@@ -273,7 +284,7 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                 child: Text(
                   alert.alertId,
                   style: TextStyle(
-                    color: AppColors.dashCyberSecurity,
+                    color: isDark ? AppColors.dashCyberSecurity : const Color(0xFF00B4D8),
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -285,7 +296,7 @@ class _AlertTableRowState extends State<_AlertTableRow> {
               child: Text(
                 alert.title,
                 style: TextStyle(
-                  color: AppColors.textPrimaryDark,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -326,7 +337,7 @@ class _AlertTableRowState extends State<_AlertTableRow> {
               child: Text(
                 alert.sourceLabel,
                 style: TextStyle(
-                  color: AppColors.textTertiaryDark,
+                  color: isDark ? AppColors.textTertiaryDark : const Color(0xFF64748B),
                   fontSize: 11.5.sp,
                 ),
               ),
@@ -336,7 +347,7 @@ class _AlertTableRowState extends State<_AlertTableRow> {
               child: Text(
                 alert.timeAgo,
                 style: TextStyle(
-                  color: AppColors.textPlaceholderDark,
+                  color: isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
                   fontSize: 11.sp,
                 ),
               ),
@@ -361,8 +372,8 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                       color: alert.status == ThreatStatus.investigating
                           ? AppColors.alertMedium
                           : alert.status == ThreatStatus.closed
-                          ? AppColors.textPlaceholderDark
-                          : AppColors.textPrimaryDark,
+                          ? (isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B))
+                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -383,16 +394,16 @@ class _AlertTableRowState extends State<_AlertTableRow> {
                       vertical: 5.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: AppColors.dashCyberSecurity.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6.r),
                       border: Border.all(
-                        color: AppColors.primaryLight.withValues(alpha: 0.5),
+                        color: AppColors.dashCyberSecurity.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Text(
                       'Investigate',
                       style: TextStyle(
-                        color: AppColors.cyberLow,
+                        color: AppColors.dashCyberSecurity,
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                       ),

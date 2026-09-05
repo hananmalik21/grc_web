@@ -66,6 +66,7 @@ class _LoginFormState extends State<LoginForm> {
           filled: true,
           borderColor: const Color(0xFFE2E8F0),
           focusedBorderColor: LoginForm.skyBlue,
+          textColor: const Color(0xFF0F172B),
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           onSubmitted: (_) => widget.passwordFocusNode.requestFocus(),
         ),
@@ -92,6 +93,7 @@ class _LoginFormState extends State<LoginForm> {
           filled: true,
           borderColor: const Color(0xFFE2E8F0),
           focusedBorderColor: LoginForm.skyBlue,
+          textColor: const Color(0xFF0F172B),
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           suffixIcon: IconButton(
             icon: Icon(

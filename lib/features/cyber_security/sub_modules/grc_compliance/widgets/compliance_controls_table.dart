@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:grc/core/constants/app_colors.dart';
 import 'package:grc/core/models/cyber_security/grc_compliance/compliance_framework_model.dart';
+import 'package:grc/core/theme/theme_extensions.dart';
 import 'package:grc/features/cyber_security/sub_modules/grc_compliance/dialogs/evidence_viewer_dialog.dart';
 
 class ComplianceControlsTable extends StatelessWidget {
@@ -19,6 +20,8 @@ class ComplianceControlsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -28,7 +31,7 @@ class ComplianceControlsTable extends StatelessWidget {
             Text(
               '${framework.name.toUpperCase()} CONTROLS',
               style: TextStyle(
-                color: AppColors.textPlaceholderDark,
+                color: isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
                 fontSize: 11.5.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.8,
@@ -37,7 +40,7 @@ class ComplianceControlsTable extends StatelessWidget {
             Text(
               '${framework.controls.length} controls mapped',
               style: TextStyle(
-                color: AppColors.textPlaceholderDark,
+                color: isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
                 fontSize: 11.sp,
               ),
             ),
@@ -47,9 +50,11 @@ class ComplianceControlsTable extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.cyberCardBg,
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
             borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.cyberCardBorder),
+            border: Border.all(
+              color: isDark ? AppColors.cyberCardBorder : const Color(0xFFE2E8F0),
+            ),
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -70,14 +75,14 @@ class ComplianceControlsTable extends StatelessWidget {
                           vertical: 12.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundDark,
+                          color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10.r),
                             topRight: Radius.circular(10.r),
                           ),
-                          border: const Border(
+                          border: Border(
                             bottom: BorderSide(
-                              color: AppColors.cyberCardBorder,
+                              color: isDark ? AppColors.cyberCardBorder : const Color(0xFFE2E8F0),
                             ),
                           ),
                         ),
@@ -85,19 +90,19 @@ class ComplianceControlsTable extends StatelessWidget {
                           children: [
                             SizedBox(
                               width: 120.w,
-                              child: _buildHeaderLabel('CONTROL ID'),
+                              child: _buildHeaderLabel('CONTROL ID', isDark),
                             ),
                             SizedBox(
                               width: 250.w,
-                              child: _buildHeaderLabel('CONTROL NAME'),
+                              child: _buildHeaderLabel('CONTROL NAME', isDark),
                             ),
                             SizedBox(
                               width: 100.w,
-                              child: _buildHeaderLabel('STATUS'),
+                              child: _buildHeaderLabel('STATUS', isDark),
                             ),
                             SizedBox(
                               width: 130.w,
-                              child: _buildHeaderLabel('SCORE'),
+                              child: _buildHeaderLabel('SCORE', isDark),
                             ),
                             SizedBox(
                               width: 110.w,
@@ -114,9 +119,10 @@ class ComplianceControlsTable extends StatelessWidget {
                               control: control,
                               onGetEvidence: () =>
                                   _openEvidence(context, control),
+                              isDark: isDark,
                             ),
-                            const Divider(
-                              color: AppColors.cyberCardBorder,
+                            Divider(
+                              color: isDark ? AppColors.cyberCardBorder : const Color(0xFFE2E8F0),
                               height: 1,
                             ),
                           ],
@@ -133,11 +139,11 @@ class ComplianceControlsTable extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderLabel(String text) {
+  Widget _buildHeaderLabel(String text, bool isDark) {
     return Text(
       text,
       style: TextStyle(
-        color: AppColors.textPlaceholderDark,
+        color: isDark ? AppColors.textPlaceholderDark : const Color(0xFF64748B),
         fontSize: 10.5.sp,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
@@ -149,8 +155,13 @@ class ComplianceControlsTable extends StatelessWidget {
 class _ControlTableRow extends StatefulWidget {
   final ControlItemModel control;
   final VoidCallback onGetEvidence;
+  final bool isDark;
 
-  const _ControlTableRow({required this.control, required this.onGetEvidence});
+  const _ControlTableRow({
+    required this.control,
+    required this.onGetEvidence,
+    required this.isDark,
+  });
 
   @override
   State<_ControlTableRow> createState() => _ControlTableRowState();
@@ -168,7 +179,9 @@ class _ControlTableRowState extends State<_ControlTableRow> {
       onExit: (_) => setState(() => _isHovered = false),
       child: Container(
         color: _isHovered
-            ? AppColors.cardBackgroundGreyDark.withValues(alpha: 0.3)
+            ? (widget.isDark
+                ? AppColors.cardBackgroundGreyDark.withValues(alpha: 0.3)
+                : const Color(0xFFF1F5F9))
             : Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
         child: Row(
@@ -192,7 +205,7 @@ class _ControlTableRowState extends State<_ControlTableRow> {
               child: Text(
                 control.controlName,
                 style: TextStyle(
-                  color: AppColors.textPrimaryDark,
+                  color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -234,7 +247,9 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                       borderRadius: BorderRadius.circular(2.r),
                       child: LinearProgressIndicator(
                         value: control.score / 100,
-                        backgroundColor: AppColors.cardBackgroundGreyDark,
+                        backgroundColor: widget.isDark
+                            ? AppColors.cardBackgroundGreyDark
+                            : const Color(0xFFE2E8F0),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           control.statusColor,
                         ),
@@ -246,7 +261,7 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                   Text(
                     '${control.score}%',
                     style: TextStyle(
-                      color: AppColors.textSecondaryDark,
+                      color: widget.isDark ? AppColors.textSecondaryDark : AppColors.textPrimary,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
                     ),
@@ -267,16 +282,16 @@ class _ControlTableRowState extends State<_ControlTableRow> {
                       vertical: 5.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: AppColors.dashCyberSecurity.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6.r),
                       border: Border.all(
-                        color: AppColors.primaryLight.withValues(alpha: 0.5),
+                        color: AppColors.dashCyberSecurity.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Text(
                       'Get Evidence',
                       style: TextStyle(
-                        color: AppColors.cyberLow,
+                        color: AppColors.dashCyberSecurity,
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                       ),
